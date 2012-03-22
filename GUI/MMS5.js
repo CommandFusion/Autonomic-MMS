@@ -427,32 +427,38 @@ var self = {
 						CF.setJoin(self.txtInstance, "Player D");
 						break;	
 				}
-				
+				self.instanceRegex.lastIndex = 0;
+			
 		} else if (self.stateThumbnailRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
 				var matches = self.stateThumbnailRegex.exec(matchedString);
 				CF.setJoin(self.txtCoverArt, self.coverart+matches[1]);
+				self.stateThumbnailRegex.lastIndex = 0;
 		
 		}else if (self.stateTrackNumberRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
 				var matches = self.stateTrackNumberRegex.exec(matchedString);
 				CF.setJoin(self.txtTrackStatus, matches[1]);
+				self.stateTrackNumberRegex.lastIndex = 0;
 		
 		} else if (self.stateArtistRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
 				var matches = self.stateArtistRegex.exec(matchedString);
 				CF.setJoin(self.txtArtist, matches[1]);
+				self.stateArtistRegex.lastIndex = 0;
 		
 		} else if (self.stateAlbumRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
 				var matches = self.stateAlbumRegex.exec(matchedString);
 				CF.setJoin(self.txtAlbum, matches[1]);
+				self.stateAlbumRegex.lastIndex = 0;
 		
 		} else if (self.stateTrackRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
 				var matches = self.stateTrackRegex.exec(matchedString);
 				CF.setJoin(self.txtTrackTitle, matches[1]);
-		
+				self.stateTrackRegex.lastIndex = 0;
+				
 		} else if (self.stateTrackTimeRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
 				var matches = self.stateTrackTimeRegex.exec(matchedString);
@@ -463,7 +469,8 @@ var self = {
 				var seconds = Math.floor(remain_seconds);
 				var clockTime = ("00"+minutes).slice(-2) + ":" + ("00"+seconds).slice(-2);
 				CF.setJoin(self.txtTrackTime, clockTime);
-		
+				self.stateTrackTimeRegex.lastIndex = 0;
+				
 		} else if (self.stateShuffleRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
 				var matches = self.stateShuffleRegex.exec(matchedString);
@@ -476,7 +483,8 @@ var self = {
 						CF.setJoin(self.btnShuffle, 0);
 						break;
 				}
-		
+				self.stateShuffleRegex.lastIndex = 0;
+				
 		} else if (self.stateRepeatRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
 				var matches = self.stateRepeatRegex.exec(matchedString);
@@ -489,7 +497,8 @@ var self = {
 						CF.setJoin(self.btnRepeat, 0);
 						break;
 				}  
-		
+				self.stateRepeatRegex.lastIndex = 0;
+				
 		} else if (self.statePlayStatusRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
 				var matches = self.statePlayStatusRegex.exec(matchedString);
@@ -508,6 +517,8 @@ var self = {
 						CF.setJoin(self.txtPlayStatus, "PLAYING STATUS : Stopped");
 						break;	
 				}  
+				self.statePlayStatusRegex.lastIndex = 0;
+
 		} else if (self.stateMuteRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
 				var matches = self.stateMuteRegex.exec(matchedString);
@@ -520,11 +531,14 @@ var self = {
 						CF.setJoin(self.btnMute, 0);
 						break;
 				}  
+				self.stateMuteRegex.lastIndex = 0;
+				
 		} else if (self.stateVolumeRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
 				var matches = self.stateVolumeRegex.exec(matchedString);
 				CF.setJoin(self.txtVolumeLevel, matches[1]);
 				CF.setJoin(self.sldVolumeControl, Math.round((matches[1]/50)*65535));
+				self.stateVolumeRegex.lastIndex = 0;
 		} 
 		
 	}, 
@@ -1232,7 +1246,8 @@ var self = {
 	// Select the zone instance and update the now playing info.
 	selectZone:	function(zone) { 
 		self.sendCmd("SetInstance "+zone);
-		self.getStatus();									
+		self.getStatus();
+		self.browseQueue();		
 	},		
 	
 	// Format the command string to send to system
