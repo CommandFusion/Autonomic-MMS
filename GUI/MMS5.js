@@ -119,18 +119,17 @@ var self = {
 			return;
 		}
 
-		// Watch all incoming data through a single feedback item : syntax CF.watch(CF.event, systemName, feedbackName, feedbackFunction)
+		// Watch all incoming data through a single feedback item : Syntax CF.watch(CF.event, systemName, feedbackName, feedbackFunction)
 		CF.watch(CF.FeedbackMatchedEvent, self.sysName, "Incoming Data", self.incomingData); 				
 
-		// To get the system IP address and port for use: "http://"+CF.systems[""].address+":"+(CF.systems[""].port+1)+"/"; 
-		CF.watch(CF.ConnectionStatusChangeEvent, self.sysName, self.onConnectionChange, true);			//CF.watch(CF.event, systemName, systemFunction, boolean) syntax
+		// Watch for connection changes. Syntax CF.watch(CF.event, systemName, systemFunction, boolean)
+		CF.watch(CF.ConnectionStatusChangeEvent, self.sysName, self.onConnectionChange, true);			
 
 		// Suspend and resume activities when Iviewer quits or put into background
 		CF.watch(CF.GUISuspendedEvent, self.onGUISuspended);
 		CF.watch(CF.GUIResumedEvent, self.onGUIResumed);
 		
-		// Get the system IP address and port for use in all cover art calls
-		// Sample command: http://192.168.1.10:5005/albumart?album={33432-33432-95909-33423-34430}
+		// Get the system IP address and port for use in all cover art calls. Sample command: http://192.168.1.10:5005/albumart?album={33432-33432-95909-33423-34430}
 		self.coverart = "http://"+CF.systems[self.sysName].address+":"+(CF.systems[self.sysName].port+1)+"/albumart?album="; // ?getalbumart
 		
 		// Set Current Instance.
@@ -816,7 +815,11 @@ var self = {
 	},
 	
 	// *Special Note* : It'll take a while for the playlist changes to be updated, you won't be able to see the changes immediately.
-	savePlaylist: function(text) { self.sendCmd("SavePlaylist " + text); },							// Save Playlist. *Command : SavePlaylist "Playlist1"
+	savePlaylist: function(title) {																	
+		self.sendCmd("SavePlaylist " + title); 														// Save Playlist. *Command : SavePlaylist "Playlist1" 
+		CF.setJoin(self.txtPlaylist, "");										// Reset the Playlist textbox to show back default text 
+	},
+	
 	deletePlaylist: function(title) { self.sendCmd("DeletePlaylist " + title); },					// Delete Playlist. *Command : SavePlaylist "Playlist1"
 	
 	// -----------------------------------------------------------------------------------------------------------------------------
