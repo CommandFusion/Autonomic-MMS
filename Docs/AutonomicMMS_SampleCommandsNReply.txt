@@ -1,3 +1,58 @@
+***************************************************************************
+COMMANDS FROM PORT 23
+***************************************************************************
+Autonomic Controls Remote Configuration version 3.0.10415.0 Release.
+More info found on the Web http://www.Autonomic-Controls.com
+
+Type '?' for help or 'help <command>' for help on <command>.
+
+Welcome. You are logged in.
+
+ACRemoteConfig: Remote Configuration
+===========================================================================
+AutoUpdate             - Update firmware.
+Banner                 - Display connection banner.
+BrowseSources          - Returns a sorted list of IDs for all configured 
+                         instances.
+BrowseTimeZones        - Get list of valid TimeZone values.
+cls                    - Clear the ANSI Terminal
+Echo                   - Echo text. Good for testing Encoding.
+Exit                   - Close connection.
+Get                    - Get current setting values.
+Login                  - Login to the configuration server.
+NtpSync                - Synchronize with the currently configured NTP 
+                         server.
+Ping                   - Echo Pong.
+Reboot                 - Reboot the system.
+RemoteSupport          - Initiates a remote support call.
+RemoveLicense          - Removes a new licens key from the server.
+ResetToFactoryDefaults - Reset the system to factory defaults.
+Revert                 - Revert changed setting values.
+Save                   - Save changed setting values.
+Set                    - Set current setting value.
+SetEncoding            - Sets encoding for current communications 
+                         channel.
+SetHost                - Set host name / ip.
+SetLicenseKey          - Sets a new licens key into the server.
+SetResponseEolZero     - Sets Response EOL delimiter to 0x00.
+SetXmlMode             - Set XML based responses to None | Lists | All .
+Shutdown               - Shutdown the system.
+ToggleDelete           - Toggle current delete flag.
+UploadLogFiles         - Upload Log files.
+Uptime                 - Report Daemon uptime
+
+HELP: Help And Syntax Provider
+===========================================================================
+Help                   - Display this message
+
+QA: QA
+===========================================================================
+RunQATest              - Run one or more QA Tests.
+
+
+***************************************************************************
+COMMANDS from PORT 5004
+***************************************************************************
 AhEhSrvr: Media Control Server
 ===========================================================================
 AddFavorite              - Add Media as a favorite.

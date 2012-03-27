@@ -1,7 +1,7 @@
 <gui>
   <properties>
-    <project>MMS5</project>
-    <designer>CF</designer>
+    <project>Autonomic MMS5</project>
+    <designer>Terence</designer>
     <size>
       <portrait width="768" height="1024" />
       <landscape width="1024" height="768" />
@@ -14,7 +14,7 @@
     </devices>
   </properties>
   <systems>
-    <system name="MMS5" ip="192.168.168.205" port="5004" protocol="tcp" alwayson="1" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="\x0D\x0A" connectionStatus="0" disconnectionStatus="0">
+    <system name="MMS5" ip="192.168.168.204" port="5004" protocol="tcp" alwayson="1" offlinequeue="1" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="\x0D\x0A" connectionStatus="0" disconnectionStatus="0">
       <cmd name="setVolume" js="self.SetVolume(data)" jsSendsCommand="True">[sliderval]</cmd>
       <cmd name="searchAlbums" js="self.searchAlbums(data)" jsSendsCommand="True">[inputval]</cmd>
       <cmd name="searchArtists" js="self.searchArtists(data)" jsSendsCommand="True">[inputval]</cmd>
@@ -23,9 +23,13 @@
       <cmd name="searchRadioSources" js="self.searchRadioSources(data)" jsSendsCommand="True">[inputval]</cmd>
       <cmd name="searchQueue" js="self.searchQueue(data)" jsSendsCommand="True">[inputval]</cmd>
       <cmd name="savePlaylist" js="self.savePlaylist(data)" jsSendsCommand="True">[inputval]</cmd>
+      <cmd name="setSystemSettings" js="self.setSystemSettings()" jsSendsCommand="True" />
       <fb name="Incoming Data" regex="(?msi)(.*)">
         <group index="1" name="" datatype="s" target="s1" />
       </fb>
+    </system>
+    <system name="MMS5_2" ip="192.168.168.204" port="23" protocol="tcp" alwayson="0" offlinequeue="0" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="\x0D\x0A" connectionStatus="0" disconnectionStatus="0">
+      <cmd name="WOL">\xFF\xFF\xFF\xFF\xFF\xFF\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93</cmd>
     </system>
   </systems>
   <themes>
@@ -78,7 +82,7 @@
     <theme type="button" name=".transport_bg_c[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(top_btn_center_on.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
     <theme type="button" name=".transparent_glow[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(button_transparent_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
     <theme type="button" name=".transparent_glow[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(button_transparent_on.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
-    <theme type="input" name=".search_black"><![CDATA[ border-width: 0px; color: Black; font-size: 12px; font-family: 'Arial'; text-align: left; vertical-align: middle; font-weight: normal; font-style: none; text-decoration: none; display: table-cell;]]></theme>
+    <theme type="input" name=".search_black"><![CDATA[ border-width: 0px; color: Black; font-size: 14px; font-family: 'Arial'; text-align: left; vertical-align: middle; font-weight: normal; font-style: none; text-decoration: none; display: table-cell;]]></theme>
     <theme type="button" name=".list_menudrop_body_blank[state='0']"><![CDATA[padding: 0px 0px 0px 15px; background-image: url(btn_list_blank_off.png); color: Black; font-size: 16px; font-family: 'Microsoft Sans Serif'; font-weight: normal; font-style: none; text-decoration: none; text-align: left; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
     <theme type="button" name=".list_menudrop_body_blank[state='1']"><![CDATA[padding: 0px 0px 0px 15px; background-image: url(btn_list_blank_on.png); text-shadow: rgba(0,0,0,1) 1px 1px 1px; color: White; font-size: 16px; font-family: 'Microsoft Sans Serif'; font-weight: normal; font-style: none; text-decoration: none; text-align: left; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
     <theme type="button" name=".list_menudrop_footer_arrow[state='0']"><![CDATA[padding: 0px 0px 0px 15px; background-image: url(btn_list_footer_off.png); color: Black; font-size: 16px; font-family: 'Microsoft Sans Serif'; font-weight: normal; font-style: none; text-decoration: none; text-align: left; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
@@ -122,8 +126,18 @@
     <theme type="button" name=".top_btn_single_stretch[state='1']"><![CDATA[padding: 0px 20px 0px 20px; -webkit-border-image: url(top_btn_single_on.png) 0 20 0 20; color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
     <theme type="button" name=".play_all_item[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(movie_play_off_80x80.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
     <theme type="button" name=".play_all_item[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(movie_play_on_80x80.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
-    <theme type="input" name=".search_white"><![CDATA[ border-width: 0px; color: White; font-size: 12px; font-family: 'Arial'; text-align: left; vertical-align: middle; font-weight: bold; font-style: none; text-decoration: none; display: table-cell;]]></theme>
+    <theme type="input" name=".search_white_l"><![CDATA[ border-width: 0px; color: White; font-size: 12px; font-family: 'Verdana'; text-align: left; vertical-align: middle; font-weight: normal; font-style: none; text-decoration: none; display: table-cell;]]></theme>
+    <theme type="input" name=".search_white_c"><![CDATA[ border-width: 0px; border-color: #000000; color: #FFFFFF; font-size: 12px; font-family: 'Verdana'; text-align: center; vertical-align: middle; font-weight: normal; font-style: none; text-decoration: none; display: table-cell;]]></theme>
+    <theme type="button" name=".list_dropmenu_btn_single_l[state='0']"><![CDATA[padding: 0px 0px 0px 15px; background-image: url(btn_list_single_off.png); color: Black; font-size: 16px; font-family: 'MS Reference Sans Serif'; font-weight: normal; font-style: none; text-decoration: none; text-align: left; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".list_dropmenu_btn_single_l[state='1']"><![CDATA[padding: 0px 0px 0px 15px; background-image: url(btn_list_single_on.png); color: White; font-size: 16px; font-family: 'MS Reference Sans Serif'; font-weight: normal; font-style: none; text-decoration: none; text-align: left; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
   </themes>
+  <tokens>
+    <token name="[inputSysName]" value="MMS5" persist="1" />
+    <token name="[inputURL]" value="192.168.168.204" persist="1" />
+    <token name="[inputPort]" value="5004" persist="1" />
+    <token name="[inputUsername]" value="null" persist="1" />
+    <token name="[inputPassword]" value="null" persist="1" />
+  </tokens>
   <scripts>
     <script name="MMS5.js" />
   </scripts>
@@ -338,26 +352,29 @@ feedback</txt>
     </txt>
     <txt j="4505" x="17" y="188" w="197" h="23" t="nowplaying" wrap="True" l="0">
     </txt>
-    <txt j="4506" x="17" y="205" w="197" h="23" t="nowplaying" wrap="True" l="0">
+    <txt j="4506" x="17" y="205" w="36" h="23" t="nowplaying" wrap="True" l="0">
     </txt>
     <txt j="4501" x="144" y="34" w="71" h="113" t="nowplaying" wrap="True" l="0">
     </txt>
     <txt j="4500" x="16" y="2" w="197" h="23" t="nowplaying" wrap="True" l="0">
     </txt>
+    <txt j="4507" x="178" y="205" w="36" h="23" t="nowplaying" wrap="True" l="0">
+    </txt>
+    <slider j="4501" d="0" x="54" y="202" w="126" h="28" min="0" max="65535" decimals="0" unit="decimal" t="vol_bar" sim="0" l="0" />
   </subpage>
   <subpage name="Queue_Item" w="759" h="90" clip="1">
     <txt j="2" x="166" y="0" w="593" h="37" t="cfblue2_title_l" wrap="True" l="0">(Queue)</txt>
     <txt j="4" x="166" y="55" w="477" h="25" t="cfblue2_small_l" wrap="True" l="0">(Album)</txt>
     <img x="72" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="355" y="0" w="403" h="90" t="transparent_glow" flip="None" sim="1" l="0" s="1" js="self.playCurrentItem(list, listIndex, join)">
+    <btn j="1" x="66" y="0" w="693" h="90" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="self.playCurrentItem(list, listIndex, join)">
       <inactive s="0">
       </inactive>
       <active s="0">
       </active>
     </btn>
     <txt j="5" x="649" y="55" w="110" h="25" t="cfblue2_small_l" wrap="True" l="0">(Time)</txt>
-    <txt j="3" x="166" y="32" w="593" h="25" t="cfblue2_small_l" wrap="True" l="0">(Artist)</txt>
-    <btn j="2" x="11" y="22" w="48" h="48" t="delete_item" flip="None" sim="1" l="0" s="1" js="self.removeCurrentItem(list, listIndex, join)">
+    <txt j="3" x="166" y="32" w="593" h="25" t="cfblue2_small_l" wrap="True" l="1">(Artist)</txt>
+    <btn j="2" x="11" y="22" w="48" h="48" t="delete_item" flip="None" sim="1" l="1" s="1" js="self.removeCurrentItem(list, listIndex, join)">
       <inactive s="0">
       </inactive>
       <active s="0">
@@ -601,22 +618,40 @@ feedback</txt>
     </btn>
     <img x="56" y="115" w="342" h="574" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">bg_drop_down_settings_menu_l.png</img>
     <txt j="0" x="82" y="141" w="294" h="35" t="menu_dropdown_title_c" wrap="True" l="0">Settings</txt>
-    <btn j="0" x="77" y="203" w="302" h="45" t="list_menudrop_header_blank" flip="None" sim="1" l="0" s="1">
-      <inactive s="0">IP Address : </inactive>
-      <active s="0">IP Address : </active>
+    <btn j="0" x="77" y="216" w="302" h="45" t="list_menudrop_header_blank" flip="None" sim="1" l="0" s="1">
+      <inactive s="0">System Name : </inactive>
+      <active s="0">System Name : </active>
     </btn>
-    <btn j="0" x="77" y="293" w="302" h="45" t="list_menudrop_footer_blank" flip="None" sim="1" l="0" s="1">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
+    <btn j="0" x="77" y="306" w="302" h="45" t="list_menudrop_footer_blank" flip="None" sim="1" l="0" s="1">
+      <inactive s="0">Port :</inactive>
+      <active s="0">Port :</active>
     </btn>
-    <btn j="0" x="77" y="248" w="302" h="45" t="list_menudrop_body_blank" flip="None" sim="1" l="0" s="1">
-      <inactive s="0">System Name :</inactive>
-      <active s="0">System Name :</active>
+    <btn j="0" x="77" y="261" w="302" h="45" t="list_menudrop_body_blank" flip="None" sim="1" l="0" s="1">
+      <inactive s="0">IP Address :</inactive>
+      <active s="0">IP Address :</active>
     </btn>
-    <input j="0" s="4520" x="185" y="208" w="194" h="38" pass="0" autoFocus="0" f="0" t="search_black" l="0">(IP Address)</input>
-    <input j="0" s="4521" x="206" y="251" w="173" h="38" pass="0" autoFocus="0" f="0" t="search_black" l="0">(System Name)</input>
+    <input j="0" s="4521" x="185" y="264" w="194" h="38" pass="0" autoFocus="0" f="0" t="search_black" command="setSystemSettings" l="0">(IP Address)</input>
+    <input j="0" s="4520" x="206" y="220" w="173" h="38" pass="0" autoFocus="0" f="0" t="search_black" command="setSystemSettings" l="0">(System Name)</input>
+    <input j="0" s="4522" x="138" y="310" w="241" h="38" pass="0" autoFocus="0" f="0" t="search_black" command="setSystemSettings" l="0">(Port)</input>
+    <btn j="0" x="77" y="471" w="302" h="45" t="list_menudrop_header_blank" flip="None" sim="1" l="0" s="1">
+      <inactive s="0">Shutdown</inactive>
+      <active s="0">Shutdown</active>
+    </btn>
+    <btn j="0" x="77" y="561" w="302" h="45" t="list_menudrop_footer_blank" flip="None" sim="1" l="0" s="1">
+      <inactive s="0">Wake-On-Lan (WOL)</inactive>
+      <active s="0">Wake-On-Lan (WOL)</active>
+    </btn>
+    <btn j="0" x="77" y="516" w="302" h="45" t="list_menudrop_body_blank" flip="None" sim="1" l="0" s="1">
+      <inactive s="0">Reboot</inactive>
+      <active s="0">Reboot</active>
+    </btn>
+    <btn j="0" x="78" y="388" w="302" h="45" t="list_dropmenu_btn_single_l" flip="None" sim="1" l="0" s="1">
+      <inactive s="0">Settings</inactive>
+      <active s="0">Settings</active>
+    </btn>
+    <txt j="0" x="91" y="179" w="283" h="39" t="cfblue2_title_l" wrap="True" l="0">General</txt>
+    <txt j="0" x="91" y="349" w="283" h="39" t="cfblue2_title_l" wrap="True" l="0">Advanced</txt>
+    <txt j="0" x="86" y="432" w="283" h="39" t="cfblue2_title_l" wrap="True" l="0">Power</txt>
   </subpage>
   <subpage name="Album_List" w="780" h="545" clip="1">
     <img x="576" y="16" w="186" h="29" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">menu_search.png</img>
@@ -649,7 +684,13 @@ feedback</txt>
     <txt j="0" x="123" y="9" w="402" h="43" t="cfblue2_title_l" wrap="True" l="0">RADIO SOURCE</txt>
   </subpage>
   <subpage name="Queue_List" w="780" h="545" clip="1">
-    <input j="0" s="4516" x="367" y="16" w="156" h="30" pass="0" autoFocus="0" f="0" t="search_white" command="savePlaylist" l="0">SAVE PLAYLIST AS ...</input>
+    <btn j="0" x="369" y="7" w="186" h="43" t="btn_212x43" flip="None" sim="1" l="0" s="1">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+    <input j="0" s="4516" x="380" y="13" w="167" h="30" pass="0" autoFocus="0" f="0" t="search_white_c" command="savePlaylist" l="0">Save Playlist As ...</input>
     <img x="576" y="16" w="186" h="29" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">menu_search.png</img>
     <input j="0" s="4515" x="604" y="16" w="158" h="30" pass="0" autoFocus="0" f="0" t="search_black" l="0">(Search Queue)</input>
     <list j="4560" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="Queue_Item" footerSub="" orientation="v" l="1" swipedelete="0" />

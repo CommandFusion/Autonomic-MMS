@@ -8,17 +8,18 @@ URL:		https://github.com/CommandFusion/Autonomic-MMS
 VERSION:	v0.01
 LAST MOD:	5 March 2012
 MODULE JOIN RANGE: 4500 - 4600
-MODULE TEST SETUP: Autonomic MMS5 Server, GuiDesigner 2.3.5.2, Iviewer TF v.4.0.197
+MODULE TEST SETUP: Autonomic MMS5 Server, GuiDesigner 2.3.5.5, Iviewer TF v.4.0.201
 ===============================================================================
 
 Todo list:
-- Save Queue as playlist (done - to finalise) 
-- Clear Queue (done)
 - Add Artist, track, Album to My Favorites (* Find out how to access my favorites - not accesible through Mirage control software?)
-- System Settings startup configuration
 - Search, search by alphabar
 - Radio Source navigation (done - to finetune)
 - Test Connection/Disconnection after long period of time
+- Shutdown/Reboot/WOL
+
+// MAC Address 38-60-77-93-1E-93
+// Control on two ports 5400 and 23. General controls (port 5004) and shutdown/reboot (port 23)
 
 */
 
@@ -35,11 +36,11 @@ var self = {
 	// System Settings
 	// ======================================================================
 	
-	sysName: "MMS5",					// System Name under System Properties in GuiDesigner
-	//url: "192.168.168.202",			// URL for media server
-	//port: "5004",						// port for media server
-	//username: null,					// username or null for authentification
-	//password: null,					// password or null for authentification
+	sysName: "",					// System Name under System Properties in GuiDesigner
+	sysURL: "",				// URL for media server
+	sysPort: "",					// port for media server
+	//SysUsername: null,				// username or null for authentification
+	//SysPassword: null,				// password or null for authentification
 	
 	// ======================================================================
 	// Join Listings
@@ -81,6 +82,7 @@ var self = {
 	
 	// Analogue join
 	sldVolumeControl:		"a4500",
+	sldTrackTime:			"a4501",
 	
 	// Serial joins (text box)
 	txtPlayStatus:			"s4500",
@@ -90,6 +92,7 @@ var self = {
 	txtAlbum:				"s4505",
 	txtArtist:				"s4504",
 	txtTrackTime:			"s4506",
+	txtTrackDuration:		"s4507",
 	srchAlbum:				"s4510",
 	srchArtist:				"s4511",
 	srchGenre:				"s4512",
@@ -97,11 +100,28 @@ var self = {
 	srchRadioSource:		"s4514",
 	srchQueue:				"s4515",
 	txtPlaylist:			"s4516",
-	sysIPAdd:				"s4520",
-	sysHostname:			"s4521",
+	txtHostname:			"s4520",
+	txtIPAdd:				"s4521",
+	txtIPPort:				"s4522",
 	txtConnection:			"s4580",
 	txtInstance:			"s4581",
 	txtVolumeLevel:			"s4582",
+	
+	//Arrays
+	arrayAlbum: [],					// Album
+	arrayArtist: [],				// Artist
+	arrayGenre: [],					// Genre
+	arrayPlaylist:[],				// Playlist
+	arrayRadioSource: [],			// Radio Sources
+	arrayQueue: [],					// Now Playing
+	arrayPickListItem: [],			// PickListItem
+	
+	// ======================================================================
+	// Global variables 
+	// ======================================================================
+	
+	TrackTime: 0,			// Initialize the variable with an initial value	
+	TrackDuration: 1,		// Initialize the variable with an initial value
 	
 	// ======================================================================
 	// Setup 
@@ -109,42 +129,62 @@ var self = {
 	
 	setup: function() {
 	
-		CF.log("Autonomic MMS-5 System Setup Started.");		//log in debugging window
+		// ---------------------------------------------------------------------------------------------------------------------------------------------------------
+		// On startup, check for global tokens via CF.getJoin(CF.GlobalTokensJoin) and get the values for all the paramaters and set them to the System Properties.
+		// ---------------------------------------------------------------------------------------------------------------------------------------------------------	
+		
+		//Get the global tokens values. Set the default value of the tokens via Global Token Manager.
+		CF.getJoin(CF.GlobalTokensJoin, function(join, values, tokens) {
+	
+			//Read the tokens, if accidentally deleted the settings of the tokens then use default values.
+			self.sysName = tokens["[inputSysName]"] || "MMS5";
+			self.sysURL = tokens["[inputURL]"] || "192.168.0.103";
+			self.sysPort = tokens["[inputPort]"] || "5004";
+			
+			// Read the tokens and display the values on the System Settings drop-down menu box.
+			CF.setJoins([ {join: self.txtHostname, value: self.sysName}, {join: self.txtIPAdd, value: self.sysURL}, {join: self.txtIPPort, value: self.sysPort}, ]);
+		
+			// Switch to new system.
+			CF.setSystemProperties(self.sysName, { enabled: true, address: self.sysURL,	port: self.sysPort });
+		
+			CF.log("Autonomic MMS-5 System Setup Started.");		//log in debugging window
+			
+			// Check that the "MMS5" system is defined in the GUI. Otherwise no commands from JS will work!
+			if (CF.systems[self.sysName] === undefined) {
+				// Show alert
+				CF.log("Your GUI file is missing the "+self.sysName+" system.\nPlease add it to your project before continuing.\n\nSee readme in comments at top of the script.");
+				// Cancel further JS setup
+				return;
+			}
+			
+			// Watch all incoming data through a single feedback item : Syntax CF.watch(CF.event, systemName, feedbackName, feedbackFunction)
+			CF.watch(CF.FeedbackMatchedEvent, self.sysName, "Incoming Data", self.incomingData); 				
 
-		// Check that the "MMS5" system is defined in the GUI. Otherwise no commands from JS will work!
-		if (CF.systems[self.sysName] === undefined) {
-			// Show alert
-			CF.log("Your GUI file is missing the "+self.sysName+" system.\nPlease add it to your project before continuing.\n\nSee readme in comments at top of the script.");
-			// Cancel further JS setup
-			return;
-		}
+			// Watch for connection changes. Syntax CF.watch(CF.event, systemName, systemFunction, boolean)
+			CF.watch(CF.ConnectionStatusChangeEvent, self.sysName, self.onConnectionChange, true);			
 
-		// Watch all incoming data through a single feedback item : Syntax CF.watch(CF.event, systemName, feedbackName, feedbackFunction)
-		CF.watch(CF.FeedbackMatchedEvent, self.sysName, "Incoming Data", self.incomingData); 				
-
-		// Watch for connection changes. Syntax CF.watch(CF.event, systemName, systemFunction, boolean)
-		CF.watch(CF.ConnectionStatusChangeEvent, self.sysName, self.onConnectionChange, true);			
-
-		// Suspend and resume activities when Iviewer quits or put into background
-		CF.watch(CF.GUISuspendedEvent, self.onGUISuspended);
-		CF.watch(CF.GUIResumedEvent, self.onGUIResumed);
+			// Suspend and resume activities when Iviewer quits or put into background
+			//CF.watch(CF.GUISuspendedEvent, self.onGUISuspended);
+			//CF.watch(CF.GUIResumedEvent, self.onGUIResumed);
+			
+			// Get the system IP address and port for use in all cover art calls. Sample command: http://192.168.1.10:5005/albumart?album={33432-33432-95909-33423-34430}
+			self.coverart = "http://"+self.sysURL+":"+(parseInt(self.sysPort)+1)+"/albumart?album="; // ?getalbumart
+			
+			// Set Current Instance.
+			self.setCurrentInstance();
+			
+			// Get real time feedback of changed status of items.
+			self.subcribeEventOn();
+			
+			// Get the starting status of all items.
+			self.getStatus();
+			
+			// Show the list of Albums when starting up
+			self.browseAlbums();		
+			
+			CF.log("Autonomic MMS-5 System Setup Completed.");
 		
-		// Get the system IP address and port for use in all cover art calls. Sample command: http://192.168.1.10:5005/albumart?album={33432-33432-95909-33423-34430}
-		self.coverart = "http://"+CF.systems[self.sysName].address+":"+(CF.systems[self.sysName].port+1)+"/albumart?album="; // ?getalbumart
-		
-		// Set Current Instance.
-		self.setCurrentInstance();
-		
-		// Get real time feedback of changed status of items.
-		self.subcribeEventOn();
-		
-		// Get the starting status of all items.
-		self.getStatus();
-		
-		// Show the list of Albums when starting up
-		self.browseAlbums();		
-		
-		CF.log("Autonomic MMS-5 System Setup Completed.");
+		}); 
 	},
 	
 	onGUISuspended: function() {
@@ -156,6 +196,31 @@ var self = {
 	onGUIResumed: function() {
     // Show the time at which the GUI was put back to front
     self.subcribeEventOn();
+	},
+	
+	// Gets the values of the IP settings, set to the global tokens and switch to new system.
+	setSystemSettings: function() {									
+			
+			// Stop all CF.watch events else there's be multiple watch calls which causes the data received to be multiplied according to number of watches being called.
+			CF.unwatch(CF.FeedbackMatchedEvent, self.sysName, "Incoming Data");							// Stop watching all incoming data 				
+			CF.unwatch(CF.ConnectionStatusChangeEvent, self.sysName, self.onConnectionChange, true);	// Stop watching for connection changes.			
+			//CF.unwatch(CF.GUISuspendedEvent, self.onGUISuspended);
+			//CF.unwatch(CF.GUIResumedEvent, self.onGUIResumed);
+			
+			// Get the values of all the IP Settings at once. txtHostname:	"s4520", txtIPAdd: "s4521",	txtIPPort: "s4522",
+			CF.getJoins(["s4520", "s4521", "s4522"], function(joins) {
+			
+				// Set all these values as global tokens and persist, use CF.setToken(CF.GlobalTokensJoin)
+				CF.setToken(CF.GlobalTokensJoin, "[inputSysName]", joins.s4520.value);
+				CF.setToken(CF.GlobalTokensJoin, "[inputURL]", joins.s4521.value);
+				CF.setToken(CF.GlobalTokensJoin, "[inputPort]", joins.s4522.value);				
+				
+				// Clear all previous lists and arrays
+				self.clearAll();
+				
+				// Re-run setup with all the new global token values
+				self.setup();
+		});
 	},
 	
 	// ======================================================================
@@ -223,19 +288,21 @@ var self = {
 	// Example: ReportState Player_A NowPlayingGuid={16091522-760a-42c7-ec32-468556de19e9}		// Report of starting status of items
 	// Example: StateChanged Player_A NowPlayingGuid={16091522-760a-42c7-ec32-468556de19e9}		// Report of changed status of items		
 		//startStatusRegex: /ReportState\x20(.*)\x20(.*)=(.*)/i,
-		stateThumbnailRegex: /NowPlayingGuid=(.*)/i,		// Thumbnail
-		stateTrackNumberRegex: /MetaData1=(.*)/i,			// Track No. out of total tracks
-		stateArtistRegex: /MetaData2=(.*)/i,				// Artist
-		stateAlbumRegex: /MetaData3=(.*)/i,					// Album
-		stateTrackRegex: /MetaData4=(.*)/i,					// Track
-		stateTrackTimeRegex: /TrackTime=(.*)/i,				// Track Time
-		stateShuffleRegex: /Shuffle=(.*)/i,					// Shuffle status (True/False)
-		stateRepeatRegex: /Repeat=(.*)/i,					// Repeat status (True/False)
-		stateQueueModeRegex: /QueueMode=(.*)/i,				// QueueMode
-		stateVolumeRegex: /Volume=(\d+)/i,					// Volume level
-		statePlayStatusRegex: /MediaControl=(.*)/i,			// Current Playing status (Play/Pause)
-		stateMuteRegex: /Mute=(.*)/i,						// Mute status (True/False)
-		stateMediaArtChanged: /MediaArtChanged=(.*)/i,		// State media art changed status (True/False).
+		stateThumbnailRegex: /NowPlayingGuid=(.*)/i,			// Thumbnail
+		stateTrackNumberRegex: /MetaData1=(.*)/i,				// Track No. out of total tracks
+		stateArtistRegex: /MetaData2=(.*)/i,					// Artist
+		stateAlbumRegex: /MetaData3=(.*)/i,						// Album
+		stateTrackRegex: /MetaData4=(.*)/i,						// Track
+		stateTrackTimeRegex: /TrackTime=(.*)/i,					// Track Time
+		stateTrackDurationRegex: /TrackDuration=(.*)/i,			// Track Duration
+		stateShuffleRegex: /Shuffle=(.*)/i,						// Shuffle status (True/False)
+		stateRepeatRegex: /Repeat=(.*)/i,						// Repeat status (True/False)
+		stateQueueModeRegex: /QueueMode=(.*)/i,					// QueueMode
+		stateVolumeRegex: /Volume=(\d+)/i,						// Volume level
+		statePlayStatusRegex: /MediaControl=(.*)/i,				// Current Playing status (Play/Pause)
+		stateMuteRegex: /Mute=(.*)/i,							// Mute status (True/False)
+		stateMediaArtChangedRegex: /MediaArtChanged=(.*)/i,		// State media art changed status (True/False).
+		//stateRunningRegex: /Running=(.*)/i,					// Running status (True/False). When shutdown, will changed to False.
 	
 	// =============================================================================================================================
 	// Incoming Data Point - Only used to populate array with data. Populations of lists will be done by other functions.
@@ -251,6 +318,8 @@ var self = {
 		self.arrayRadioSource = [];				// Radio Sources
 		self.arrayQueue = [];					// Now Playing
 		self.arrayPickListItem = [];			// PickListItem
+		
+		// Feedback processing starts here
 		
 		if (self.albumRegex.test(matchedString)) {							// Test if it is a Album message. This is for loading data into Album list.
 				
@@ -464,13 +533,27 @@ var self = {
 				var matches = self.stateTrackTimeRegex.exec(matchedString);
 				
 				// convert the total time into minutes and seconds
+				self.TrackTime = matches[1];
 				var minutes = Math.floor(matches[1]/60);
 				var remain_seconds = matches[1] % 60;
 				var seconds = Math.floor(remain_seconds);
-				var clockTime = ("00"+minutes).slice(-2) + ":" + ("00"+seconds).slice(-2);
-				CF.setJoin(self.txtTrackTime, clockTime);
+				var time = ("00"+minutes).slice(-2) + ":" + ("00"+seconds).slice(-2);
+				CF.setJoin(self.txtTrackTime, time);
 				self.stateTrackTimeRegex.lastIndex = 0;
 				
+		} else if (self.stateTrackDurationRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
+		
+				var matches = self.stateTrackDurationRegex.exec(matchedString);
+				
+				// convert the total time into minutes and seconds
+				self.TrackDuration = Math.floor(matches[1]);
+				var minutes = Math.floor(matches[1]/60);
+				var remain_seconds = matches[1] % 60;
+				var seconds = Math.floor(remain_seconds);
+				var time = ("00"+minutes).slice(-2) + ":" + ("00"+seconds).slice(-2);
+				CF.setJoin(self.txtTrackDuration, time);
+				self.stateTrackDurationRegex.lastIndex = 0;
+		
 		} else if (self.stateShuffleRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
 				var matches = self.stateShuffleRegex.exec(matchedString);
@@ -539,13 +622,52 @@ var self = {
 				CF.setJoin(self.txtVolumeLevel, matches[1]);
 				CF.setJoin(self.sldVolumeControl, Math.round((matches[1]/50)*65535));
 				self.stateVolumeRegex.lastIndex = 0;
+		
 		} 
+		
+		/*
+		else if (self.stateRunningRegex.test(matchedString)) {				// Test if it is a shutdown message. This is for checking the shutdown status.
+		
+				var matches = self.stateRunningRegex.exec(matchedString);
+				
+				switch(matches[1])
+				{
+					case "True":
+						//Set the network connection status to disconnected and WIFI LED off
+						CF.setJoin(self.txtConnection, "Server Connected");		//Send a string to display on Main Page that the System is disconnected
+						CF.setJoin(self.btnWifiLED, 1);						//Show disconnected status
+						break;
+					case "False":
+						//Set the network connection status to disconnected and WIFI LED off
+						CF.setJoin(self.txtConnection, "Server Disconnected");		//Send a string to display on Main Page that the System is disconnected
+						CF.setJoin(self.btnWifiLED, 0);								//Show disconnected status
+						
+						// Clear all the Now Playing items
+						CF.setJoins([																		
+							{join: self.txtPlayStatus, value: ""},
+							{join: self.txtTrackStatus, value: ""},				
+							{join: self.txtCoverArt, value: ""},			
+							{join: self.txtTrackTitle, value: ""},			
+							{join: self.txtAlbum, value: ""},
+							{join: self.txtArtist, value: ""},			
+							{join: self.txtTrackTime, value: ""},
+							{join: self.txtTrackDuration, value: ""},
+							{join: self.sldTrackTime, value: 0},			// track time feedback slider
+						]);
+						break;
+				} 
+				self.stateRunningRegex.lastIndex = 0;
+		}
+		*/
+		
+		// Set the playing status feedback on the slider
+		CF.setJoin(self.sldTrackTime, Math.round((self.TrackTime/self.TrackDuration)*65535));	
 		
 	}, 
 	
-	clearList: function() {
+	clearAll: function() {
 		
-		// clear all lists of all previous entries
+		// clear all lists of previous entries
 		CF.listRemove(self.lstAlbum);				
 		CF.listRemove(self.lstArtist);				
 		CF.listRemove(self.lstGenre);				
@@ -553,6 +675,38 @@ var self = {
 		CF.listRemove(self.lstRadioSource);		
 		CF.listRemove(self.lstQueue);
 		CF.listRemove(self.lstPickListItem);
+		
+		// clear all arrays of previous entries
+		self.arrayAlbum = [];					// Album
+		self.arrayArtist = [];					// Artist
+		self.arrayGenre = [];					// Genre
+		self.arrayPlaylist = [];				// Playlist
+		self.arrayRadioSource = [];				// Radio Sources
+		self.arrayQueue = [];					// Now Playing
+		self.arrayPickListItem = [];			// PickListItem
+	
+		// clear the irrelevant text fields and slider values
+		CF.setJoins([																		
+				{join: "s1", value: ""},
+				{join: self.txtPlayStatus, value: ""},
+				{join: self.txtTrackStatus, value: ""},				
+				{join: self.txtCoverArt, value: ""},			
+				{join: self.txtTrackTitle, value: ""},			
+				{join: self.txtAlbum, value: ""},
+				{join: self.txtArtist, value: ""},			
+				{join: self.txtTrackTime, value: ""},
+				{join: self.txtTrackDuration, value: ""},
+				{join: self.srchAlbum, value: ""},			
+				{join: self.srchArtist, value: ""},
+				{join: self.srchGenre, value: ""},			
+				{join: self.srchPlaylist, value: ""},
+				{join: self.srchRadioSource, value: ""},			
+				{join: self.srchQueue, value: ""},
+				{join: self.txtPlaylist, value: ""},
+				{join: self.txtVolumeLevel, value: ""},
+				{join: self.sldVolumeControl, value: 0},		// volume slider
+				{join: self.sldTrackTime, value: 0},			// track time feedback slider
+		]);
 	},
 	
 	// =============================================================================================================================
@@ -1239,7 +1393,7 @@ var self = {
 	subcribeEventOff: 			function() { self.sendCmd("SubscribeEvents False"); },					// Turns OFF feedback of StateChanged events for CURRENT instance only.
 	subcribeAllEventOn: 		function() { self.sendCmd("SubscribeEventsAll True"); },				// Turns ON feedback of StateChanged events for ALL instances.
 	subcribeAllEventOff: 		function() { self.sendCmd("SubscribeEventsAll False"); },				// Turns OFF feedback of StateChanged events for ALL instances.
-	clearQueue:					function() { self.sendCmd("ClearNowPlaying"); },						// Stop all playing tracks and clear all now playing list.
+	clearQueue:					function() { self.sendCmd("ClearNowPlaying"); self.browseQueue();},		// Stop all playing tracks and clear all now playing list.
 	Back:						function() { self.sendCmd("Back"); },									// Back
 	Forward:					function() { self.sendCmd("Forward"); },								// Forward
 	
