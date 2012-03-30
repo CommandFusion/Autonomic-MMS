@@ -23,7 +23,7 @@ This module provides design layout, data browsing, actions and transport control
 ### Transport actions and Lists
 ![Album List](https://github.com/CommandFusion/Autonomic-MMS/raw/master/Docs/AlbumList.png)
 
-Generally the module gives the user the ability to list, browse, select, add, delete and search for data for Albums, Artists, Genres, Playlists, Radio Sources and Queue (Now Playing) data.
+1. Generally the module gives the user the ability to list, browse, select, add, delete and search for data for Albums, Artists, Genres, Playlists, Radio Sources and Queue (Now Playing) data.
    * Also the various information based on the selected choices such as Albums(cover art, title, artist, etc.), Artists (albums, cover art, titles, etc.) can be viewed.
    * View the realtime feedback and status of the Now Playing items including track time progress, title, artist, album, etc.
    * Add, save or delete playlist or tracks in the Queue list.
@@ -40,7 +40,9 @@ Provides searching and filtering by word, string and the beginning letters of th
    * Settings Menu lets you see, set and change the IP and System Settings together with System Power options.
    * Actions Menu lets you save the different categories to your favorites.
    * Zone Settings Menu gives you the option to change, control and update information from 5 zones.
+   
 1. System Power lets you Shutdown, Reboot or even Wake-On-Lan (WOL) the server.
+
 1. Advanced Settings lets you change some of the more advanced features in the server setup (not recommended for normal user).
     
 ### Bug Reporting/Feature Requests
