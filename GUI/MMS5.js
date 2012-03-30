@@ -13,13 +13,14 @@ MODULE TEST SETUP: Autonomic MMS5 Server, GuiDesigner 2.3.5.5, Iviewer TF v.4.0.
 
 Todo list:
 - Add Artist, track, Album to My Favorites (* Find out how to access my favorites - not accesible through Mirage control software?)
-- Search, search by alphabar
+- Alphabar
 - Radio Source navigation (done - to finetune)
 - Test Connection/Disconnection after long period of time
-- Shutdown/Reboot/WOL
+- Shutdown/Reboot/WOL (done). For WOL, use the WOL Generator in guiDesigner.
 
-// MAC Address 38-60-77-93-1E-93
-// Control on two ports 5400 and 23. General controls (port 5004) and shutdown/reboot (port 23)
+Special Note:
+- MAC Address of test unit: 38-60-77-93-1E-93
+- Have control on two ports 5400 and 23. Majority of the controls (port 5004) and shutdown/reboot (port 23)
 
 */
 
@@ -36,11 +37,24 @@ var self = {
 	// System Settings
 	// ======================================================================
 	
+	// Edit the settings here if you want to set the default values
+	defaultSysName: "MMS5",					// System 1 Name
+	defaultSys2Name: "MMS5_2",				// System 2 Name
+	defaultSysURL: "192.168.168.204",		// URL for both systems
+	
+	// For the first system
 	sysName: "",					// System Name under System Properties in GuiDesigner
-	sysURL: "",				// URL for media server
-	sysPort: "",					// port for media server
-	//SysUsername: null,				// username or null for authentification
-	//SysPassword: null,				// password or null for authentification
+	sysURL: "",						// URL for media server
+	sysPort: 5004,					// port for media server
+	//SysUsername: null,			// username or null for authentification (not used)
+	//SysPassword: null,			// password or null for authentification (not used)
+	
+	// For the second system
+	sys2Name: "",					// System Name under System Properties in GuiDesigner
+	sys2URL: "",					// URL for media server
+	sys2Port: 23,					// port for media server
+	//SysUsername: null,			// username or null for authentification (not used)
+	//SysPassword: null,			// password or null for authentification (not used)
 	
 	// ======================================================================
 	// Join Listings
@@ -107,7 +121,7 @@ var self = {
 	txtInstance:			"s4581",
 	txtVolumeLevel:			"s4582",
 	
-	//Arrays
+	//Main database Arrays
 	arrayAlbum: [],					// Album
 	arrayArtist: [],				// Artist
 	arrayGenre: [],					// Genre
@@ -115,6 +129,16 @@ var self = {
 	arrayRadioSource: [],			// Radio Sources
 	arrayQueue: [],					// Now Playing
 	arrayPickListItem: [],			// PickListItem
+	
+	//Sub database Arrays
+	subarrayAlbum: [],					// Album
+	subarrayArtist: [],					// Artist
+	subarrayGenre: [],					// Genre
+	subarrayPlaylist:[],				// Playlist
+	subarrayRadioSource: [],			// Radio Sources
+	subarrayQueue: [],					// Now Playing
+	subarrayPickListItem: [],			// PickListItem
+	
 	
 	// ======================================================================
 	// Global variables 
@@ -128,7 +152,7 @@ var self = {
 	// ======================================================================
 	
 	setup: function() {
-	
+		
 		// ---------------------------------------------------------------------------------------------------------------------------------------------------------
 		// On startup, check for global tokens via CF.getJoin(CF.GlobalTokensJoin) and get the values for all the paramaters and set them to the System Properties.
 		// ---------------------------------------------------------------------------------------------------------------------------------------------------------	
@@ -136,26 +160,32 @@ var self = {
 		//Get the global tokens values. Set the default value of the tokens via Global Token Manager.
 		CF.getJoin(CF.GlobalTokensJoin, function(join, values, tokens) {
 	
-			//Read the tokens, if accidentally deleted the settings of the tokens then use default values.
-			self.sysName = tokens["[inputSysName]"] || "MMS5";
-			self.sysURL = tokens["[inputURL]"] || "192.168.0.103";
-			self.sysPort = tokens["[inputPort]"] || "5004";
-			
+			//Read the global tokens. If global tokens are accidentally deleted, then use default values.
+			self.sysName = tokens["[inputSysName]"] || self.defaultSysName;
+			self.sys2Name = tokens["[inputSys2Name]"] || self.defaultSys2Name;
+			self.sysURL = tokens["[inputURL]"] || self.defaultSysURL;
+						
 			// Read the tokens and display the values on the System Settings drop-down menu box.
 			CF.setJoins([ {join: self.txtHostname, value: self.sysName}, {join: self.txtIPAdd, value: self.sysURL}, {join: self.txtIPPort, value: self.sysPort}, ]);
 		
-			// Switch to new system.
+			// Switch to new systems by using the global token values.
 			CF.setSystemProperties(self.sysName, { enabled: true, address: self.sysURL,	port: self.sysPort });
+			CF.setSystemProperties(self.sys2Name, { enabled: true, address: self.sysURL, port: self.sys2Port });
 		
 			CF.log("Autonomic MMS-5 System Setup Started.");		//log in debugging window
 			
-			// Check that the "MMS5" system is defined in the GUI. Otherwise no commands from JS will work!
+			// Check that both the "MMS5" and "MMS5_2" system is defined in the GUI. Otherwise no commands from JS will work!
 			if (CF.systems[self.sysName] === undefined) {
 				// Show alert
 				CF.log("Your GUI file is missing the "+self.sysName+" system.\nPlease add it to your project before continuing.\n\nSee readme in comments at top of the script.");
 				// Cancel further JS setup
 				return;
-			}
+			} else if (CF.systems[self.sys2Name] === undefined) {
+				// Show alert
+				CF.log("Your GUI file is missing the "+self.sys2Name+" system.\nPlease add it to your project before continuing.\n\nSee readme in comments at top of the script.");
+				// Cancel further JS setup
+				return;
+			} 
 			
 			// Watch all incoming data through a single feedback item : Syntax CF.watch(CF.event, systemName, feedbackName, feedbackFunction)
 			CF.watch(CF.FeedbackMatchedEvent, self.sysName, "Incoming Data", self.incomingData); 				
@@ -180,7 +210,7 @@ var self = {
 			self.getStatus();
 			
 			// Show the list of Albums when starting up
-			self.browseAlbums();		
+			setTimeout(function(){self.browseAlbums();}, 2000);	
 			
 			CF.log("Autonomic MMS-5 System Setup Completed.");
 		
@@ -278,6 +308,9 @@ var self = {
 		radioSourceRegex : /RadioSource.\{(.*)\}.\"(.*)\"/i,
 		pickListItemRegex:  /PickListItem.\{(.*)\}.\"(.*)\".(\d+)/i,
 	
+	// Example: RadioStation {da79c6f8-eb5a-49e6-9892-35da9db8693e} "Rock and Roll Hall of Fame Radio" "Music by Rock Hall Inducted Artists" -1 ""
+		radioStationRegex: /RadioStation.\{(.*)\}.\"(.*)\".\"(.*)\".(.*).\"(.*)\"/i,
+
 	// Example: Title {2a4786ff-56f1-3c47-142c-fa0939ec73d5} "Always Tomorrow" "00:04:52" 16 "GLORIA ESTEFAN" "Greatest Hits" -1 "" ""	
 	//	queueFullRegex: /Title.\{(.*)\}.\"(.*)\".\"(.*?)\".(\d+).\"(.*?)\".\"(.*?)\".(.*\d).\"(.*)\".\"(.*)\"/i,
 		queueRegex: /Title.\{(.*)\}.\"(.*)\".\"(.*?)\".(\d+).\"(.*?)\".\"(.*?)\".(.*\d).\"(.*)\".\"(.*)\"/i,
@@ -302,44 +335,32 @@ var self = {
 		statePlayStatusRegex: /MediaControl=(.*)/i,				// Current Playing status (Play/Pause)
 		stateMuteRegex: /Mute=(.*)/i,							// Mute status (True/False)
 		stateMediaArtChangedRegex: /MediaArtChanged=(.*)/i,		// State media art changed status (True/False).
-		//stateRunningRegex: /Running=(.*)/i,					// Running status (True/False). When shutdown, will changed to False.
+		stateRunningRegex: /Running=(.*)/i,					// Running status (True/False). When shutdown, will changed to False.
 	
 	// =============================================================================================================================
 	// Incoming Data Point - Only used to populate array with data. Populations of lists will be done by other functions.
 	// =============================================================================================================================	
 	
 	incomingData: function (itemName, matchedString) {
-	
-		// Clear all arrays
-		self.arrayAlbum = [];					// Album
-		self.arrayArtist = [];					// Artist
-		self.arrayGenre = [];					// Genre
-		self.arrayPlaylist = [];				// Playlist
-		self.arrayRadioSource = [];				// Radio Sources
-		self.arrayQueue = [];					// Now Playing
-		self.arrayPickListItem = [];			// PickListItem
-		
-		// Feedback processing starts here
 		
 		if (self.albumRegex.test(matchedString)) {							// Test if it is a Album message. This is for loading data into Album list.
 				
 				var matches = self.albumRegex.exec(matchedString);			
-				self.arrayAlbum.push({
+				self.arrayAlbum.push({										// push this into an array for searching later
 									s1: self.coverart+matches[1],		
 									s2: matches[2],						
 									s3: "Album",						
-									d1: {
-										tokens: {
-											"[guid]": matches[1]
-										}
-									},
-									d2: {
-										tokens: {
-											"[guid]": matches[1]
-										}
-									}
+									d1: { tokens: {"[guid]": matches[1]} },
+									d2: { tokens: {"[guid]": matches[1]} }
 								});
-				CF.listAdd(self.lstAlbum, self.arrayAlbum);			
+				CF.listAdd(self.lstAlbum, [{								// as the feedback item comes in, straight away push into the list
+									s1: self.coverart+matches[1],		
+									s2: matches[2],						
+									s3: "Album",						
+									d1: { tokens: {"[guid]": matches[1]} },
+									d2: { tokens: {"[guid]": matches[1]} }
+								}]
+				);
 				self.albumRegex.lastIndex = 0;
 		
 		} else if (self.artistRegex.test(matchedString)) {					// Test if it is a Artist message. This is for loading data into Artist list.
@@ -349,18 +370,17 @@ var self = {
 									s1: self.coverart+matches[1],		
 									s2: matches[2],						
 									s3: "Artist",
-									d1: {
-										tokens: {
-											"[guid]": matches[1]
-										}
-									},
-									d2: {
-										tokens: {
-											"[guid]": matches[1]
-										}
-									}
+									d1: { tokens: {"[guid]": matches[1]} },
+									d2: { tokens: {"[guid]": matches[1]} }
 								});
-				CF.listAdd(self.lstArtist, self.arrayArtist);			
+				CF.listAdd(self.lstArtist, [{
+									s1: self.coverart+matches[1],		
+									s2: matches[2],						
+									s3: "Artist",						
+									d1: { tokens: {"[guid]": matches[1]} },
+									d2: { tokens: {"[guid]": matches[1]} }
+								}]
+				);
 				self.artistRegex.lastIndex = 0;					
 
 		} else if (self.genreRegex.test(matchedString)) {					// Test if it is a Genre message. This is for loading data into Genre list.
@@ -370,18 +390,17 @@ var self = {
 									s1: self.coverart+matches[1],		
 									s2: matches[2],						
 									s3: "Genre",						
-									d1: {
-										tokens: {
-											"[guid]": matches[1]
-										}
-									},
-									d2: {
-										tokens: {
-											"[guid]": matches[1]
-										}
-									}
+									d1: { tokens: {"[guid]": matches[1]} },
+									d2: { tokens: {"[guid]": matches[1]} }
 								});
-				CF.listAdd(self.lstGenre, self.arrayGenre);
+				CF.listAdd(self.lstGenre, [{
+									s1: self.coverart+matches[1],		
+									s2: matches[2],						
+									s3: "Genre",						
+									d1: { tokens: {"[guid]": matches[1]} },
+									d2: { tokens: {"[guid]": matches[1]} }
+								}]
+				);
 				self.genreRegex.lastIndex = 0;		
 		
 		} else if (self.playlistRegex.test(matchedString)) {					// Test if it is a Playlist message. This is for loading data into Playlist list.
@@ -391,23 +410,19 @@ var self = {
 									s1: self.coverart+matches[1],		
 									s2: matches[2],						
 									s3: "Playlist",						
-									d1: {
-										tokens: {
-											"[guid]": matches[1]
-										}
-									},
-									d2: {
-										tokens: {
-											"[guid]": matches[1]
-										}
-									},
-									d3: {
-										tokens: {
-											"[title]": matches[2]
-										}
-									}
+									d1: { tokens: {"[guid]": matches[1]} },
+									d2: { tokens: {"[guid]": matches[1]} },
+									d3: { tokens: {"[title]": matches[2]} }
 								});
-				CF.listAdd(self.lstPlaylist, self.arrayPlaylist);
+				CF.listAdd(self.lstPlaylist, [{
+									s1: self.coverart+matches[1],		
+									s2: matches[2],						
+									s3: "Playlist",						
+									d1: { tokens: {"[guid]": matches[1]} },
+									d2: { tokens: {"[guid]": matches[1]} },
+									d3: { tokens: {"[title]": matches[2]} }
+								}]
+				);
 				self.playlistRegex.lastIndex = 0;
 		
 		} else if (self.radioSourceRegex.test(matchedString)) {					// Test if it is a Radio Source message. This is for loading data into Radio Source list.
@@ -417,19 +432,38 @@ var self = {
 									s1: self.coverart+matches[1],
 									s2: matches[2],
 									s3: "Radio Sources",
-									d1: {
-										tokens: {
-											"[guid]": matches[1]
-										}
-									},
-									d2: {
-										tokens: {
-											"[guid]": matches[1]
-										}
-									}
+									d1: { tokens: {"[guid]": matches[1]} },
+									d2: { tokens: {"[guid]": matches[1]} }
 								});
-				CF.listAdd(self.lstRadioSource, self.arrayRadioSource);
+				CF.listAdd(self.lstRadioSource, [{
+									s1: self.coverart+matches[1],		
+									s2: matches[2],						
+									s3: "Radio Sources",						
+									d1: { tokens: {"[guid]": matches[1]} },
+									d2: { tokens: {"[guid]": matches[1]} }
+								}]
+				);
 				self.radioSourceRegex.lastIndex = 0;						// Reset the regex to work correctly after each consecutive match
+		
+		} else if (self.radioStationRegex.test(matchedString)) {					// Test if it is a Radio Source message. This is for loading data into Radio Source list.
+			
+				var matches = self.radioStationRegex.exec(matchedString);
+				self.arrayPickListItem.push({
+									s1: self.coverart+matches[1],
+									s2: matches[2],
+									s3: "",
+									d1: { tokens: {"[guid]": matches[1]} },
+									d2: { tokens: {"[guid]": matches[1]} }
+								});
+				CF.listAdd(self.lstPickListItem, [{
+									s1: self.coverart+matches[1],		
+									s2: matches[2],						
+									s3: "",						
+									d1: { tokens: {"[guid]": matches[1]} },
+									d2: { tokens: {"[guid]": matches[1]} }
+								}]
+				);
+				self.radioStationRegex.lastIndex = 0;						// Reset the regex to work correctly after each consecutive match
 		
 		} else if (self.pickListItemRegex.test(matchedString)) {					// Test if it is a Radio Source message. This is for loading data into Radio Source list.
 			
@@ -438,41 +472,41 @@ var self = {
 									s1: self.coverart+matches[1],
 									s2: matches[2],
 									s3: "",
-									d1: {
-										tokens: {
-											"[guid]": matches[1]
-										}
-									},
-									d2: {
-										tokens: {
-											"[guid]": matches[1]
-										}
-									}
+									d1: { tokens: {"[guid]": matches[1]} },
+									d2: { tokens: {"[guid]": matches[1]} }
 								});
-				CF.listAdd(self.lstPickListItem, self.arrayPickListItem);
+				CF.listAdd(self.lstPickListItem, [{
+									s1: self.coverart+matches[1],		
+									s2: matches[2],						
+									s3: "",						
+									d1: { tokens: {"[guid]": matches[1]} },
+									d2: { tokens: {"[guid]": matches[1]} }
+								}]
+				);
 				self.pickListItemRegex.lastIndex = 0;						// Reset the regex to work correctly after each consecutive match
 		
 		} else if (self.queueRegex.test(matchedString)) {					// Test if it is a Queue message. This is for loading data into Queue list.	
 		
 				var matches = self.queueRegex.exec(matchedString);
 				self.arrayQueue.push({
-								s1: self.coverart+matches[1],						// fanart
-								s2: "Track #" + matches[4] + " : "+ matches[2],		// track no. & title
-								s3: matches[5],										// track time
-								s4: matches[6],										// album										
-								s5: matches[3],										// artist
-								d1: {
-										tokens: {
-											"[guid]": matches[1]
-										}
-									},
-									d2: {
-										tokens: {
-											"[guid]": matches[1]
-										}
-									}
+									s1: self.coverart+matches[1],						// fanart
+									s2: "Track #" + matches[4] + " : "+ matches[2],		// track no. & title
+									s3: matches[5],										// track time
+									s4: matches[6],										// album										
+									s5: matches[3],										// artist
+									d1: { tokens: {"[guid]": matches[1]} },
+									d2: { tokens: {"[guid]": matches[1]} }
 							});
-				CF.listAdd(self.lstQueue, self.arrayQueue);
+				CF.listAdd(self.lstQueue, [{
+									s1: self.coverart+matches[1],						// fanart
+									s2: "Track #" + matches[4] + " : "+ matches[2],		// track no. & title
+									s3: matches[5],										// track time
+									s4: matches[6],										// album										
+									s5: matches[3],										// artist
+									d1: { tokens: {"[guid]": matches[1]} },
+									d2: { tokens: {"[guid]": matches[1]} }
+								}]
+				);
 				self.queueRegex.lastIndex = 0;								// Reset the regex to work correctly after each consecutive match
 		
 		} else if (self.instanceRegex.test(matchedString)) {				// Test if it is a Instance message. This is for defining which zone/instance the player is at currently.
@@ -662,62 +696,20 @@ var self = {
 		
 		// Set the playing status feedback on the slider
 		CF.setJoin(self.sldTrackTime, Math.round((self.TrackTime/self.TrackDuration)*65535));	
-		
 	}, 
 	
-	clearAll: function() {
-		
-		// clear all lists of previous entries
-		CF.listRemove(self.lstAlbum);				
-		CF.listRemove(self.lstArtist);				
-		CF.listRemove(self.lstGenre);				
-		CF.listRemove(self.lstPlaylist);			
-		CF.listRemove(self.lstRadioSource);		
-		CF.listRemove(self.lstQueue);
-		CF.listRemove(self.lstPickListItem);
-		
-		// clear all arrays of previous entries
-		self.arrayAlbum = [];					// Album
-		self.arrayArtist = [];					// Artist
-		self.arrayGenre = [];					// Genre
-		self.arrayPlaylist = [];				// Playlist
-		self.arrayRadioSource = [];				// Radio Sources
-		self.arrayQueue = [];					// Now Playing
-		self.arrayPickListItem = [];			// PickListItem
-	
-		// clear the irrelevant text fields and slider values
-		CF.setJoins([																		
-				{join: "s1", value: ""},
-				{join: self.txtPlayStatus, value: ""},
-				{join: self.txtTrackStatus, value: ""},				
-				{join: self.txtCoverArt, value: ""},			
-				{join: self.txtTrackTitle, value: ""},			
-				{join: self.txtAlbum, value: ""},
-				{join: self.txtArtist, value: ""},			
-				{join: self.txtTrackTime, value: ""},
-				{join: self.txtTrackDuration, value: ""},
-				{join: self.srchAlbum, value: ""},			
-				{join: self.srchArtist, value: ""},
-				{join: self.srchGenre, value: ""},			
-				{join: self.srchPlaylist, value: ""},
-				{join: self.srchRadioSource, value: ""},			
-				{join: self.srchQueue, value: ""},
-				{join: self.txtPlaylist, value: ""},
-				{join: self.txtVolumeLevel, value: ""},
-				{join: self.sldVolumeControl, value: 0},		// volume slider
-				{join: self.sldTrackTime, value: 0},			// track time feedback slider
-		]);
-	},
-	
 	// =============================================================================================================================
-	// Most commands are reverse engineered from Crestron Module. *Note - however not all commands are tested working.
+	// Creation and control of Lists.
+	// note: For large databases it's better to increase the delay time of setTimeout function to give more time for the regex to
+	//       process the large amount of data before pushing the array into lists.	
 	// =============================================================================================================================
 	
 	// -----------------------------------------------------------------------------------------------------------------------------
 	// Albums -> Title
 	// -----------------------------------------------------------------------------------------------------------------------------
 	browseAlbums: function() { 
-		CF.listRemove(self.lstAlbum);													// clear list of any previous entries
+		self.arrayAlbum = [];																// clear array of any previous data
+		CF.listRemove(self.lstAlbum);														// clear list of any previous entries
 		CF.setJoins([																		// show the correct subpage and hide the rest
 				{join: self.subAlbum, value: 1},
 				{join: self.subAlbumTitle, value: 0},				
@@ -735,12 +727,14 @@ var self = {
 			]);
 		self.clearMusicFilter();															// clear all previous music filters
 		self.clearRadioFilter();															// clear all previous radio filters
-		self.sendCmd("BrowseAlbums"); 														// send the command
+		self.sendCmd("BrowseAlbums"); 														// send the command and populate the array with data
+		//setTimeout(function(){CF.listAdd(self.lstAlbum, self.arrayAlbum);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 	},
 	
 	selectAlbum_Title: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
-			CF.listRemove(self.lstQueue);				//clear list of any previous entries
+			self.arrayQueue = [];															// clear array of any previous data
+			CF.listRemove(self.lstQueue);							//clear list of any previous entries
 			CF.setJoins([											//toggle to the correct subpage
 				{join: self.subAlbum, value: 0},
 				{join: self.subAlbumTitle, value: 1},				
@@ -758,6 +752,7 @@ var self = {
 			]);
 			self.setMusicFilter_Album(t["[guid]"]);					//set the filter
 			self.sendCmd("BrowseAlbumTitles");						// Get all the titles in the selected album
+			//setTimeout(function(){CF.listAdd(self.lstQueue, self.arrayQueue);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 		});
 	},
 	
@@ -768,12 +763,41 @@ var self = {
 		});
 	},
 	
+	// Search the list of albums and display the searched results only.
+	searchAlbums: function(strSearch) {
+	
+				var templistArray = [];				//initialize temporary array
+				CF.listRemove(self.lstAlbum);		//clear list of any previous entries
+	
+				for (var i = 0;i<self.arrayAlbum.length;i++)						//loop thru all the elements in the Albums array 
+				{
+					var searchCoverArt = self.arrayAlbum[i].s1;
+					var searchAlbum = self.arrayAlbum[i].s2;
+					var searchType = self.arrayAlbum[i].s3;
+					var searchTokenGuiD = self.arrayAlbum[i].d1.tokens["[guid]"];
+					var searchToken2GuiD = self.arrayAlbum[i].d2.tokens["[guid]"];
+					
+					if(self.search(searchAlbum, strSearch))							// refer to search() from "Other functions" section
+					{
+						templistArray.push({										// Add matched info to temp array
+							s1: searchCoverArt,
+							s2: searchAlbum,
+							s3: searchType,
+							d1: { tokens: {"[guid]": searchTokenGuiD} },
+							d2: { tokens: {"[guid]": searchToken2GuiD} }
+						});
+					} // end if
+				}// end for
+				CF.listAdd(self.lstAlbum, templistArray);							// Add temp array to list
+	},
+	
 	// -----------------------------------------------------------------------------------------------------------------------------
 	// Artists -> Albums -> Title
 	// -----------------------------------------------------------------------------------------------------------------------------
 	
 	browseArtists: function() { 
-		CF.listRemove(self.lstArtist);													// clear list of any previous entries
+		self.arrayArtist = [];																// clear array of any previous data
+		CF.listRemove(self.lstArtist);														// clear list of any previous entries
 		CF.setJoins([																		// show the correct subpage and hide the rest
 				{join: self.subAlbum, value: 0},
 				{join: self.subAlbumTitle, value: 0},				
@@ -792,10 +816,12 @@ var self = {
 		self.clearMusicFilter();															// clear all previous music filters
 		self.clearRadioFilter();															// clear all previous radio filters
 		self.sendCmd("BrowseArtists"); 														// send the command
+		//setTimeout(function(){CF.listAdd(self.lstArtist, self.arrayArtist);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 	},
 	
 	selectArtist_Album: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
+			self.arrayAlbum = [];									// clear array of any previous data
 			CF.listRemove(self.lstAlbum);							//clear list of any previous entries
 			CF.setJoins([											//toggle to the correct subpage
 				{join: self.subAlbum, value: 0},
@@ -814,11 +840,13 @@ var self = {
 			]);
 			self.setMusicFilter_Artist(t["[guid]"]);					//set the filter
 			self.sendCmd("BrowseAlbums");						// Get all the titles in the selected album
+			//setTimeout(function(){CF.listAdd(self.lstAlbum, self.arrayAlbum);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 		});
 	},
 	
 	selectArtist_Album_Title: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
+			self.arrayQueue = [];									// clear array of any previous data
 			CF.listRemove(self.lstQueue);							//clear list of any previous entries
 			CF.setJoins([											//toggle to the correct subpage
 				{join: self.subAlbum, value: 0},
@@ -837,6 +865,7 @@ var self = {
 			]);
 			self.setMusicFilter_Album(t["[guid]"]);					//set the filter
 			self.sendCmd("BrowseAlbumTitles");						// Get all the titles in the selected album
+			//setTimeout(function(){CF.listAdd(self.lstQueue, self.arrayQueue);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 		});
 	},
 	
@@ -847,13 +876,41 @@ var self = {
 		});
 	},
 	
+	// Search the list of artists and display the searched results only.
+	searchArtists: function(strSearch) {
+	
+				var templistArray = [];				//initialize temporary array
+				CF.listRemove(self.lstArtist);		//clear list of any previous entries
+	
+				for (var i = 0;i<self.arrayArtist.length;i++)						//loop thru all the elements in the Albums array 
+				{
+					var searchCoverArt = self.arrayArtist[i].s1;
+					var searchArtist = self.arrayArtist[i].s2;
+					var searchType = self.arrayArtist[i].s3;
+					var searchTokenGuiD = self.arrayArtist[i].d1.tokens["[guid]"];
+					var searchToken2GuiD = self.arrayArtist[i].d2.tokens["[guid]"];
+					
+					if(self.search(searchArtist, strSearch))							// refer to search() from "Other functions" section
+					{
+						templistArray.push({										// Add matched info to temp array
+							s1: searchCoverArt,
+							s2: searchArtist,
+							s3: searchType,
+							d1: { tokens: {"[guid]": searchTokenGuiD} },
+							d2: { tokens: {"[guid]": searchToken2GuiD} }
+						});
+					} // end if
+				}// end for
+				CF.listAdd(self.lstArtist, templistArray);							// Add temp array to list
+	},
 	
 	// -----------------------------------------------------------------------------------------------------------------------------
 	// Genres -> Albums -> Title
 	// -----------------------------------------------------------------------------------------------------------------------------
 	
 	browseGenres: function() { 
-		CF.listRemove(self.lstGenre);													// clear list of any previous entries
+		self.arrayGenre = [];																// clear array of any previous data
+		CF.listRemove(self.lstGenre);														// clear list of any previous entries
 		CF.setJoins([																		// show the correct subpage and hide the rest
 				{join: self.subAlbum, value: 0},
 				{join: self.subAlbumTitle, value: 0},				
@@ -872,10 +929,12 @@ var self = {
 		self.clearMusicFilter();															// clear all previous music filters
 		self.clearRadioFilter();															// clear all previous radio filters
 		self.sendCmd("BrowseGenres"); 														// send the command
+		//setTimeout(function(){CF.listAdd(self.lstGenre, self.arrayGenre);}, 4000);			// set a short delay to give time for array to be populated before adding array into list.
 	},
 	
 	selectGenre_Album: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
+			self.arrayAlbum = [];									// clear array of any previous data
 			CF.listRemove(self.lstAlbum);							//clear list of any previous entries
 			CF.setJoins([											//toggle to the correct subpage
 				{join: self.subAlbum, value: 0},
@@ -894,11 +953,13 @@ var self = {
 			]);
 			self.setMusicFilter_Genre(t["[guid]"]);				//set the filter
 			self.sendCmd("BrowseAlbums");						// Get all the titles in the selected album
+			//setTimeout(function(){CF.listAdd(self.lstAlbum, self.arrayAlbum);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 		});
 	},
 	
 	selectGenre_Album_Title: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
+			self.arrayQueue = [];									// clear array of any previous data
 			CF.listRemove(self.lstQueue);							//clear list of any previous entries
 			CF.setJoins([											//toggle to the correct subpage
 				{join: self.subAlbum, value: 0},
@@ -917,6 +978,7 @@ var self = {
 			]);
 			self.setMusicFilter_Album(t["[guid]"]);				//set the filter
 			self.sendCmd("BrowseAlbumTitles");						// Get all the titles in the selected album
+			//setTimeout(function(){CF.listAdd(self.lstQueue, self.arrayQueue);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 		});
 	},
 	
@@ -927,12 +989,40 @@ var self = {
 		});
 	},
 	
+	// Search the list of genres and display the searched results only.
+	searchGenres: function(strSearch) {
+	
+				var templistArray = [];				//initialize temporary array
+				CF.listRemove(self.lstGenre);		//clear list of any previous entries
+	
+				for (var i = 0;i<self.arrayGenre.length;i++)						//loop thru all the elements in the Albums array 
+				{
+					var searchCoverArt = self.arrayGenre[i].s1;
+					var searchGenre = self.arrayGenre[i].s2;
+					var searchType = self.arrayGenre[i].s3;
+					var searchTokenGuiD = self.arrayGenre[i].d1.tokens["[guid]"];
+					var searchToken2GuiD = self.arrayGenre[i].d2.tokens["[guid]"];
+					
+					if(self.search(searchGenre, strSearch))							// refer to search() from "Other functions" section
+					{
+						templistArray.push({										// Add matched info to temp array
+							s1: searchCoverArt,
+							s2: searchGenre,
+							s3: searchType,
+							d1: { tokens: {"[guid]": searchTokenGuiD} },
+							d2: { tokens: {"[guid]": searchToken2GuiD} }
+						});
+					} // end if
+				}// end for
+				CF.listAdd(self.lstGenre, templistArray);							// Add temp array to list
+	},
 	
 	// -----------------------------------------------------------------------------------------------------------------------------
 	// Playlists -> Titles
 	// -----------------------------------------------------------------------------------------------------------------------------
 	
 	browsePlaylists: function() { 
+		self.arrayPlaylist = [];															// clear array of any previous data
 		CF.listRemove(self.lstPlaylist);													// clear list of any previous entries
 		CF.setJoins([																		// show the correct subpage and hide the rest
 				{join: self.subAlbum, value: 0},
@@ -952,10 +1042,12 @@ var self = {
 		self.clearMusicFilter();															// clear all previous music filters
 		self.clearRadioFilter();															// clear all previous radio filters
 		self.sendCmd("BrowsePlaylists"); 														// send the command
+		//setTimeout(function(){CF.listAdd(self.lstPlaylist, self.arrayPlaylist);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 	},
 	
 	selectPlaylist_Title: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
+			self.arrayQueue = [];									// clear array of any previous data
 			CF.listRemove(self.lstQueue);							//clear list of any previous entries
 			CF.setJoins([											//toggle to the correct subpage
 				{join: self.subAlbum, value: 0},
@@ -974,6 +1066,7 @@ var self = {
 			]);
 			self.setMusicFilter_Playlist(t["[guid]"]);				//set the filter
 			self.sendCmd("BrowseTitles");									// Get all the titles in the selected album
+			//setTimeout(function(){CF.listAdd(self.lstQueue, self.arrayQueue);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 		});
 	},
 	
@@ -998,11 +1091,42 @@ var self = {
 	
 	deletePlaylist: function(title) { self.sendCmd("DeletePlaylist " + title); },					// Delete Playlist. *Command : SavePlaylist "Playlist1"
 	
+	// Search the list of playlists and display the searched results only.
+	searchPlaylists: function(strSearch) {
+	
+				var templistArray = [];				//initialize temporary array
+				CF.listRemove(self.lstPlaylist);		//clear list of any previous entries
+	
+				for (var i = 0;i<self.arrayPlaylist.length;i++)						//loop thru all the elements in the Albums array 
+				{
+					var searchCoverArt = self.arrayPlaylist[i].s1;
+					var searchPlaylist = self.arrayPlaylist[i].s2;
+					var searchType = self.arrayPlaylist[i].s3;
+					var searchTokenGuiD = self.arrayPlaylist[i].d1.tokens["[guid]"];
+					var searchToken2GuiD = self.arrayPlaylist[i].d2.tokens["[guid]"];
+					var searchToken3GuiD = self.arrayPlaylist[i].d3.tokens["[guid]"];
+					
+					if(self.search(searchPlaylist, strSearch))							// refer to search() from "Other functions" section
+					{
+						templistArray.push({										// Add matched info to temp array
+							s1: searchCoverArt,
+							s2: searchPlaylist,
+							s3: searchType,
+							d1: { tokens: {"[guid]": searchTokenGuiD} },
+							d2: { tokens: {"[guid]": searchToken2GuiD} },
+							d3: { tokens: {"[guid]": searchToken3GuiD} }
+						});
+					} // end if
+				}// end for
+				CF.listAdd(self.lstPlaylist, templistArray);							// Add temp array to list
+	},
+	
 	// -----------------------------------------------------------------------------------------------------------------------------
 	// Radio Sources -> Radio Stations -> All multiple selections depending on the source
 	// -----------------------------------------------------------------------------------------------------------------------------
 	
 	browseRadioSources: function() { 
+		self.arrayRadioSource = [];															// clear array of any previous data
 		CF.listRemove(self.lstRadioSource);													// clear list of any previous entries
 		CF.setJoins([																		// show the correct subpage and hide the rest
 				{join: self.subAlbum, value: 0},
@@ -1022,11 +1146,13 @@ var self = {
 		self.clearMusicFilter();															// clear all previous music filters
 		self.clearRadioFilter();															// clear all previous radio filters
 		self.sendCmd("BrowseRadioSources"); 														// send the command
+		//setTimeout(function(){CF.listAdd(self.lstRadioSource, self.arrayRadioSource);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 	},
 	
 	selectRadioSource: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
-			CF.listRemove(self.lstPickListItem);							//clear list of any previous entries
+			self.arrayPickListItem = [];							// clear array of any previous data
+			CF.listRemove(self.lstPickListItem);					//clear list of any previous entries
 			CF.setJoins([											//toggle to the correct subpage
 				{join: self.subAlbum, value: 0},
 				{join: self.subAlbumTitle, value: 0},				
@@ -1044,12 +1170,14 @@ var self = {
 			]);
 			self.setRadioFilter_RadioSource(t["[guid]"]);				//set the filter
 			self.sendCmd("BrowseRadioStations");
+			//setTimeout(function(){CF.listAdd(self.lstPickListItem, self.arrayPickListItem);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 		});
 	},
 	
 	selectRadioStation: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
-			CF.listRemove(self.lstPickListItem);							//clear list of any previous entries
+			self.arrayPickListItem = [];							// clear array of any previous data
+			CF.listRemove(self.lstPickListItem);					//clear list of any previous entries
 			CF.setJoins([											//toggle to the correct subpage
 				{join: self.subAlbum, value: 0},
 				{join: self.subAlbumTitle, value: 0},				
@@ -1065,19 +1193,50 @@ var self = {
 				{join: self.subRadioSourceStation, value: 1},
 				{join: self.subQueue, value: 0},
 			]);
-			self.ackpickListItem(t["[guid]"]);				//set the filter
+			self.ackpickListItem(t["[guid]"]);				//Play item using AckPickList OR
+			self.playRadioStation(t["[guid]"]);				//play item using PlayRadioStation
+			//setTimeout(function(){CF.listAdd(self.lstPickListItem, self.arrayPickListItem);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 		});
 	},
 	
 	ackpickListItem: 			function(guid) { self.sendCmd("AckPickItem " + guid); },				// Ack Pick Item 
+	
+	// Search the list of radio sources and display the searched results only.
+	searchRadioSources: function(strSearch) {
+	
+				var templistArray = [];				//initialize temporary array
+				CF.listRemove(self.lstRadioSource);		//clear list of any previous entries
+	
+				for (var i = 0;i<self.arrayRadioSource.length;i++)						//loop thru all the elements in the Albums array 
+				{
+					var searchCoverArt = self.arrayRadioSource[i].s1;
+					var searchRadioSource = self.arrayRadioSource[i].s2;
+					var searchType = self.arrayRadioSource[i].s3;
+					var searchTokenGuiD = self.arrayRadioSource[i].d1.tokens["[guid]"];
+					var searchToken2GuiD = self.arrayRadioSource[i].d2.tokens["[guid]"];
+					
+					if(self.search(searchRadioSource, strSearch))							// refer to search() from "Other functions" section
+					{
+						templistArray.push({										// Add matched info to temp array
+							s1: searchCoverArt,
+							s2: searchRadioSource,
+							s3: searchType,
+							d1: { tokens: {"[guid]": searchTokenGuiD} },
+							d2: { tokens: {"[guid]": searchToken2GuiD} }
+						});
+					} // end if
+				}// end for
+				CF.listAdd(self.lstRadioSource, templistArray);							// Add temp array to list
+	},
 	
 	// -----------------------------------------------------------------------------------------------------------------------------
 	// Queue - Shows all Now Playing Titles
 	// -----------------------------------------------------------------------------------------------------------------------------
 	
 	browseQueue: function() { 
+		self.arrayQueue = [];															// clear array of any previous data
 		CF.listRemove(self.lstQueue);													// clear list of any previous entries
-		CF.setJoins([																		// show the correct subpage and hide the rest
+		CF.setJoins([																	// show the correct subpage and hide the rest
 				{join: self.subAlbum, value: 0},
 				{join: self.subAlbumTitle, value: 0},				
 				{join: self.subArtist, value: 0},			
@@ -1095,6 +1254,7 @@ var self = {
 		self.clearMusicFilter();															// clear all previous music filters
 		self.clearRadioFilter();															// clear all previous radio filters
 		self.sendCmd("BrowseNowPlaying"); 														// send the command
+		//setTimeout(function(){CF.listAdd(self.lstQueue, self.arrayQueue);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 	},
 	
 	playCurrentTitle: function(list, listIndex, join) {							
@@ -1122,6 +1282,33 @@ var self = {
 		});
 	},
 	
+	// Search the list of radio sources and display the searched results only.
+	searchQueue: function(strSearch) {
+	
+				var templistArray = [];				//initialize temporary array
+				CF.listRemove(self.lstQueue);		//clear list of any previous entries
+	
+				for (var i = 0;i<self.arrayQueue.length;i++)						//loop thru all the elements in the Albums array 
+				{
+					var searchCoverArt = self.arrayQueue[i].s1;
+					var searchQueue = self.arrayQueue[i].s2;
+					var searchType = self.arrayQueue[i].s3;
+					var searchTokenGuiD = self.arrayQueue[i].d1.tokens["[guid]"];
+					var searchToken2GuiD = self.arrayQueue[i].d2.tokens["[guid]"];
+					
+					if(self.search(searchQueue, strSearch))							// refer to search() from "Other functions" section
+					{
+						templistArray.push({										// Add matched info to temp array
+							s1: searchCoverArt,
+							s2: searchQueue,
+							s3: searchType,
+							d1: { tokens: {"[guid]": searchTokenGuiD} },
+							d2: { tokens: {"[guid]": searchToken2GuiD} }
+						});
+					} // end if
+				}// end for
+				CF.listAdd(self.lstQueue, templistArray);							// Add temp array to list
+	},
 	
 	// -----------------------------------------------------------------------------------------------------------------------------
 	// Toggling between subpages
@@ -1273,6 +1460,50 @@ var self = {
 		self.Forward();																		// Move forward browsing history
 	},
 	
+	clearAll: function() {
+		
+		// clear all lists of previous entries
+		CF.listRemove(self.lstAlbum);				
+		CF.listRemove(self.lstArtist);				
+		CF.listRemove(self.lstGenre);				
+		CF.listRemove(self.lstPlaylist);			
+		CF.listRemove(self.lstRadioSource);		
+		CF.listRemove(self.lstQueue);
+		CF.listRemove(self.lstPickListItem);
+		
+		// clear all arrays of previous entries
+		self.arrayAlbum = [];					// Album
+		self.arrayArtist = [];					// Artist
+		self.arrayGenre = [];					// Genre
+		self.arrayPlaylist = [];				// Playlist
+		self.arrayRadioSource = [];				// Radio Sources
+		self.arrayQueue = [];					// Now Playing
+		self.arrayPickListItem = [];			// PickListItem
+	
+		// clear the irrelevant text fields and slider values
+		CF.setJoins([																		
+				{join: "s1", value: ""},
+				{join: self.txtPlayStatus, value: ""},
+				{join: self.txtTrackStatus, value: ""},				
+				{join: self.txtCoverArt, value: ""},			
+				{join: self.txtTrackTitle, value: ""},			
+				{join: self.txtAlbum, value: ""},
+				{join: self.txtArtist, value: ""},			
+				{join: self.txtTrackTime, value: ""},
+				{join: self.txtTrackDuration, value: ""},
+				{join: self.srchAlbum, value: ""},			
+				{join: self.srchArtist, value: ""},
+				{join: self.srchGenre, value: ""},			
+				{join: self.srchPlaylist, value: ""},
+				{join: self.srchRadioSource, value: ""},			
+				{join: self.srchQueue, value: ""},
+				{join: self.txtPlaylist, value: ""},
+				{join: self.txtVolumeLevel, value: ""},
+				{join: self.sldVolumeControl, value: 0},		// volume slider
+				{join: self.sldTrackTime, value: 0},			// track time feedback slider
+		]);
+	},
+	
 	// -----------------------------------------------------------------------------------------------------------------------------
 	// Other actions
 	// -----------------------------------------------------------------------------------------------------------------------------
@@ -1396,6 +1627,8 @@ var self = {
 	clearQueue:					function() { self.sendCmd("ClearNowPlaying"); self.browseQueue();},		// Stop all playing tracks and clear all now playing list.
 	Back:						function() { self.sendCmd("Back"); },									// Back
 	Forward:					function() { self.sendCmd("Forward"); },								// Forward
+	Shutdown:					function() { self.sendCmd2("Shutdown"); },								// System Shutdown
+	Reboot:						function() { self.sendCmd2("Reboot"); },								// System Reboot
 	
 	// Select the zone instance and update the now playing info.
 	selectZone:	function(zone) { 
@@ -1404,9 +1637,17 @@ var self = {
 		self.browseQueue();		
 	},		
 	
-	// Format the command string to send to system
-	sendCmd: function(command) { CF.send(self.sysName, command+"\x0D\x0A"); }										//CF.send(systemName, string [, outputFormat])	
-
+	// Format the command string to send to system : CF.send(systemName, string [, outputFormat])
+	sendCmd: function(command) { CF.send(self.sysName, command+"\x0D\x0A"); },										// System 1 : Port 5004
+	sendCmd2: function(command) { CF.send(self.sys2Name, command+"\x0D\x0A"); },										// System 2 : Port 23
+	
+	// Only allow logging calls when CF is in debug mode - better performance in release mode this way
+	log: function(msg) {
+			if (CF.debug) {
+				CF.log(msg);
+			}
+		}
+	
 };
 
 CF.modules.push(

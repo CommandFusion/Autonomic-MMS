@@ -28,7 +28,12 @@
         <group index="1" name="" datatype="s" target="s1" />
       </fb>
     </system>
-    <system name="MMS5_2" ip="192.168.168.204" port="23" protocol="tcp" alwayson="0" offlinequeue="0" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="\x0D\x0A" connectionStatus="0" disconnectionStatus="0">
+    <system name="MMS5_2" ip="192.168.168.204" port="23" protocol="tcp" alwayson="1" offlinequeue="0" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="\x0D\x0A" connectionStatus="0" disconnectionStatus="0">
+      <fb name="Incoming Data System 2" regex="(?msi)(.*)">
+        <group index="1" name="" datatype="s" target="s1" />
+      </fb>
+    </system>
+    <system name="WakeOnLan" ip="255.255.255.255" port="9" protocol="udp" alwayson="0" offlinequeue="0" accept="0" acceptBroadcasts="1" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0">
       <cmd name="WOL">\xFF\xFF\xFF\xFF\xFF\xFF\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93</cmd>
     </system>
   </systems>
@@ -133,10 +138,8 @@
   </themes>
   <tokens>
     <token name="[inputSysName]" value="MMS5" persist="1" />
+    <token name="[inputSys2Name]" value="MMS5_2" persist="1" />
     <token name="[inputURL]" value="192.168.168.204" persist="1" />
-    <token name="[inputPort]" value="5004" persist="1" />
-    <token name="[inputUsername]" value="null" persist="1" />
-    <token name="[inputPassword]" value="null" persist="1" />
   </tokens>
   <scripts>
     <script name="MMS5.js" />
@@ -345,7 +348,7 @@ feedback</txt>
     </btn>
   </subpage>
   <subpage name="NowPlaying" w="230" h="230" clip="1">
-    <img x="16" y="31" w="120" h="120" j="4502" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0" />
+    <img x="16" y="31" w="120" h="120" j="4502" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="1" />
     <txt j="4503" x="17" y="154" w="197" h="23" t="nowplaying" wrap="True" l="0">
     </txt>
     <txt j="4504" x="17" y="171" w="197" h="23" t="nowplaying" wrap="True" l="0">
@@ -358,9 +361,9 @@ feedback</txt>
     </txt>
     <txt j="4500" x="16" y="2" w="197" h="23" t="nowplaying" wrap="True" l="0">
     </txt>
-    <txt j="4507" x="178" y="205" w="36" h="23" t="nowplaying" wrap="True" l="0">
+    <txt j="4507" x="178" y="205" w="36" h="23" t="nowplaying" wrap="True" l="1">
     </txt>
-    <slider j="4501" d="0" x="54" y="202" w="126" h="28" min="0" max="65535" decimals="0" unit="decimal" t="vol_bar" sim="0" l="0" />
+    <slider j="4501" d="0" x="54" y="202" w="119" h="28" min="0" max="65535" decimals="0" unit="decimal" t="vol_bar" sim="0" l="0" />
   </subpage>
   <subpage name="Queue_Item" w="759" h="90" clip="1">
     <txt j="2" x="166" y="0" w="593" h="37" t="cfblue2_title_l" wrap="True" l="0">(Queue)</txt>
@@ -622,64 +625,59 @@ feedback</txt>
       <inactive s="0">System Name : </inactive>
       <active s="0">System Name : </active>
     </btn>
-    <btn j="0" x="77" y="306" w="302" h="45" t="list_menudrop_footer_blank" flip="None" sim="1" l="0" s="1">
-      <inactive s="0">Port :</inactive>
-      <active s="0">Port :</active>
-    </btn>
-    <btn j="0" x="77" y="261" w="302" h="45" t="list_menudrop_body_blank" flip="None" sim="1" l="0" s="1">
+    <btn j="0" x="77" y="261" w="302" h="45" t="list_menudrop_footer_blank" flip="None" sim="1" l="0" s="1">
       <inactive s="0">IP Address :</inactive>
       <active s="0">IP Address :</active>
     </btn>
     <input j="0" s="4521" x="185" y="264" w="194" h="38" pass="0" autoFocus="0" f="0" t="search_black" command="setSystemSettings" l="0">(IP Address)</input>
     <input j="0" s="4520" x="206" y="220" w="173" h="38" pass="0" autoFocus="0" f="0" t="search_black" command="setSystemSettings" l="0">(System Name)</input>
-    <input j="0" s="4522" x="138" y="310" w="241" h="38" pass="0" autoFocus="0" f="0" t="search_black" command="setSystemSettings" l="0">(Port)</input>
-    <btn j="0" x="77" y="471" w="302" h="45" t="list_menudrop_header_blank" flip="None" sim="1" l="0" s="1">
+    <btn j="0" x="77" y="424" w="302" h="45" t="list_menudrop_header_blank" flip="None" sim="1" l="0" s="1" js="self.Shutdown()">
       <inactive s="0">Shutdown</inactive>
       <active s="0">Shutdown</active>
     </btn>
-    <btn j="0" x="77" y="561" w="302" h="45" t="list_menudrop_footer_blank" flip="None" sim="1" l="0" s="1">
+    <btn j="0" x="77" y="514" w="302" h="45" t="list_menudrop_footer_blank" flip="None" sim="1" l="0" s="1" cmd="WOL">
       <inactive s="0">Wake-On-Lan (WOL)</inactive>
       <active s="0">Wake-On-Lan (WOL)</active>
     </btn>
-    <btn j="0" x="77" y="516" w="302" h="45" t="list_menudrop_body_blank" flip="None" sim="1" l="0" s="1">
+    <btn j="0" x="77" y="469" w="302" h="45" t="list_menudrop_body_blank" flip="None" sim="1" l="0" s="1" js="self.Reboot()">
       <inactive s="0">Reboot</inactive>
       <active s="0">Reboot</active>
     </btn>
-    <btn j="0" x="78" y="388" w="302" h="45" t="list_dropmenu_btn_single_l" flip="None" sim="1" l="0" s="1">
-      <inactive s="0">Settings</inactive>
-      <active s="0">Settings</active>
+    <btn j="0" x="78" y="343" w="302" h="45" t="list_dropmenu_btn_single_l" flip="None" sim="1" l="0" s="1">
+      <inactive s="0">Server Settings</inactive>
+      <active s="0">Server Settings</active>
     </btn>
     <txt j="0" x="91" y="179" w="283" h="39" t="cfblue2_title_l" wrap="True" l="0">General</txt>
-    <txt j="0" x="91" y="349" w="283" h="39" t="cfblue2_title_l" wrap="True" l="0">Advanced</txt>
-    <txt j="0" x="86" y="432" w="283" h="39" t="cfblue2_title_l" wrap="True" l="0">Power</txt>
+    <txt j="0" x="91" y="304" w="283" h="39" t="cfblue2_title_l" wrap="True" l="0">Advanced</txt>
+    <txt j="0" x="86" y="385" w="283" h="39" t="cfblue2_title_l" wrap="True" l="0">Power</txt>
   </subpage>
   <subpage name="Album_List" w="780" h="545" clip="1">
     <img x="576" y="16" w="186" h="29" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">menu_search.png</img>
-    <input j="0" s="4510" x="604" y="16" w="158" h="30" pass="0" autoFocus="0" f="0" t="search_black" l="0">(Search Albums)</input>
+    <input j="0" s="4510" x="604" y="16" w="158" h="30" pass="0" autoFocus="0" f="0" t="search_black" changeCommand="searchAlbums" l="0">(Search Albums)</input>
     <list j="4510" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="Album_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
     <txt j="0" x="123" y="9" w="436" h="43" t="cfblue2_title_l" wrap="True" l="0">ALBUM</txt>
   </subpage>
   <subpage name="Artist_List" w="780" h="545" clip="1">
     <img x="576" y="16" w="186" h="29" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">menu_search.png</img>
-    <input j="0" s="4511" x="604" y="16" w="158" h="30" pass="0" autoFocus="0" f="0" t="search_black" l="0">(Search Artists)</input>
+    <input j="0" s="4511" x="604" y="16" w="158" h="30" pass="0" autoFocus="0" f="0" t="search_black" changeCommand="searchArtists" l="0">(Search Artists)</input>
     <list j="4520" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="Artist_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
     <txt j="0" x="123" y="9" w="425" h="43" t="cfblue2_title_l" wrap="True" l="0">ARTIST</txt>
   </subpage>
   <subpage name="Genre_List" w="780" h="545" clip="1">
     <img x="576" y="16" w="186" h="29" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">menu_search.png</img>
-    <input j="0" s="4512" x="604" y="16" w="158" h="30" pass="0" autoFocus="0" f="0" t="search_black" l="0">(Search Genres)</input>
+    <input j="0" s="4512" x="604" y="16" w="158" h="30" pass="0" autoFocus="0" f="0" t="search_black" changeCommand="searchGenres" l="0">(Search Genres)</input>
     <list j="4530" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="Genre_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
     <txt j="0" x="123" y="9" w="425" h="43" t="cfblue2_title_l" wrap="True" l="0">GENRE</txt>
   </subpage>
   <subpage name="Playlist_List" w="780" h="545" clip="1">
     <img x="576" y="16" w="186" h="29" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">menu_search.png</img>
-    <input j="0" s="4513" x="604" y="16" w="158" h="30" pass="0" autoFocus="0" f="0" t="search_black" l="0">(Search Playlists)</input>
+    <input j="0" s="4513" x="604" y="16" w="158" h="30" pass="0" autoFocus="0" f="0" t="search_black" changeCommand="searchPlaylists" l="0">(Search Playlists)</input>
     <list j="4540" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="Playlist_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
     <txt j="0" x="123" y="9" w="429" h="43" t="cfblue2_title_l" wrap="True" l="0">PLAYLIST</txt>
   </subpage>
   <subpage name="RadioSources_List" w="780" h="545" clip="1">
     <img x="576" y="16" w="186" h="29" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">menu_search.png</img>
-    <input j="0" s="4514" x="604" y="16" w="158" h="30" pass="0" autoFocus="0" f="0" t="search_black" l="0">(Search Radio Sources)</input>
+    <input j="0" s="4514" x="604" y="16" w="158" h="30" pass="0" autoFocus="0" f="0" t="search_black" changeCommand="searchRadioSources" l="0">(Search Radio Sources)</input>
     <list j="4550" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="RadioSources_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
     <txt j="0" x="123" y="9" w="402" h="43" t="cfblue2_title_l" wrap="True" l="0">RADIO SOURCE</txt>
   </subpage>
@@ -692,7 +690,7 @@ feedback</txt>
     </btn>
     <input j="0" s="4516" x="380" y="13" w="167" h="30" pass="0" autoFocus="0" f="0" t="search_white_c" command="savePlaylist" l="0">Save Playlist As ...</input>
     <img x="576" y="16" w="186" h="29" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">menu_search.png</img>
-    <input j="0" s="4515" x="604" y="16" w="158" h="30" pass="0" autoFocus="0" f="0" t="search_black" l="0">(Search Queue)</input>
+    <input j="0" s="4515" x="604" y="16" w="158" h="30" pass="0" autoFocus="0" f="0" t="search_black" changeCommand="searchQueue" l="0">(Search Queue)</input>
     <list j="4560" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="Queue_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
     <txt j="0" x="21" y="9" w="141" h="43" t="cfblue2_title_l" wrap="True" l="0">NOW PLAYING</txt>
     <btn j="0" x="169" y="7" w="186" h="43" t="btn_212x43" flip="None" sim="1" l="0" s="1" js="self.clearQueue()">
@@ -734,8 +732,8 @@ feedback</txt>
   </subpage>
   <subpage name="Artist_Album_Title_List" w="780" h="545" clip="1">
     <list j="4560" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="Artist_Album_Title_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
-    <txt j="0" x="123" y="9" w="545" h="43" t="cfblue2_title_l" wrap="True" l="0">GENRE &gt; ALBUM &gt; TITLE</txt>
-    <btn j="0" x="10" y="9" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.backGenreAlbumList()">
+    <txt j="0" x="123" y="9" w="545" h="43" t="cfblue2_title_l" wrap="True" l="0">ARTIST &gt; ALBUM &gt; TITLE</txt>
+    <btn j="0" x="10" y="9" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.backArtistAlbumList()">
       <inactive s="0">&lt; BACK</inactive>
       <active s="0">&lt; BACK</active>
     </btn>
