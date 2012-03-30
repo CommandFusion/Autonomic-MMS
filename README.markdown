@@ -27,6 +27,10 @@ Enter the IP address of the MMS server in the System Manager properties and load
    * Add and saves new playlists or delete selected playlists, tracks, etc.
    * Control different MMS servers
 
+![layout](https://github.com/CommandFusion/Autonomic-MMS/raw/master/Docs/Layout.png)  
+![Album List](https://github.com/CommandFusion/Autonomic-MMS/raw/master/Docs/AlbumList.png)
+![Search](https://github.com/CommandFusion/Autonomic-MMS/raw/master/Docs/Search.png)
+![Drop Menu](https://github.com/CommandFusion/Autonomic-MMS/raw/master/Docs/ZoneDropMenu.png)
 
 ### Bug Reporting/Feature Requests
 Please help to post any bug/issues that is encountered using this module at the [issues](https://github.com/CommandFusion/Autonomic-MMS/issues) tab of this GitHub repo. 
