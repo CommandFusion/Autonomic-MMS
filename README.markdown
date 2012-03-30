@@ -23,7 +23,7 @@ This module provides design layout, data browsing, actions and transport control
 ### Transport actions and Lists
 ![Album List](https://github.com/CommandFusion/Autonomic-MMS/raw/master/Docs/AlbumList.png)
 
-1. Generally the module gives the user the ability to list, browse, select, add, delete and search for data for Albums, Artists, Genres, Playlists, Radio Sources and Queue (Now Playing) data.
+Generally the module gives the user the ability to list, browse, select, add, delete and search for data for Albums, Artists, Genres, Playlists, Radio Sources and Queue (Now Playing) data.
    * Also the various information based on the selected choices such as Albums(cover art, title, artist, etc.), Artists (albums, cover art, titles, etc.) can be viewed.
    * View the realtime feedback and status of the Now Playing items including track time progress, title, artist, album, etc.
    * Add, save or delete playlist or tracks in the Queue list.
