@@ -1,6 +1,6 @@
 # CommandFusion Javascript Module for Autonomic MMS5 (Beta Version) 
 
-This module is used for controlling Autonomic's Media Server (MMS) using CommandFusion's iViewer and Javascript via TCP protocol and IP Port 4005.
+This module is used for controlling Autonomic's Media Server (MMS) using CommandFusion's iViewer and Javascript via TCP protocol and IP Port 5004 and 23.
 
 ### Module file details
 1. GUI file - MMS5.gui
@@ -37,9 +37,12 @@ Provides searching and filtering by word, string and the beginning letters of th
 ### Drop Menu, Settings and Advanced Settings
 ![Drop Menu](https://github.com/CommandFusion/Autonomic-MMS/raw/master/Docs/ZoneDropMenu.png)
 1. There are 4 Drop Menus (but only 3 are used currently) - Settings, Actions and Zone.
-   * Control and view information of up to 5 different instances (zones)
-   * Control different MMS servers
-
+   * Settings Menu lets you see, set and change the IP and System Settings together with System Power options.
+   * Actions Menu lets you save the different categories to your favorites.
+   * Zone Settings Menu gives you the option to change, control and update information from 5 zones.
+1. System Power lets you Shutdown, Reboot or even Wake-On-Lan (WOL) the server.
+1. Advanced Settings lets you change some of the more advanced features in the server setup (not recommended for normal user).
+    
 ### Bug Reporting/Feature Requests
 Please help to post any bug/issues that is encountered using this module at the [issues](https://github.com/CommandFusion/Autonomic-MMS/issues) tab of this GitHub repo. 
 Any other inputs or suggestions are also welcomed.
