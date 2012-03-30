@@ -36,10 +36,11 @@ Provides searching and filtering by word, string and the beginning letters of th
 
 ### Drop Menu, Settings and Advanced Settings
 ![Drop Menu](https://github.com/CommandFusion/Autonomic-MMS/raw/master/Docs/ZoneDropMenu.png)
+
 1. There are 4 Drop Menus (but only 3 are used currently) - Settings, Actions and Zone.
    * Settings Menu lets you see, set and change the IP and System Settings together with System Power options.
    * Actions Menu lets you save the different categories to your favorites.
-   * Zone Settings Menu gives you the option to change, control and update information from 5 zones.
+   * Zone Settings Menu gives you the option to change, control and update information from 5 zones.   
 1. System Power lets you Shutdown, Reboot or even Wake-On-Lan (WOL) the server.
 1. Advanced Settings lets you change some of the more advanced features in the server setup (not recommended for normal user).
     
