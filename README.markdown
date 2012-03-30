@@ -36,9 +36,9 @@ Provides searching and filtering by word, string and the beginning letters of th
 
 ### Drop Menu, Settings and Advanced Settings
 ![Drop Menu](https://github.com/CommandFusion/Autonomic-MMS/raw/master/Docs/ZoneDropMenu.png)
-There are 4 Drop Menus (but only 3 are used currently) - Settings, Actions and Zone.
-* Control and view information of up to 5 different instances (zones)
-* Control different MMS servers
+1. There are 4 Drop Menus (but only 3 are used currently) - Settings, Actions and Zone.
+   * Control and view information of up to 5 different instances (zones)
+   * Control different MMS servers
 
 ### Bug Reporting/Feature Requests
 Please help to post any bug/issues that is encountered using this module at the [issues](https://github.com/CommandFusion/Autonomic-MMS/issues) tab of this GitHub repo. 
