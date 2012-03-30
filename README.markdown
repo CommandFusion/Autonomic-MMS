@@ -11,8 +11,8 @@ This module is used for controlling Autonomic's Media Server (MMS) using Command
 ### System Setup that was used to develop this module:
 1. Autonomic MMS5 Server
 1. Autonomic's MMS softwares - Remote Media Sync(a media synchronization tool) and Mirage (control software) that both needs to be installed on the PC.  
-1. GuiDesigner 2.3.5.2
-1. iViewer 4 (v4.0.196) and iViewer TF (v4.0.197)
+1. GuiDesigner 2.3.5.5
+1. iViewer 4 (v4.0.196) and iViewer TF (v4.0.201)
 
 ### Guidelines for module usage:
 Enter the IP address/hostname of the MMS server in the System Manager properties and load the GUI file.
