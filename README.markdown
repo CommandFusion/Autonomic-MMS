@@ -18,7 +18,7 @@ This module is used for controlling Autonomic's Media Server (MMS) using Command
 Enter the IP address/hostname of the MMS server in the System Manager properties and Global Token properties (Edit > Project Properties > Global Token Manager) and load the GUI file.
 
 ### Overview
-This module provides design layout, data browsing, actions and transport control similar to the capabilities of the MMS5's Mirage control software with a few additional features. 
+This module provides design layout, data browsing, actions and transport control similar to the capabilities of the MMS5's Mirage control software.
 
 ### Transport actions and Lists
 ![Album List](https://github.com/CommandFusion/Autonomic-MMS/raw/master/Docs/AlbumList.png)
