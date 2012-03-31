@@ -44,6 +44,10 @@ Provides searching and filtering by word, string and the beginning letters of th
 1. System Power lets you Shutdown, Reboot or even Wake-On-Lan (WOL) the server.
 1. Advanced Settings lets you change some of the more advanced features in the server setup (not recommended for normal user).
     
+### Known Issues
+1. WOL is not working consistently. Needs to switch on/off power before sending the WOL again.
+1. Navigation between list selections for different Radio Channels is not finalised yet. It will not reflect exactly what Mirage is showing. However, control and list showing/selection is working fine.
+
 ### Bug Reporting/Feature Requests
 Please help to post any bug/issues that is encountered using this module at the [issues](https://github.com/CommandFusion/Autonomic-MMS/issues) tab of this GitHub repo. 
 Any other inputs or suggestions are also welcomed.
