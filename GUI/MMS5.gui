@@ -36,7 +36,17 @@
     <system name="WakeOnLan" ip="255.255.255.255" port="9" protocol="udp" alwayson="0" offlinequeue="0" accept="0" acceptBroadcasts="1" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0">
       <cmd name="WOL">\xFF\xFF\xFF\xFF\xFF\xFF\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93</cmd>
     </system>
+    <system name="Loopback" ip="127.0.0.1" port="10210" protocol="tcp" alwayson="1" offlinequeue="0" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0">
+      <cmd name="alphabar" js="self.alphasearch(data)" jsSendsCommand="False">[sliderval]</cmd>
+    </system>
   </systems>
+  <macros>
+    <macro name="WOLmacro">
+      <command delay="0">WOL</command>
+      <command delay="0">WOL</command>
+      <command delay="0">WOL</command>
+    </macro>
+  </macros>
   <themes>
     <theme type="button" name=".wifi_led[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(wifi_led_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
     <theme type="button" name=".wifi_led[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(wifi_led_on.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
@@ -135,11 +145,67 @@
     <theme type="input" name=".search_white_c"><![CDATA[ border-width: 0px; border-color: #000000; color: #FFFFFF; font-size: 12px; font-family: 'Verdana'; text-align: center; vertical-align: middle; font-weight: normal; font-style: none; text-decoration: none; display: table-cell;]]></theme>
     <theme type="button" name=".list_dropmenu_btn_single_l[state='0']"><![CDATA[padding: 0px 0px 0px 15px; background-image: url(btn_list_single_off.png); color: Black; font-size: 16px; font-family: 'MS Reference Sans Serif'; font-weight: normal; font-style: none; text-decoration: none; text-align: left; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
     <theme type="button" name=".list_dropmenu_btn_single_l[state='1']"><![CDATA[padding: 0px 0px 0px 15px; background-image: url(btn_list_single_on.png); color: White; font-size: 16px; font-family: 'MS Reference Sans Serif'; font-weight: normal; font-style: none; text-decoration: none; text-align: left; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="text" name=".cfblue2_title_c_copy"><![CDATA[ text-shadow: rgba(0,0,0,0.78) 1px 1px 1px; color: White; font-size: 18px; font-family: 'Futura'; text-align: center; vertical-align: middle; font-weight: normal; font-style: none; text-decoration: none; display: table-cell;]]></theme>
+    <theme type="button" name=".transport_bg_c_copy[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(top_btn_center_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".transport_bg_c_copy[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(top_btn_center_on.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".transport_bg_c_copy1[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(top_btn_center_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".transport_bg_c_copy1[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(top_btn_center_on.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".transport_bg_c_copy2[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(top_btn_center_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".transport_bg_c_copy2[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(top_btn_center_on.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".transport_bg_l_copy[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(top_btn_left_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".transport_bg_l_copy[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(top_btn_left_on.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".transport_bg_r_copy[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(top_btn_right_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".transport_bg_r_copy[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(top_btn_right_on.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".transport_bg_c_copy3[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(top_btn_center_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".transport_bg_c_copy3[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(top_btn_center_on.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".top_btn_single_copy[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(top_btn_single_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".top_btn_single_copy[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(top_btn_single_on.png); color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".top_btn_single_copy1[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(top_btn_single_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".top_btn_single_copy1[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(top_btn_single_on.png); color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="text" name=".text_sample_copy"><![CDATA[ color: White; font-size: 12px; font-family: 'Verdana'; text-align: center; vertical-align: middle; font-weight: normal; font-style: none; text-decoration: none; display: table-cell;]]></theme>
+    <theme type="text" name=".Small_Text_copy"><![CDATA[ text-shadow: rgba(0,0,0,0.78) 1px 1px 1px; color: White; font-size: 12px; font-family: 'Futura'; text-align: left; vertical-align: middle; font-weight: normal; font-style: none; text-decoration: none; display: table-cell;]]></theme>
+    <theme type="button" name=".btn_212x43_copy[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_on.png); color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy1[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy1[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_on.png); color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy2[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy2[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_on.png); color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy3[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy3[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_on.png); color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy4[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy4[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_on.png); color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy5[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy5[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_on.png); color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="text" name=".cfblue2_small_c_copy"><![CDATA[ text-shadow: rgba(0,0,0,0.78) 1px 1px 1px; color: White; font-size: 14px; font-family: 'Futura'; text-align: center; vertical-align: middle; font-weight: normal; font-style: none; text-decoration: none; display: table-cell;]]></theme>
+    <theme type="text" name=".cfblue2_title_c_copy1"><![CDATA[ text-shadow: rgba(0,0,0,0.78) 1px 1px 1px; color: White; font-size: 18px; font-family: 'Futura'; text-align: center; vertical-align: middle; font-weight: normal; font-style: none; text-decoration: none; display: table-cell;]]></theme>
+    <theme type="button" name=".btn_212x43_copy6[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy6[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_on.png); color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy7[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy7[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_on.png); color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy8[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy8[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_on.png); color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy9[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy9[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_on.png); color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="text" name=".cfblue2_title_c_copy2"><![CDATA[ text-shadow: rgba(0,0,0,0.78) 1px 1px 1px; color: White; font-size: 18px; font-family: 'Futura'; text-align: center; vertical-align: middle; font-weight: normal; font-style: none; text-decoration: none; display: table-cell;]]></theme>
+    <theme type="text" name=".text_sample_copy1"><![CDATA[ color: White; font-size: 12px; font-family: 'Verdana'; text-align: center; vertical-align: middle; font-weight: normal; font-style: none; text-decoration: none; display: table-cell;]]></theme>
+    <theme type="text" name=".cfblue2_title_c_copy3"><![CDATA[ text-shadow: rgba(0,0,0,0.78) 1px 1px 1px; color: White; font-size: 18px; font-family: 'Futura'; text-align: center; vertical-align: middle; font-weight: normal; font-style: none; text-decoration: none; display: table-cell;]]></theme>
+    <theme type="text" name=".Small_Text_copy1"><![CDATA[ text-shadow: rgba(0,0,0,0.78) 1px 1px 1px; color: White; font-size: 12px; font-family: 'Futura'; text-align: left; vertical-align: middle; font-weight: normal; font-style: none; text-decoration: none; display: table-cell;]]></theme>
+    <theme type="text" name=".cfblue2_small_c_copy1"><![CDATA[ text-shadow: rgba(0,0,0,0.78) 1px 1px 1px; color: White; font-size: 14px; font-family: 'Futura'; text-align: center; vertical-align: middle; font-weight: normal; font-style: none; text-decoration: none; display: table-cell;]]></theme>
+    <theme type="button" name=".btn_212x43_copy10[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy10[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_on.png); color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy11[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy11[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_on.png); color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy12[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy12[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_on.png); color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy13[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_212x43_copy13[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_on.png); color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="gauge" name=".alphabar[state='0']"><![CDATA[ background-image: url(alphabet.png);]]></theme>
+    <theme type="gauge" name=".alphabar[state='1']"><![CDATA[]]></theme>
   </themes>
   <tokens>
     <token name="[inputSysName]" value="MMS5" persist="1" />
     <token name="[inputSys2Name]" value="MMS5_2" persist="1" />
-    <token name="[inputURL]" value="192.168.168.204" persist="1" />
+    <token name="[inputURL]" value="192.168.0.103" persist="1" />
   </tokens>
   <scripts>
     <script name="MMS5.js" />
@@ -147,23 +213,13 @@
   <page name="MainPage" j="0" transition="None" subtype="None" time="0" ease="" start="1">
     <portrait t="bg_portrait" />
     <landscape t="landscape_thatch">
-      <subpage name="BottomBar" x="0" y="666" j="0" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="1" />
-      <subpage name="vol" x="694" y="691" j="0" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="1" />
-      <img x="0" y="61" w="1024" h="61" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">menu_bg.png</img>
-      <btn j="4582" x="486" y="71" w="134" h="43" t="btn_212x43" flip="None" sim="2" l="0" s="1">
-        <inactive s="0">ACTIONS</inactive>
-        <active s="0">ACTIONS</active>
-      </btn>
-      <btn j="0" x="795" y="71" w="134" h="43" t="btn_212x43" flip="None" sim="1" l="0" s="1">
-        <inactive s="0">SOURCES</inactive>
-        <active s="0">SOURCES</active>
-      </btn>
       <img x="234" y="132" w="780" h="545" j="0" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">content.png</img>
-      <txt j="4581" x="640" y="0" w="134" h="64" t="cfblue2_title_c" wrap="True" l="0">zone btn
-feedback</txt>
-      <subpage name="wifi" x="3" y="2" j="0" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="0" />
-      <img x="952" y="61" w="61" h="61" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">cf_logo_grey.png</img>
-      <subpage name="NowPlaying" x="2" y="443" j="0" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="1" />
+      <subpage name="BottomBar" x="0" y="666" j="0" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="0" />
+      <subpage name="Playlist_List" x="234" y="132" j="4540" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="1" />
+      <subpage name="Genre_List" x="234" y="132" j="4530" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="1" />
+      <subpage name="Queue_List" x="234" y="132" j="4560" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="1" />
+      <subpage name="Playlist_Title_List" x="234" y="132" j="4541" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
+      <subpage name="Genre_Album_Title_List" x="234" y="132" j="4532" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
       <btn j="0" x="453" y="702" w="82" h="43" t="transport_bg_c" flip="None" sim="1" l="0" s="0" js="self.Stop()">
         <inactive s="0">
           <img x="18" y="0" w="43" h="43">transports_grey_stop_off_20.png</img>
@@ -228,13 +284,6 @@ feedback</txt>
           <img x="14" y="0" w="43" h="43">transports_grey_repeat_on_25.png</img>
         </active>
       </btn>
-      <btn j="4583" x="640" y="71" w="134" h="43" t="btn_212x43" flip="None" sim="2" l="0" s="1">
-        <inactive s="0">ZONE</inactive>
-        <active s="0">ZONE</active>
-      </btn>
-      <txt j="4580" x="53" y="2" w="102" h="56" t="text_sample" wrap="True" l="0">Server Disconnected</txt>
-      <subpage name="Album_List" x="234" y="132" j="4510" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="1" />
-      <txt j="1" x="174" y="63" w="303" h="60" t="Small_Text" wrap="True" l="1">Feedback</txt>
       <btn j="0" x="22" y="135" w="186" h="43" t="btn_212x43" flip="None" sim="1" l="0" s="1" js="self.browseAlbums()">
         <inactive s="0">Albums</inactive>
         <active s="0">Albums</active>
@@ -259,27 +308,47 @@ feedback</txt>
         <inactive s="0">Queue</inactive>
         <active s="0">Queue</active>
       </btn>
-      <subpage name="RadioSources_List" x="234" y="132" j="4550" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="1" />
-      <subpage name="Playlist_List" x="234" y="132" j="4540" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="1" />
-      <subpage name="Genre_List" x="234" y="132" j="4530" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="1" />
-      <subpage name="Queue_List" x="234" y="132" j="4560" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="1" />
-      <subpage name="Artist_List" x="234" y="132" j="4520" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="1" />
+      <subpage name="vol" x="694" y="691" j="0" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="0" />
+      <subpage name="NowPlaying" x="2" y="443" j="0" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="0" />
+      <subpage name="Album_List" x="234" y="132" j="4510" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
       <subpage name="Album_Title_List" x="234" y="132" j="4511" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
       <subpage name="Artist_Album_List" x="234" y="132" j="4521" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
-      <subpage name="Genre_Album_List" x="234" y="132" j="4531" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
-      <subpage name="Playlist_Title_List" x="234" y="132" j="4541" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
       <subpage name="Artist_Album_Title_List" x="234" y="132" j="4522" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
-      <subpage name="Genre_Album_Title_List" x="234" y="132" j="4532" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
-      <txt j="4582" x="953" y="61" w="58" h="60" t="cfblue2_small_c" wrap="True" l="0">Volume Level</txt>
-      <txt j="0" x="947" y="3" w="69" h="60" t="cfblue2_title_c" wrap="True" l="0">Volume Level</txt>
-      <subpage name="RadioSources_Station_List" x="234" y="132" j="4551" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
+      <subpage name="Artist_List" x="234" y="132" j="4520" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
+      <subpage name="Genre_Album_List" x="234" y="132" j="4531" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
+      <subpage name="DropMenu_Settings" x="0" y="0" j="4581" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="1" v="0" l="0" />
       <subpage name="DropMenu_Zone" x="0" y="0" j="4583" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="1" v="0" l="1" />
+      <subpage name="DropMenu_Action" x="0" y="0" j="4582" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="1" v="0" l="0" />
+      <txt j="4581" x="640" y="0" w="134" h="64" t="cfblue2_title_c" wrap="True" l="0">zone btn
+feedback</txt>
+      <txt j="4580" x="53" y="2" w="102" h="56" t="text_sample" wrap="True" l="0">Server Disconnected</txt>
+      <txt j="0" x="947" y="3" w="69" h="60" t="cfblue2_title_c" wrap="True" l="0">Volume
+Level</txt>
+      <img x="0" y="61" w="1024" h="61" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">menu_bg.png</img>
+      <txt j="1" x="174" y="63" w="303" h="60" t="Small_Text" wrap="True" l="1">Feedback</txt>
+      <txt j="4582" x="953" y="61" w="58" h="60" t="cfblue2_small_c" wrap="True" l="0">Volume Level</txt>
       <btn j="4581" x="24" y="71" w="134" h="43" t="btn_212x43" flip="None" sim="2" l="0" s="1">
         <inactive s="0">SETTINGS</inactive>
         <active s="0">SETTINGS</active>
       </btn>
-      <subpage name="DropMenu_Action" x="0" y="0" j="4582" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
-      <subpage name="DropMenu_Settings" x="0" y="0" j="4581" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
+      <btn j="4582" x="486" y="71" w="134" h="43" t="btn_212x43" flip="None" sim="2" l="0" s="1">
+        <inactive s="0">ACTIONS</inactive>
+        <active s="0">ACTIONS</active>
+      </btn>
+      <btn j="4583" x="640" y="71" w="134" h="43" t="btn_212x43" flip="None" sim="2" l="0" s="1">
+        <inactive s="0">ZONE</inactive>
+        <active s="0">ZONE</active>
+      </btn>
+      <btn j="4584" x="795" y="71" w="134" h="43" t="btn_212x43" flip="None" sim="0" l="0" s="1">
+        <inactive s="0">SOURCES</inactive>
+        <active s="0">SOURCES</active>
+      </btn>
+      <img x="952" y="61" w="61" h="61" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">cf_logo_grey.png</img>
+      <subpage name="wifi" x="3" y="2" j="0" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="0" />
+      <subpage name="RadioSources_List" x="234" y="132" j="4550" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="1" />
+      <subpage name="RadioStations_List" x="234" y="132" j="4551" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
+      <subpage name="PickListItem_List" x="234" y="132" j="4552" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="0" />
+      <txt j="2000" x="808" y="3" w="114" h="60" t="cfblue2_title_l" wrap="True" l="0">Alphasearch</txt>
     </landscape>
   </page>
   <subpage name="bg" w="1024" h="758" clip="1">
@@ -388,13 +457,13 @@ feedback</txt>
     <txt j="2" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(Album)</txt>
     <txt j="3" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
     <img x="7" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="0" y="0" w="657" h="89" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="self.selectAlbum_Title(list, listIndex, join)">
+    <btn j="1" x="0" y="0" w="640" h="89" t="transparent_glow" flip="None" sim="1" l="0" s="1" js="self.selectAlbum_Title(list, listIndex, join)">
       <inactive s="0">
       </inactive>
       <active s="0">
       </active>
     </btn>
-    <btn j="2" x="673" y="11" w="70" h="70" t="play_all_item" flip="None" sim="1" l="0" s="1" js="self.playAlbum(list, listIndex, join)">
+    <btn j="2" x="657" y="9" w="70" h="70" t="play_all_item" flip="None" sim="1" l="0" s="1" js="self.playAlbum(list, listIndex, join)">
       <inactive s="0">
       </inactive>
       <active s="0">
@@ -405,13 +474,13 @@ feedback</txt>
     <txt j="2" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(Artist)</txt>
     <txt j="3" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
     <img x="7" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="0" y="1" w="658" h="89" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="self.selectArtist_Album(list, listIndex, join)">
+    <btn j="1" x="0" y="1" w="650" h="89" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="self.selectArtist_Album(list, listIndex, join)">
       <inactive s="0">
       </inactive>
       <active s="0">
       </active>
     </btn>
-    <btn j="2" x="673" y="11" w="70" h="70" t="play_all_item" flip="None" sim="1" l="0" s="1" js="self.playArtist(list, listIndex, join)">
+    <btn j="2" x="657" y="9" w="70" h="70" t="play_all_item" flip="None" sim="1" l="1" s="1" js="self.playArtist(list, listIndex, join)">
       <inactive s="0">
       </inactive>
       <active s="0">
@@ -422,13 +491,13 @@ feedback</txt>
     <txt j="2" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(Genre)</txt>
     <txt j="3" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
     <img x="7" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="0" y="1" w="658" h="89" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="self.selectGenre_Album(list, listIndex, join)">
+    <btn j="1" x="0" y="1" w="650" h="89" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="self.selectGenre_Album(list, listIndex, join)">
       <inactive s="0">
       </inactive>
       <active s="0">
       </active>
     </btn>
-    <btn j="2" x="673" y="11" w="70" h="70" t="play_all_item" flip="None" sim="1" l="0" s="1" js="self.playGenre(list, listIndex, join)">
+    <btn j="2" x="657" y="9" w="70" h="70" t="play_all_item" flip="None" sim="1" l="0" s="1" js="self.playGenre(list, listIndex, join)">
       <inactive s="0">
       </inactive>
       <active s="0">
@@ -439,19 +508,19 @@ feedback</txt>
     <txt j="2" x="166" y="0" w="593" h="61" t="cfblue2_title_l" wrap="True" l="0">(Playlist)</txt>
     <txt j="3" x="166" y="46" w="593" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
     <img x="72" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="165" y="1" w="495" h="89" t="transparent_glow" flip="None" sim="1" l="0" s="1" js="self.selectPlaylist_Title(list, listIndex, join)">
+    <btn j="1" x="69" y="1" w="578" h="89" t="transparent_glow" flip="None" sim="1" l="0" s="1" js="self.selectPlaylist_Title(list, listIndex, join)">
       <inactive s="0">
       </inactive>
       <active s="0">
       </active>
     </btn>
-    <btn j="2" x="673" y="11" w="70" h="70" t="play_all_item" flip="None" sim="1" l="1" s="1" js="self.playPlaylist(list, listIndex, join)">
+    <btn j="2" x="657" y="9" w="70" h="70" t="play_all_item" flip="None" sim="1" l="1" s="1" js="self.playPlaylist(list, listIndex, join)">
       <inactive s="0">
       </inactive>
       <active s="0">
       </active>
     </btn>
-    <btn j="3" x="11" y="22" w="48" h="48" t="delete_item" flip="None" sim="1" l="0" s="1" js="self.deletePlaylistItem(list, listIndex, join)">
+    <btn j="3" x="11" y="22" w="48" h="48" t="delete_item" flip="None" sim="1" l="1" s="1" js="self.deletePlaylistItem(list, listIndex, join)">
       <inactive s="0">
       </inactive>
       <active s="0">
@@ -462,7 +531,7 @@ feedback</txt>
     <txt j="2" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(Radio Sources)</txt>
     <txt j="3" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
     <img x="7" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="0" y="1" w="658" h="89" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="self.selectRadioSource(list, listIndex, join)">
+    <btn j="1" x="0" y="1" w="759" h="89" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="self.selectRadioSource(list, listIndex, join)">
       <inactive s="0">
       </inactive>
       <active s="0">
@@ -473,7 +542,7 @@ feedback</txt>
     <txt j="2" x="111" y="0" w="648" h="37" t="cfblue2_title_l" wrap="True" l="1">(Selected Queue)</txt>
     <txt j="4" x="111" y="55" w="445" h="25" t="cfblue2_small_l" wrap="True" l="1">(Album)</txt>
     <img x="7" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="0" y="0" w="663" h="90" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="self.playCurrentTitle(list, listIndex, join)">
+    <btn j="1" x="0" y="0" w="655" h="90" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="self.playCurrentTitle(list, listIndex, join)">
       <inactive s="0">
       </inactive>
       <active s="0">
@@ -579,11 +648,11 @@ feedback</txt>
       </active>
     </btn>
   </subpage>
-  <subpage name="RadioSources_Station_Item" w="759" h="90" clip="1">
-    <txt j="2" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(Radio Sources)</txt>
+  <subpage name="RadioStations_Item" w="759" h="90" clip="1">
+    <txt j="2" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(Radio Station)</txt>
     <txt j="3" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
     <img x="7" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="0" y="1" w="658" h="89" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="self.selectRadioStation(list, listIndex, join)">
+    <btn j="1" x="0" y="1" w="759" h="89" t="transparent_glow" flip="None" sim="1" l="0" s="1" js="self.playSelectedStation(list, listIndex, join)">
       <inactive s="0">
       </inactive>
       <active s="0">
@@ -591,7 +660,7 @@ feedback</txt>
     </btn>
   </subpage>
   <subpage name="DropMenu_Action" w="1024" h="768" clip="1">
-    <btn j="4582" x="0" y="0" w="1024" h="768" t="btn_transparent" flip="None" sim="2" l="0" s="1">
+    <btn j="4582" x="0" y="0" w="1024" h="768" t="btn_transparent" flip="None" sim="2" l="1" s="1">
       <inactive s="0">
       </inactive>
       <active s="0">
@@ -635,7 +704,7 @@ feedback</txt>
       <inactive s="0">Shutdown</inactive>
       <active s="0">Shutdown</active>
     </btn>
-    <btn j="0" x="77" y="514" w="302" h="45" t="list_menudrop_footer_blank" flip="None" sim="1" l="0" s="1" cmd="WOL">
+    <btn j="0" x="77" y="514" w="302" h="45" t="list_menudrop_footer_blank" flip="None" sim="1" l="0" s="1" macro="WOLmacro">
       <inactive s="0">Wake-On-Lan (WOL)</inactive>
       <active s="0">Wake-On-Lan (WOL)</active>
     </btn>
@@ -651,35 +720,43 @@ feedback</txt>
     <txt j="0" x="91" y="304" w="283" h="39" t="cfblue2_title_l" wrap="True" l="0">Advanced</txt>
     <txt j="0" x="86" y="385" w="283" h="39" t="cfblue2_title_l" wrap="True" l="0">Power</txt>
   </subpage>
+  <subpage name="PickListItem_Item" w="759" h="90" clip="1">
+    <txt j="2" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(PickListItem)</txt>
+    <txt j="3" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
+    <img x="7" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
+    <btn j="1" x="0" y="1" w="759" h="89" t="transparent_glow" flip="None" sim="1" l="0" s="1" js="self.selectPickListItem(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+  </subpage>
   <subpage name="Album_List" w="780" h="545" clip="1">
     <img x="576" y="16" w="186" h="29" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">menu_search.png</img>
     <input j="0" s="4510" x="604" y="16" w="158" h="30" pass="0" autoFocus="0" f="0" t="search_black" changeCommand="searchAlbums" l="0">(Search Albums)</input>
     <list j="4510" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="Album_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
     <txt j="0" x="123" y="9" w="436" h="43" t="cfblue2_title_l" wrap="True" l="0">ALBUM</txt>
+    <slider j="0" d="0" x="732" y="0" w="48" h="545" min="0" max="27" decimals="0" pressCmd="alphabar" dragCmd="alphabar" unit="decimal" t="alphabar" invert="1" sim="0" l="0" />
   </subpage>
   <subpage name="Artist_List" w="780" h="545" clip="1">
     <img x="576" y="16" w="186" h="29" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">menu_search.png</img>
     <input j="0" s="4511" x="604" y="16" w="158" h="30" pass="0" autoFocus="0" f="0" t="search_black" changeCommand="searchArtists" l="0">(Search Artists)</input>
     <list j="4520" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="Artist_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
     <txt j="0" x="123" y="9" w="425" h="43" t="cfblue2_title_l" wrap="True" l="0">ARTIST</txt>
+    <slider j="0" d="0" x="732" y="0" w="48" h="545" min="0" max="27" decimals="0" pressCmd="alphabar" dragCmd="alphabar" unit="decimal" t="alphabar" invert="1" sim="0" l="0" />
   </subpage>
   <subpage name="Genre_List" w="780" h="545" clip="1">
     <img x="576" y="16" w="186" h="29" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">menu_search.png</img>
     <input j="0" s="4512" x="604" y="16" w="158" h="30" pass="0" autoFocus="0" f="0" t="search_black" changeCommand="searchGenres" l="0">(Search Genres)</input>
     <list j="4530" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="Genre_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
     <txt j="0" x="123" y="9" w="425" h="43" t="cfblue2_title_l" wrap="True" l="0">GENRE</txt>
+    <slider j="0" d="0" x="732" y="0" w="48" h="545" min="0" max="27" decimals="0" pressCmd="alphabar" dragCmd="alphabar" unit="decimal" t="alphabar" invert="1" sim="0" l="0" />
   </subpage>
   <subpage name="Playlist_List" w="780" h="545" clip="1">
     <img x="576" y="16" w="186" h="29" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">menu_search.png</img>
     <input j="0" s="4513" x="604" y="16" w="158" h="30" pass="0" autoFocus="0" f="0" t="search_black" changeCommand="searchPlaylists" l="0">(Search Playlists)</input>
     <list j="4540" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="Playlist_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
     <txt j="0" x="123" y="9" w="429" h="43" t="cfblue2_title_l" wrap="True" l="0">PLAYLIST</txt>
-  </subpage>
-  <subpage name="RadioSources_List" w="780" h="545" clip="1">
-    <img x="576" y="16" w="186" h="29" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">menu_search.png</img>
-    <input j="0" s="4514" x="604" y="16" w="158" h="30" pass="0" autoFocus="0" f="0" t="search_black" changeCommand="searchRadioSources" l="0">(Search Radio Sources)</input>
-    <list j="4550" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="RadioSources_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
-    <txt j="0" x="123" y="9" w="402" h="43" t="cfblue2_title_l" wrap="True" l="0">RADIO SOURCE</txt>
   </subpage>
   <subpage name="Queue_List" w="780" h="545" clip="1">
     <btn j="0" x="369" y="7" w="186" h="43" t="btn_212x43" flip="None" sim="1" l="0" s="1">
@@ -746,20 +823,44 @@ feedback</txt>
       <active s="0">&lt; BACK</active>
     </btn>
   </subpage>
-  <subpage name="RadioSources_Station_List" w="780" h="545" clip="1">
-    <list j="4551" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="RadioSources_Station_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
-    <txt j="0" x="123" y="9" w="402" h="43" t="cfblue2_title_l" wrap="True" l="0">RADIO SOURCE &gt; SOURCES</txt>
-    <btn j="0" x="10" y="9" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.backRadioSourceList()">
-      <inactive s="0">Main Page</inactive>
-      <active s="0">Main Page</active>
-    </btn>
-    <btn j="0" x="574" y="9" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.backRadioSourceStations()">
-      <inactive s="0">&lt; BACK</inactive>
-      <active s="0">&lt; BACK</active>
-    </btn>
-    <btn j="0" x="678" y="8" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.forwardRadioSourceStations()">
+  <subpage name="RadioSources_List" w="780" h="545" clip="1">
+    <img x="576" y="16" w="186" h="29" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">menu_search.png</img>
+    <input j="0" s="4514" x="597" y="15" w="158" h="30" pass="0" autoFocus="0" f="0" t="search_black" changeCommand="searchRadioSources" l="0">(Search Radio Sources)</input>
+    <txt j="0" x="123" y="9" w="402" h="43" t="cfblue2_title_l" wrap="True" l="0">RADIO SOURCE</txt>
+    <btn j="4591" x="478" y="6" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.Forward()">
       <inactive s="0">FWD &gt;</inactive>
       <active s="0">FWD &gt;</active>
     </btn>
+    <btn j="4590" x="10" y="6" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.Back()">
+      <inactive s="0">&lt; BACK</inactive>
+      <active s="0">&lt; BACK</active>
+    </btn>
+    <list j="4550" x="10" y="64" w="760" h="455" headerSub="" titleSub="" contentSub="RadioSources_Item" footerSub="" orientation="v" l="0" swipedelete="0" />
+  </subpage>
+  <subpage name="RadioStations_List" w="780" h="545" clip="1">
+    <txt j="0" x="123" y="9" w="341" h="43" t="cfblue2_title_l" wrap="True" l="0">RADIO STATIONS</txt>
+    <btn j="4591" x="478" y="6" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.Forward()">
+      <inactive s="0">FWD &gt;</inactive>
+      <active s="0">FWD &gt;</active>
+    </btn>
+    <btn j="4590" x="10" y="6" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.Back()">
+      <inactive s="0">&lt; BACK</inactive>
+      <active s="0">&lt; BACK</active>
+    </btn>
+    <list j="4551" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="RadioStations_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
+  </subpage>
+  <subpage name="PickListItem_List" w="780" h="545" clip="1">
+    <txt j="4583" x="112" y="71" w="621" h="143" t="cfblue2_title_l" wrap="True" l="0">
+    </txt>
+    <txt j="0" x="123" y="9" w="340" h="43" t="cfblue2_title_l" wrap="True" l="0">PICK LIST ITEM</txt>
+    <btn j="4591" x="478" y="6" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.Forward()">
+      <inactive s="0">FWD &gt;</inactive>
+      <active s="0">FWD &gt;</active>
+    </btn>
+    <btn j="4590" x="10" y="6" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.Back()">
+      <inactive s="0">&lt; BACK</inactive>
+      <active s="0">&lt; BACK</active>
+    </btn>
+    <list j="4552" x="10" y="64" w="760" h="455" headerSub="" titleSub="" contentSub="PickListItem_Item" footerSub="" orientation="v" l="0" swipedelete="0" />
   </subpage>
 </gui>

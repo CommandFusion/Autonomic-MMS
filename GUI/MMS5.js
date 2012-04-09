@@ -13,14 +13,20 @@ MODULE TEST SETUP: Autonomic MMS5 Server, GuiDesigner 2.3.5.5, Iviewer TF v.4.0.
 
 Todo list:
 - Add Artist, track, Album to My Favorites (* Find out how to access my favorites - not accesible through Mirage control software?)
-- Alphabar
-- Radio Source navigation (done - to finetune)
-- Test Connection/Disconnection after long period of time
+- Alphabar (in progress)
 - Shutdown/Reboot/WOL (done). For WOL, use the WOL Generator in guiDesigner.
 
+Check :
+Radio Stations sub-options:
+- Search options for Artist Radio/ Tag Radio (Last.FM)
+- Create a Pandora Station
+- Sirius XM navigation
+- Search options for Spotify
+- Search options for TuneIn Radio
+
 Special Note:
-- MAC Address of test unit: 38-60-77-93-1E-93
 - Have control on two ports 5400 and 23. Majority of the controls (port 5004) and shutdown/reboot (port 23)
+- WOL might needs port forwarding / routing setup in the routers. 
 
 */
 
@@ -66,7 +72,8 @@ var self = {
 	lstGenre: 				"l4530",
 	lstPlaylist: 			"l4540",
 	lstRadioSource: 		"l4550",
-	lstPickListItem:		"l4551",
+	lstRadioStation: 		"l4551",
+	lstPickListItem:		"l4552",
 	lstQueue: 				"l4560",
 	
 	// Digital join (subpage)
@@ -80,8 +87,9 @@ var self = {
 	subGenreAlbumTitle:		"d4532",
 	subPlaylist: 			"d4540",
 	subPlaylistTitle:		"d4541",
-	subRadioSource: 		"d4550",
-	subRadioSourceStation:	"d4551",
+	subRadioSource:			"d4550",
+	subRadioStation:		"d4551",
+	subPickListItem:		"d4552",
 	subQueue: 				"d4560",
 	
 	// Digital join (buttons)
@@ -93,6 +101,12 @@ var self = {
 	btnSettings:			"d4581",
 	btnAction:				"d4582",
 	btnZone:				"d4583",
+	btnSources:				"d4584",
+	btnBack:				"d4590",		// Actual button that contain scripts
+	btnForward:				"d4591",		// Actual button that contain scripts
+	//btnBackImage:			"d4593",		// Just for image purposes
+	//btnForwardImage:		"d4594",		// Just for image purposes
+	
 	
 	// Analogue join
 	sldVolumeControl:		"a4500",
@@ -120,6 +134,7 @@ var self = {
 	txtConnection:			"s4580",
 	txtInstance:			"s4581",
 	txtVolumeLevel:			"s4582",
+	txtSelectedStation:		"s4583",
 	
 	//Main database Arrays
 	arrayAlbum: [],					// Album
@@ -127,18 +142,10 @@ var self = {
 	arrayGenre: [],					// Genre
 	arrayPlaylist:[],				// Playlist
 	arrayRadioSource: [],			// Radio Sources
-	arrayQueue: [],					// Now Playing
+	arrayRadioStation: [],			// Radio Stations
 	arrayPickListItem: [],			// PickListItem
-	
-	//Sub database Arrays
-	subarrayAlbum: [],					// Album
-	subarrayArtist: [],					// Artist
-	subarrayGenre: [],					// Genre
-	subarrayPlaylist:[],				// Playlist
-	subarrayRadioSource: [],			// Radio Sources
-	subarrayQueue: [],					// Now Playing
-	subarrayPickListItem: [],			// PickListItem
-	
+	arrayQueue: [],					// Now Playing
+	artistLetters:	[],				// Array to store the positions for each alphabar letter
 	
 	// ======================================================================
 	// Global variables 
@@ -212,6 +219,10 @@ var self = {
 			// Show the list of Albums when starting up
 			setTimeout(function(){self.browseAlbums();}, 2000);	
 			
+			// Disable buttons that are not really used for not by adjusting the opacity settings
+			CF.setProperties({join: self.btnSources, opacity: 0.5});		// Source button (Main Page)
+			CF.setProperties({join: self.btnForward, opacity: 0.0});		// Forward button (PickListItem List Page)
+			
 			CF.log("Autonomic MMS-5 System Setup Completed.");
 		
 		}); 
@@ -280,6 +291,23 @@ var self = {
 		return compare_string.match(newRegX);
 	},
 	
+	alphasearch: function(sliderval){
+		
+		// Calculate the letter based on the slider value (0-27). To allow for better accuracy of the letter, both 0 and 1 slider values will equal "#" in the slider.
+		var letter = "#";
+		if (sliderval > 1) {
+				// Use ascii char code and convert to the letter (letter A = 65, B = 66, and so on)
+				// We have to use parseInt here otherwise the + symbol might concatenate the numbers together, rather than add them.
+				// This is because parameters may be passed as strings from tokens such as [sliderval]
+				letter = String.fromCharCode(63 + parseInt(sliderval));
+		
+		}
+		CF.setJoin("s2000", letter);		// Test the conversion
+		
+		// search for first alphabet of string and compare
+	},
+	
+	
 	// =============================================================================================================================
 	// Regex for all feedbacks coming through a single feedback item. For parsing various incoming data :
 	// 
@@ -335,8 +363,12 @@ var self = {
 		statePlayStatusRegex: /MediaControl=(.*)/i,				// Current Playing status (Play/Pause)
 		stateMuteRegex: /Mute=(.*)/i,							// Mute status (True/False)
 		stateMediaArtChangedRegex: /MediaArtChanged=(.*)/i,		// State media art changed status (True/False).
-		stateRunningRegex: /Running=(.*)/i,					// Running status (True/False). When shutdown, will changed to False.
-	
+		stateRunningRegex: /Running=(.*)/i,						// Running status (True/False). When shutdown, will changed to False.
+		stateBackRegex: /Back=(.*)/i,							// Back to previous browsing history. StateChanged Main Back=True/False
+		stateForwardRegex: /Forward=(.*)/i,						// Forward to previous browsing history. StateChanged Main Forward=True/False
+		stateUIMessageRegex: /UI=StatusMessage."(.*)"/i,		// Message that is being played after Radio Station has been selected. StateChanged Main UI=StatusMessage "Tuning to 988 FM 98.8 (Top 40-Pop)"
+		
+		
 	// =============================================================================================================================
 	// Incoming Data Point - Only used to populate array with data. Populations of lists will be done by other functions.
 	// =============================================================================================================================	
@@ -428,6 +460,13 @@ var self = {
 		} else if (self.radioSourceRegex.test(matchedString)) {					// Test if it is a Radio Source message. This is for loading data into Radio Source list.
 			
 				var matches = self.radioSourceRegex.exec(matchedString);
+				
+				CF.setJoins([											//toggle to the correct subpage
+					{join: self.subRadioSource, value: 1},	
+					{join: self.subRadioStation, value: 0},
+					{join: self.subPickListItem, value: 0},
+				]);
+				
 				self.arrayRadioSource.push({
 									s1: self.coverart+matches[1],
 									s2: matches[2],
@@ -448,14 +487,21 @@ var self = {
 		} else if (self.radioStationRegex.test(matchedString)) {					// Test if it is a Radio Source message. This is for loading data into Radio Source list.
 			
 				var matches = self.radioStationRegex.exec(matchedString);
-				self.arrayPickListItem.push({
+				
+				CF.setJoins([											//toggle to the correct subpage
+					{join: self.subRadioSource, value: 0},	
+					{join: self.subRadioStation, value: 1},
+					{join: self.subPickListItem, value: 0},
+				]);
+				
+				self.arrayRadioStation.push({
 									s1: self.coverart+matches[1],
 									s2: matches[2],
 									s3: "",
 									d1: { tokens: {"[guid]": matches[1]} },
 									d2: { tokens: {"[guid]": matches[1]} }
 								});
-				CF.listAdd(self.lstPickListItem, [{
+				CF.listAdd(self.lstRadioStation, [{
 									s1: self.coverart+matches[1],		
 									s2: matches[2],						
 									s3: "",						
@@ -468,6 +514,14 @@ var self = {
 		} else if (self.pickListItemRegex.test(matchedString)) {					// Test if it is a Radio Source message. This is for loading data into Radio Source list.
 			
 				var matches = self.pickListItemRegex.exec(matchedString);
+				
+				CF.setJoins([											//toggle to the correct subpage
+					{join: self.subRadioSource, value: 0},	
+					{join: self.subRadioStation, value: 0},
+					{join: self.subPickListItem, value: 1},
+					{join: self.txtSelectedStation, value: ""},
+				]);
+				
 				self.arrayPickListItem.push({
 									s1: self.coverart+matches[1],
 									s2: matches[2],
@@ -657,10 +711,48 @@ var self = {
 				CF.setJoin(self.sldVolumeControl, Math.round((matches[1]/50)*65535));
 				self.stateVolumeRegex.lastIndex = 0;
 		
-		} 
+		} else if (self.stateBackRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
-		/*
-		else if (self.stateRunningRegex.test(matchedString)) {				// Test if it is a shutdown message. This is for checking the shutdown status.
+				var matches = self.stateBackRegex.exec(matchedString);
+				switch(matches[1])
+				{
+					case "True":
+						CF.setProperties({join: self.btnBack, opacity: 1.0});
+						break;
+					case "False":
+						CF.setProperties({join: self.btnBack, opacity: 0.0});
+						break;
+				}  
+				self.stateBackRegex.lastIndex = 0;
+		
+		} else if (self.stateForwardRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
+		
+				var matches = self.stateForwardRegex.exec(matchedString);
+				switch(matches[1])
+				{
+					case "True":
+						CF.setProperties({join: self.btnForward, opacity: 1.0});
+						break;
+					case "False":
+						CF.setProperties({join: self.btnForward, opacity: 0.0});
+						break;
+				}  
+				self.stateForwardRegex.lastIndex = 0;
+		
+		} else if (self.stateUIMessageRegex.test(matchedString)) {					// Test if it is a Radio Source message. This is for loading data into Radio Source list.
+			
+				var matches = self.stateUIMessageRegex.exec(matchedString);
+				
+				CF.setJoins([											//toggle to the correct subpage
+					{join: self.subRadioSource, value: 0},	
+					{join: self.subRadioStation, value: 0},
+					{join: self.subPickListItem, value: 1},
+					{join: self.txtSelectedStation, value: "Currently " + matches[1]},
+				]);
+				self.stateUIMessageRegex.lastIndex = 0;						// Reset the regex to work correctly after each consecutive match
+		}
+		
+		/*else if (self.stateRunningRegex.test(matchedString)) {				// Test if it is a shutdown message. This is for checking the shutdown status.
 		
 				var matches = self.stateRunningRegex.exec(matchedString);
 				
@@ -722,7 +814,8 @@ var self = {
 				{join: self.subPlaylist, value: 0},		
 				{join: self.subPlaylistTitle, value: 0},		
 				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioSourceStation, value: 0},				
+				{join: self.subRadioStation, value: 0},
+				{join: self.subPickListItem, value: 0},
 				{join: self.subQueue, value: 0},
 			]);
 		self.clearMusicFilter();															// clear all previous music filters
@@ -747,7 +840,8 @@ var self = {
 				{join: self.subPlaylist, value: 0},		
 				{join: self.subPlaylistTitle, value: 0},		
 				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioSourceStation, value: 0},				
+				{join: self.subRadioStation, value: 0},				
+				{join: self.subPickListItem, value: 0},
 				{join: self.subQueue, value: 0},
 			]);
 			self.setMusicFilter_Album(t["[guid]"]);					//set the filter
@@ -810,7 +904,8 @@ var self = {
 				{join: self.subPlaylist, value: 0},		
 				{join: self.subPlaylistTitle, value: 0},		
 				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioSourceStation, value: 0},				
+				{join: self.subRadioStation, value: 0},				
+				{join: self.subPickListItem, value: 0},
 				{join: self.subQueue, value: 0},
 			]);
 		self.clearMusicFilter();															// clear all previous music filters
@@ -835,7 +930,8 @@ var self = {
 				{join: self.subPlaylist, value: 0},		
 				{join: self.subPlaylistTitle, value: 0},		
 				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioSourceStation, value: 0},				
+				{join: self.subRadioStation, value: 0},				
+				{join: self.subPickListItem, value: 0},
 				{join: self.subQueue, value: 0},
 			]);
 			self.setMusicFilter_Artist(t["[guid]"]);					//set the filter
@@ -860,7 +956,8 @@ var self = {
 				{join: self.subPlaylist, value: 0},		
 				{join: self.subPlaylistTitle, value: 0},		
 				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioSourceStation, value: 0},				
+				{join: self.subRadioStation, value: 0},				
+				{join: self.subPickListItem, value: 0},
 				{join: self.subQueue, value: 0},
 			]);
 			self.setMusicFilter_Album(t["[guid]"]);					//set the filter
@@ -923,7 +1020,8 @@ var self = {
 				{join: self.subPlaylist, value: 0},		
 				{join: self.subPlaylistTitle, value: 0},		
 				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioSourceStation, value: 0},				
+				{join: self.subRadioStation, value: 0},				
+				{join: self.subPickListItem, value: 0},
 				{join: self.subQueue, value: 0},
 			]);
 		self.clearMusicFilter();															// clear all previous music filters
@@ -948,7 +1046,8 @@ var self = {
 				{join: self.subPlaylist, value: 0},		
 				{join: self.subPlaylistTitle, value: 0},		
 				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioSourceStation, value: 0},				
+				{join: self.subRadioStation, value: 0},				
+				{join: self.subPickListItem, value: 0},
 				{join: self.subQueue, value: 0},
 			]);
 			self.setMusicFilter_Genre(t["[guid]"]);				//set the filter
@@ -973,7 +1072,8 @@ var self = {
 				{join: self.subPlaylist, value: 0},		
 				{join: self.subPlaylistTitle, value: 0},		
 				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioSourceStation, value: 0},				
+				{join: self.subRadioStation, value: 0},				
+				{join: self.subPickListItem, value: 0},
 				{join: self.subQueue, value: 0},
 			]);
 			self.setMusicFilter_Album(t["[guid]"]);				//set the filter
@@ -1036,7 +1136,8 @@ var self = {
 				{join: self.subPlaylist, value: 1},		
 				{join: self.subPlaylistTitle, value: 0},		
 				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioSourceStation, value: 0},				
+				{join: self.subRadioStation, value: 0},				
+				{join: self.subPickListItem, value: 0},
 				{join: self.subQueue, value: 0},
 			]);
 		self.clearMusicFilter();															// clear all previous music filters
@@ -1061,7 +1162,8 @@ var self = {
 				{join: self.subPlaylist, value: 0},		
 				{join: self.subPlaylistTitle, value: 1},		
 				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioSourceStation, value: 0},				
+				{join: self.subRadioStation, value: 0},				
+				{join: self.subPickListItem, value: 0},
 				{join: self.subQueue, value: 0},
 			]);
 			self.setMusicFilter_Playlist(t["[guid]"]);				//set the filter
@@ -1083,7 +1185,7 @@ var self = {
 		});
 	},
 	
-	// *Special Note* : It'll take a while for the playlist changes to be updated, you won't be able to see the changes immediately.
+	// Special Note : It'll take a while for the playlist changes to be updated, you won't be able to see the changes immediately.
 	savePlaylist: function(title) {																	
 		self.sendCmd("SavePlaylist " + title); 														// Save Playlist. *Command : SavePlaylist "Playlist1" 
 		CF.setJoin(self.txtPlaylist, "");										// Reset the Playlist textbox to show back default text 
@@ -1140,7 +1242,8 @@ var self = {
 				{join: self.subPlaylist, value: 0},		
 				{join: self.subPlaylistTitle, value: 0},		
 				{join: self.subRadioSource, value: 1},
-				{join: self.subRadioSourceStation, value: 0},
+				{join: self.subRadioStation, value: 0},
+				{join: self.subPickListItem, value: 0},
 				{join: self.subQueue, value: 0},
 			]);
 		self.clearMusicFilter();															// clear all previous music filters
@@ -1151,7 +1254,34 @@ var self = {
 	
 	selectRadioSource: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
-			self.arrayPickListItem = [];							// clear array of any previous data
+			self.arrayRadioStation = [];							// clear array of any previous data
+			CF.listRemove(self.lstRadioStation);					//clear list of any previous entries
+			CF.setJoins([											//toggle to the correct subpage
+				{join: self.subAlbum, value: 0},
+				{join: self.subAlbumTitle, value: 0},				
+				{join: self.subArtist, value: 0},			
+				{join: self.subArtistAlbum, value: 0},			
+				{join: self.subArtistAlbumTitle, value: 0},
+				{join: self.subGenre, value: 0},			
+				{join: self.subGenreAlbum, value: 0},
+				{join: self.subGenreAlbumTitle, value: 0},	
+				{join: self.subPlaylist, value: 0},		
+				{join: self.subPlaylistTitle, value: 0},		
+				{join: self.subRadioSource, value: 0},	
+				{join: self.subRadioStation, value: 1},
+				{join: self.subPickListItem, value: 0},
+				{join: self.subQueue, value: 0},
+			]);
+			self.setRadioFilter_RadioSource(t["[guid]"]);				//set the filter
+			self.sendCmd("BrowseRadioStations");
+			//self.ackpickListItem(t["[guid]"]);				//Play item using AckPickList OR
+			//setTimeout(function(){CF.listAdd(self.lstPickListItem, self.arrayPickListItem);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
+		});
+	},
+	
+	playSelectedStation: function(list, listIndex, join) {							
+		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
+			/*self.arrayPickListItem = [];							// clear array of any previous data
 			CF.listRemove(self.lstPickListItem);					//clear list of any previous entries
 			CF.setJoins([											//toggle to the correct subpage
 				{join: self.subAlbum, value: 0},
@@ -1165,16 +1295,18 @@ var self = {
 				{join: self.subPlaylist, value: 0},		
 				{join: self.subPlaylistTitle, value: 0},		
 				{join: self.subRadioSource, value: 0},	
-				{join: self.subRadioSourceStation, value: 1},
+				{join: self.subRadioStation, value: 0},
+				{join: self.subPickListItem, value: 1},
 				{join: self.subQueue, value: 0},
 			]);
-			self.setRadioFilter_RadioSource(t["[guid]"]);				//set the filter
-			self.sendCmd("BrowseRadioStations");
+			*/
+			//self.ackpickListItem(t["[guid]"]);				//Play item using AckPickList OR
+			self.playRadioStation(t["[guid]"]);				//play item using PlayRadioStation
 			//setTimeout(function(){CF.listAdd(self.lstPickListItem, self.arrayPickListItem);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 		});
 	},
 	
-	selectRadioStation: function(list, listIndex, join) {							
+	selectPickListItem: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
 			self.arrayPickListItem = [];							// clear array of any previous data
 			CF.listRemove(self.lstPickListItem);					//clear list of any previous entries
@@ -1190,11 +1322,12 @@ var self = {
 				{join: self.subPlaylist, value: 0},		
 				{join: self.subPlaylistTitle, value: 0},		
 				{join: self.subRadioSource, value: 0},	
-				{join: self.subRadioSourceStation, value: 1},
+				{join: self.subRadioStation, value: 0},
+				{join: self.subPickListItem, value: 1},
 				{join: self.subQueue, value: 0},
 			]);
 			self.ackpickListItem(t["[guid]"]);				//Play item using AckPickList OR
-			self.playRadioStation(t["[guid]"]);				//play item using PlayRadioStation
+			//self.playRadioStation(t["[guid]"]);				//play item using PlayRadioStation
 			//setTimeout(function(){CF.listAdd(self.lstPickListItem, self.arrayPickListItem);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 		});
 	},
@@ -1248,7 +1381,8 @@ var self = {
 				{join: self.subPlaylist, value: 0},		
 				{join: self.subPlaylistTitle, value: 0},		
 				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioSourceStation, value: 0},				
+				{join: self.subRadioStation, value: 0},				
+				{join: self.subPickListItem, value: 0},
 				{join: self.subQueue, value: 1},
 			]);
 		self.clearMusicFilter();															// clear all previous music filters
@@ -1327,7 +1461,8 @@ var self = {
 				{join: self.subPlaylist, value: 0},		
 				{join: self.subPlaylistTitle, value: 0},		
 				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioSourceStation, value: 0},				
+				{join: self.subRadioStation, value: 0},				
+				{join: self.subPickListItem, value: 0},
 				{join: self.subQueue, value: 0},
 			]);
 		self.clearMusicFilter();															// clear all previous music filters
@@ -1347,7 +1482,8 @@ var self = {
 				{join: self.subPlaylist, value: 0},		
 				{join: self.subPlaylistTitle, value: 0},		
 				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioSourceStation, value: 0},				
+				{join: self.subRadioStation, value: 0},				
+				{join: self.subPickListItem, value: 0},
 				{join: self.subQueue, value: 0},
 			]);
 		self.clearMusicFilter();															// clear all previous music filters
@@ -1367,7 +1503,8 @@ var self = {
 				{join: self.subPlaylist, value: 0},		
 				{join: self.subPlaylistTitle, value: 0},		
 				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioSourceStation, value: 0},				
+				{join: self.subRadioStation, value: 0},				
+				{join: self.subPickListItem, value: 0},
 				{join: self.subQueue, value: 0},
 			]);
 	},
@@ -1385,7 +1522,8 @@ var self = {
 				{join: self.subPlaylist, value: 0},		
 				{join: self.subPlaylistTitle, value: 0},		
 				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioSourceStation, value: 0},				
+				{join: self.subRadioStation, value: 0},				
+				{join: self.subPickListItem, value: 0},
 				{join: self.subQueue, value: 0},
 			]);
 		self.clearMusicFilter();															// clear all previous music filters
@@ -1405,7 +1543,8 @@ var self = {
 				{join: self.subPlaylist, value: 0},		
 				{join: self.subPlaylistTitle, value: 0},		
 				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioSourceStation, value: 0},				
+				{join: self.subRadioStation, value: 0},				
+				{join: self.subPickListItem, value: 0},
 				{join: self.subQueue, value: 0},
 			]);
 	},
@@ -1423,7 +1562,8 @@ var self = {
 				{join: self.subPlaylist, value: 1},		
 				{join: self.subPlaylistTitle, value: 0},		
 				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioSourceStation, value: 0},				
+				{join: self.subRadioStation, value: 0},				
+				{join: self.subPickListItem, value: 0},
 				{join: self.subQueue, value: 0},
 			]);
 		self.clearMusicFilter();															// clear all previous music filters
@@ -1443,7 +1583,8 @@ var self = {
 				{join: self.subPlaylist, value: 0},		
 				{join: self.subPlaylistTitle, value: 0},		
 				{join: self.subRadioSource, value: 1},
-				{join: self.subRadioSourceStation, value: 0},				
+				{join: self.subRadioStation, value: 0},				
+				{join: self.subPickListItem, value: 0},
 				{join: self.subQueue, value: 0},
 			]);
 		self.clearMusicFilter();															// clear all previous music filters
@@ -1467,9 +1608,10 @@ var self = {
 		CF.listRemove(self.lstArtist);				
 		CF.listRemove(self.lstGenre);				
 		CF.listRemove(self.lstPlaylist);			
-		CF.listRemove(self.lstRadioSource);		
-		CF.listRemove(self.lstQueue);
+		CF.listRemove(self.lstRadioSource);
+		CF.listRemove(self.lstRadioStation);		
 		CF.listRemove(self.lstPickListItem);
+		CF.listRemove(self.lstQueue);
 		
 		// clear all arrays of previous entries
 		self.arrayAlbum = [];					// Album
@@ -1477,9 +1619,12 @@ var self = {
 		self.arrayGenre = [];					// Genre
 		self.arrayPlaylist = [];				// Playlist
 		self.arrayRadioSource = [];				// Radio Sources
-		self.arrayQueue = [];					// Now Playing
+		self.arrayRadioSource = [];				// Radio Sources
+		self.arrayRadioStation = [],			// Radio Stations
 		self.arrayPickListItem = [];			// PickListItem
-	
+		self.arrayQueue = [];					// Now Playing
+		self.artistLetters = [];				// Artist letters
+		
 		// clear the irrelevant text fields and slider values
 		CF.setJoins([																		
 				{join: "s1", value: ""},
@@ -1625,10 +1770,23 @@ var self = {
 	subcribeAllEventOn: 		function() { self.sendCmd("SubscribeEventsAll True"); },				// Turns ON feedback of StateChanged events for ALL instances.
 	subcribeAllEventOff: 		function() { self.sendCmd("SubscribeEventsAll False"); },				// Turns OFF feedback of StateChanged events for ALL instances.
 	clearQueue:					function() { self.sendCmd("ClearNowPlaying"); self.browseQueue();},		// Stop all playing tracks and clear all now playing list.
-	Back:						function() { self.sendCmd("Back"); },									// Back
-	Forward:					function() { self.sendCmd("Forward"); },								// Forward
 	Shutdown:					function() { self.sendCmd2("Shutdown"); },								// System Shutdown
 	Reboot:						function() { self.sendCmd2("Reboot"); },								// System Reboot
+	
+	Back: function() { 																					// Back
+		CF.listRemove(self.lstRadioSource);
+		CF.listRemove(self.lstRadioStation);
+		CF.listRemove(self.lstPickListItem);		
+		self.sendCmd("Back"); 
+	},
+	
+	Forward: function() { 																				// Forward
+		CF.listRemove(self.lstRadioSource);
+		CF.listRemove(self.lstRadioStation);
+		CF.listRemove(self.lstPickListItem);
+		self.sendCmd("Forward"); 
+	},								
+	
 	
 	// Select the zone instance and update the now playing info.
 	selectZone:	function(zone) { 
@@ -1639,7 +1797,7 @@ var self = {
 	
 	// Format the command string to send to system : CF.send(systemName, string [, outputFormat])
 	sendCmd: function(command) { CF.send(self.sysName, command+"\x0D\x0A"); },										// System 1 : Port 5004
-	sendCmd2: function(command) { CF.send(self.sys2Name, command+"\x0D\x0A"); },										// System 2 : Port 23
+	sendCmd2: function(command) { CF.send(self.sys2Name, command+"\x0D\x0A"); },									// System 2 : Port 23
 	
 	// Only allow logging calls when CF is in debug mode - better performance in release mode this way
 	log: function(msg) {
@@ -1647,7 +1805,6 @@ var self = {
 				CF.log(msg);
 			}
 		}
-	
 };
 
 CF.modules.push(
