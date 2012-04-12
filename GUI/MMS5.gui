@@ -347,8 +347,9 @@ Level</txt>
       <subpage name="wifi" x="3" y="2" j="0" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="0" />
       <subpage name="RadioSources_List" x="234" y="132" j="4550" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="1" />
       <subpage name="RadioStations_List" x="234" y="132" j="4551" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
-      <subpage name="PickListItem_List" x="234" y="132" j="4552" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="0" />
+      <subpage name="PickListItem_List" x="234" y="132" j="4552" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
       <txt j="2000" x="808" y="3" w="114" h="60" t="cfblue2_title_l" wrap="True" l="0">Alphasearch</txt>
+      <subpage name="RadioGenres_List" x="234" y="132" j="4553" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="0" />
     </landscape>
   </page>
   <subpage name="bg" w="1024" h="758" clip="1">
@@ -704,7 +705,7 @@ Level</txt>
       <inactive s="0">Shutdown</inactive>
       <active s="0">Shutdown</active>
     </btn>
-    <btn j="0" x="77" y="514" w="302" h="45" t="list_menudrop_footer_blank" flip="None" sim="1" l="0" s="1" macro="WOLmacro">
+    <btn j="0" x="77" y="514" w="302" h="45" t="list_menudrop_footer_blank" flip="None" sim="1" l="0" s="1" cmd="WOL">
       <inactive s="0">Wake-On-Lan (WOL)</inactive>
       <active s="0">Wake-On-Lan (WOL)</active>
     </btn>
@@ -725,6 +726,17 @@ Level</txt>
     <txt j="3" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
     <img x="7" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
     <btn j="1" x="0" y="1" w="759" h="89" t="transparent_glow" flip="None" sim="1" l="0" s="1" js="self.selectPickListItem(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+  </subpage>
+  <subpage name="RadioGenres_Item" w="759" h="90" clip="1">
+    <txt j="2" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(Radio Genres)</txt>
+    <txt j="3" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
+    <img x="7" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
+    <btn j="1" x="0" y="1" w="759" h="89" t="transparent_glow" flip="None" sim="1" l="0" s="1" js="self.selectRadioGenre(list, listIndex, join)">
       <inactive s="0">
       </inactive>
       <active s="0">
@@ -862,5 +874,17 @@ Level</txt>
       <active s="0">&lt; BACK</active>
     </btn>
     <list j="4552" x="10" y="64" w="760" h="455" headerSub="" titleSub="" contentSub="PickListItem_Item" footerSub="" orientation="v" l="0" swipedelete="0" />
+  </subpage>
+  <subpage name="RadioGenres_List" w="780" h="545" clip="1">
+    <txt j="0" x="123" y="9" w="341" h="43" t="cfblue2_title_l" wrap="True" l="0">RADIO GENRES</txt>
+    <btn j="4591" x="478" y="6" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.Forward()">
+      <inactive s="0">FWD &gt;</inactive>
+      <active s="0">FWD &gt;</active>
+    </btn>
+    <btn j="4590" x="10" y="6" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.Back()">
+      <inactive s="0">&lt; BACK</inactive>
+      <active s="0">&lt; BACK</active>
+    </btn>
+    <list j="4553" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="RadioGenres_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
   </subpage>
 </gui>

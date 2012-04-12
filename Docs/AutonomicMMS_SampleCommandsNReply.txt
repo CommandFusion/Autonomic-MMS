@@ -592,3 +592,26 @@ BeginRadioStations Total=6 Start=1 Alpha=0 Caption="Radio stations"
   RadioStation {da79c6f8-eb5a-49e6-9892-35da9db8693e} "Rock and Roll Hall of Fame Radio" "Music by Rock Hall Inducted Artists" -1 ""
 EndRadioStations NoMore
 
+BrowseRadioGenres
+BeginRadioGenres Total=19 Start=1 Alpha=1 Caption="SiriusXM Internet Radio"
+  RadioGenre {dee22e49-014e-45dd-99af-560441916be1} "Christian"
+  RadioGenre {7ac44a6d-cea7-4ebc-bbc7-68537b5d89b8} "Classical"
+  RadioGenre {5a711f5c-a945-4785-9b20-44c463836393} "Comedy"
+  RadioGenre {1e564c6f-1e0b-4d60-982f-718395d5d117} "Country"
+  RadioGenre {95f6ec47-5e21-4db8-90d8-e946603e5c28} "Dance/Electronic"
+  RadioGenre {3409d7eb-cd80-4e42-9220-46c1198ec043} "Entertainment"
+  RadioGenre {77b8b577-282a-4f03-8c52-bb44f39a0b40} "Family & Health"
+  RadioGenre {1bb26854-b3b3-4fd0-9071-116b9eabe8d5} "Hip-Hop/R&B"
+  RadioGenre {615d2cea-65ce-4850-acc5-e79c03e458d9} "Howard Stern"
+  RadioGenre {7812f4e6-dee9-4fe6-9cd0-bd243e938355} "Jazz/Standards"
+  RadioGenre {75dc0be8-f4ef-4599-9550-2f6d0a38ce7a} "Latin"
+  RadioGenre {e340e436-1421-4b8a-9dd0-4d50746c79bb} "More"
+  RadioGenre {d624a493-306e-4c6d-9639-bb7abb0c6034} "News/Public Radio"
+  RadioGenre {5e0d7730-0eeb-4cae-9b2f-8f748c5fc56f} "Politics"
+  RadioGenre {a97d7af2-77c4-4dde-ac13-cf5386a39332} "Pop"
+  RadioGenre {107a19b4-7150-4018-8145-c826d36313b9} "Religion"
+  RadioGenre {d23927b2-2fe2-4359-826b-5e6138b417e9} "Rock"
+  RadioGenre {1873a2ad-1121-4c33-96ff-c41733de4db1} "Sirius"
+  RadioGenre {9d6a5d9c-1d45-4fd2-bc6a-9c4951e7a3f9} "Sports"
+EndRadioGenres NoMore
+
