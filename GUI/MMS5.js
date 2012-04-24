@@ -13,19 +13,15 @@ MODULE TEST SETUP: Autonomic MMS5 Server, GuiDesigner 2.3.5.5, Iviewer TF v.4.0.
 
 Todo list:
 - Add Artist, track, Album to My Favorites (* Find out how to access my favorites - not accesible through Mirage control software?)
-- Alphabar (in progress)
-- Shutdown/Reboot/WOL (done). For WOL, use the WOL Generator in guiDesigner.
 
 Check :
-Radio Stations sub-options:
-- Search options for Artist Radio/ Tag Radio (Last.FM)
-- Create a Pandora Station
-- Search options for Spotify
-- Search options for TuneIn Radio
+- Searching options
+- Creating radio stations for Pandora
 
 Special Note:
 - Have control on two ports 5400 and 23. Majority of the controls (port 5004) and shutdown/reboot (port 23)
-- WOL might needs port forwarding / routing setup in the routers. 
+- For WOL, use the WOL Generator in guiDesigner. WOL might needs port forwarding / routing setup in the routers. 
+- Scrobble Icon (http://kon.deviantart.com/)
 
 */
 
@@ -91,6 +87,7 @@ var self = {
 	subRadioStation:		"d4551",
 	subPickListItem:		"d4552",
 	subRadioGenre:			"d4553",
+	subSearchRadioStations:	"d4554",
 	subQueue: 				"d4560",
 	
 	// Digital join (buttons)
@@ -98,11 +95,15 @@ var self = {
 	btnRepeat:				"d4571",
 	btnPlayPause:			"d4572",
 	btnMute:				"d4573",
+	btnScrobble:			"d4574",
 	btnWifiLED:				"d4580",
 	btnSettings:			"d4581",
 	btnAction:				"d4582",
 	btnZone:				"d4583",
 	btnSources:				"d4584",
+	btnShutdown:			"d4585",
+	btnReboot:				"d4586",
+	btnCancel:				"d4587",
 	btnBack:				"d4590",		// Actual button that contain scripts
 	btnForward:				"d4591",		// Actual button that contain scripts
 	//btnBackImage:			"d4593",		// Just for image purposes
@@ -129,6 +130,9 @@ var self = {
 	srchRadioSource:		"s4514",
 	srchQueue:				"s4515",
 	txtPlaylist:			"s4516",
+	txtSearchTitle:			"s4517",
+	txtSearchDesc:			"s4518",
+	srchRadioStation:		"s4519",
 	txtHostname:			"s4520",
 	txtIPAdd:				"s4521",
 	txtIPPort:				"s4522",
@@ -209,16 +213,17 @@ var self = {
 			
 			// Get the system IP address and port for use in all cover art calls. Sample command: http://192.168.1.10:5005/albumart?album={33432-33432-95909-33423-34430}
 			self.coverart = "http://"+self.sysURL+":"+(parseInt(self.sysPort)+1)+"/albumart?album="; 
-			
-			// Set Current Instance.
-			self.setCurrentInstance();
-			
-			// Get real time feedback of changed status of items.
-			self.subcribeEventOn();
-			
-			// Get the starting status of all items.
-			self.getStatus();
-			
+						
+			// Send the startup commands.
+			// CF.send(self.sysName, "SetHost 192.168.0.103\x0D\x0A");				// Set Host IP Address
+			// CF.send(self.sysName, "SetXMLMode Lists\x0D\x0A");					// Set list feedback in XML mode
+			// CF.send(self.sysName, "SetClientType "Mirage"\x0D\x0A");				// Set client type
+			self.setEncoding();														// Set character encoding to UTF8, to display non-Latin character.
+			self.setCurrentInstance();												// Set instance to current instance.
+			self.setPickListCount(1000);											// Set the number of items in the PickList list.
+			self.subcribeEventOn();													// Get real time feedback of changed status of items.
+			self.getStatus();														// Get the starting status of all items.
+		
 			// Show the list of Albums when starting up
 			setTimeout(function(){self.browseAlbums();}, 2000);	
 			
@@ -291,23 +296,6 @@ var self = {
 		return compare_string.match(newRegX);
 	},
 	
-	//  Filter library function using the alphabar slider (in-progress)
-	alphasearch: function(sliderval){
-		
-		// Calculate the letter based on the slider value (0-27). To allow for better accuracy of the letter, both 0 and 1 slider values will equal "#" in the slider.
-		var letter = "#";
-		if (sliderval > 1) {
-				// Use ascii char code and convert to the letter (letter A = 65, B = 66, and so on). Use parseInt here otherwise the + symbol might concatenate the numbers together, 
-				// rather than add them. This is because parameters may be passed as strings from tokens such as [sliderval]
-				letter = String.fromCharCode(63 + parseInt(sliderval));
-		
-		}
-		CF.setJoin("s2000", letter);		// Test the conversion
-		
-		// search for first alphabet of string and compare
-	},
-	
-	
 	// =============================================================================================================================
 	// Regex for all feedbacks coming through a single feedback item. For parsing various incoming data :
 	// 
@@ -365,12 +353,13 @@ var self = {
 		stateVolumeRegex: /Volume=(\d+)/i,						// Volume level
 		statePlayStatusRegex: /MediaControl=(.*)/i,				// Current Playing status (Play/Pause)
 		stateMuteRegex: /Mute=(.*)/i,							// Mute status (True/False)
+		stateScrobbleRegex: /Scrobbling=(\d)/i,					// Scrobble status (True/False)
 		stateMediaArtChangedRegex: /MediaArtChanged=(.*)/i,		// State media art changed status (True/False).
 		stateRunningRegex: /Running=(.*)/i,						// Running status (True/False). When shutdown, will changed to False.
 		stateBackRegex: /Back=(.*)/i,							// Back to previous browsing history. StateChanged Main Back=True/False
 		stateForwardRegex: /Forward=(.*)/i,						// Forward to previous browsing history. StateChanged Main Forward=True/False
 		stateUIMessageRegex: /UI=StatusMessage."(.*)"/i,		// Message that is being played after Radio Station has been selected. StateChanged Main UI=StatusMessage "Tuning to 988 FM 98.8 (Top 40-Pop)"
-		
+		stateUIInputBoxRegex: /UI=InputBox.\{(.*)\}.\"(.*)\".\"(.*)\".\"(.*)\".\"(.*)\".\"(.*)\"/i,		// InputBox selections.
 		
 	// =============================================================================================================================
 	// Incoming Data Point - Only used to populate array with data. Populations of lists will be done by other functions.
@@ -469,6 +458,7 @@ var self = {
 					{join: self.subRadioStation, value: 0},
 					{join: self.subRadioGenre, value: 0},
 					{join: self.subPickListItem, value: 0},
+					{join: self.subSearchRadioStations, value: 0},
 				]);
 				
 				self.arrayRadioSource.push({
@@ -497,6 +487,7 @@ var self = {
 					{join: self.subRadioStation, value: 1},
 					{join: self.subRadioGenre, value: 0},
 					{join: self.subPickListItem, value: 0},
+					{join: self.subSearchRadioStations, value: 0},
 				]);
 				
 				self.arrayRadioStation.push({
@@ -523,6 +514,7 @@ var self = {
 					{join: self.subRadioStation, value: 0},
 					{join: self.subRadioGenre, value: 1},
 					{join: self.subPickListItem, value: 0},
+					{join: self.subSearchRadioStations, value: 0},
 				]);
 				
 				self.arrayRadioGenre.push({
@@ -549,6 +541,7 @@ var self = {
 					{join: self.subRadioStation, value: 0},
 					{join: self.subRadioGenre, value: 0},
 					{join: self.subPickListItem, value: 1},
+					{join: self.subSearchRadioStations, value: 0},
 					{join: self.txtSelectedStation, value: ""},
 				]);
 				
@@ -684,6 +677,20 @@ var self = {
 				}
 				self.stateShuffleRegex.lastIndex = 0;
 				
+		} else if (self.stateScrobbleRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
+		
+				var matches = self.stateScrobbleRegex.exec(matchedString);
+				switch(matches[1])
+				{
+					case "1":
+						CF.setJoin(self.btnScrobble, 1);
+						break;
+					case "0":
+						CF.setJoin(self.btnScrobble, 0);
+						break;
+				}
+				self.stateScrobbleRegex.lastIndex = 0;
+				
 		} else if (self.stateRepeatRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
 				var matches = self.stateRepeatRegex.exec(matchedString);
@@ -776,10 +783,27 @@ var self = {
 					{join: self.subRadioStation, value: 0},
 					{join: self.subRadioGenre, value: 0},
 					{join: self.subPickListItem, value: 1},
+					{join: self.subSearchRadioStations, value: 0},
 					{join: self.txtSelectedStation, value: "Currently " + matches[1]},
 				]);
 				self.stateUIMessageRegex.lastIndex = 0;						// Reset the regex to work correctly after each consecutive match
 		
+		} else if (self.stateUIInputBoxRegex.test(matchedString)) {				// Test if it is a Radio Source message. This is for loading data into Radio Source list.
+			
+				var matches = self.stateUIInputBoxRegex.exec(matchedString);
+				
+				CF.setJoins([													//toggle to the correct subpage
+					{join: self.subRadioSource, value: 0},	
+					{join: self.subRadioStation, value: 0},	
+					{join: self.subPickListItem, value: 0},	
+					{join: self.subRadioGenre, value: 0},	
+					{join: self.subSearchRadioStations, value: 1},
+					{join: self.txtSearchTitle, value: matches[2]},	
+					{join: self.txtSearchDesc, value: matches[3]},
+					{join: self.btnCancel, tokens: {"[guid]": matches[6]} },
+				]);
+				
+				self.stateUIInputBoxRegex.lastIndex = 0;						// Reset the regex to work correctly after each consecutive match
 		} 
 		
 		/*else if (self.stateRunningRegex.test(matchedString)) {				// Test if it is a shutdown message. This is for checking the shutdown status.
@@ -917,6 +941,53 @@ var self = {
 				CF.listAdd(self.lstAlbum, templistArray);							// Add temp array to list
 	},
 	
+	// Use the alphabar to filter the list of albums and display the filtered results only.
+	alphasrchAlbums: function(sliderval) {
+	
+				// Calculate the letter based on the slider value (0-27). To allow for better accuracy of the letter, both 0 and 1 slider values will equal "#" in the slider.
+				var letter = "#";
+				if (sliderval > 1) {
+					// Use ascii char code and convert to the letter (letter A = 65, B = 66, and so on). Use parseInt here otherwise the + symbol might concatenate the numbers together, 
+					// rather than add them. This is because parameters may be passed as strings from tokens such as [sliderval]
+					letter = String.fromCharCode(63 + parseInt(sliderval));
+				}
+				CF.setJoin("s2000", letter);		// Test the conversion
+				
+				var templistArray = [];				//initialize temporary array
+				CF.listRemove(self.lstAlbum);		//clear list of any previous entries
+	
+				for (var i = 0;i<self.arrayAlbum.length;i++)						//loop thru all the elements in the Albums array 
+				{
+					var searchCoverArt = self.arrayAlbum[i].s1;
+					var searchAlbum = self.arrayAlbum[i].s2;
+					var searchType = self.arrayAlbum[i].s3;
+					var searchTokenGuiD = self.arrayAlbum[i].d1.tokens["[guid]"];
+					var searchToken2GuiD = self.arrayAlbum[i].d2.tokens["[guid]"];
+					
+					if (letter == "#")												// Non-filtered, display everything
+					{
+						templistArray.push({										
+							s1: searchCoverArt,
+							s2: searchAlbum,
+							s3: searchType,
+							d1: { tokens: {"[guid]": searchTokenGuiD} },
+							d2: { tokens: {"[guid]": searchToken2GuiD} }
+						});
+					} 
+					else if (letter == searchAlbum.charAt(0))						// compare the first alphabet of feedback string with the letter selected from slider
+					{
+						templistArray.push({										// Add matched info to temp array
+							s1: searchCoverArt,
+							s2: searchAlbum,
+							s3: searchType,
+							d1: { tokens: {"[guid]": searchTokenGuiD} },
+							d2: { tokens: {"[guid]": searchToken2GuiD} }
+						});
+					}
+				}// end for
+				CF.listAdd(self.lstAlbum, templistArray);							// Add temp array to list
+	},
+	
 	// -----------------------------------------------------------------------------------------------------------------------------
 	// Artists -> Albums -> Title
 	// -----------------------------------------------------------------------------------------------------------------------------
@@ -1036,6 +1107,53 @@ var self = {
 				CF.listAdd(self.lstArtist, templistArray);							// Add temp array to list
 	},
 	
+	// Use the alphabar to filter the list of albums and display the filtered results only.
+	alphasrchArtists: function(sliderval) {
+	
+				// Calculate the letter based on the slider value (0-27). To allow for better accuracy of the letter, both 0 and 1 slider values will equal "#" in the slider.
+				var letter = "#";
+				if (sliderval > 1) {
+					// Use ascii char code and convert to the letter (letter A = 65, B = 66, and so on). Use parseInt here otherwise the + symbol might concatenate the numbers together, 
+					// rather than add them. This is because parameters may be passed as strings from tokens such as [sliderval]
+					letter = String.fromCharCode(63 + parseInt(sliderval));
+				}
+				CF.setJoin("s2000", letter);		// Test the conversion
+				
+				var templistArray = [];				//initialize temporary array
+				CF.listRemove(self.lstArtist);		//clear list of any previous entries
+	
+				for (var i = 0;i<self.arrayArtist.length;i++)						//loop thru all the elements in the Albums array 
+				{
+					var searchCoverArt = self.arrayArtist[i].s1;
+					var searchArtist = self.arrayArtist[i].s2;
+					var searchType = self.arrayArtist[i].s3;
+					var searchTokenGuiD = self.arrayArtist[i].d1.tokens["[guid]"];
+					var searchToken2GuiD = self.arrayArtist[i].d2.tokens["[guid]"];
+					
+					if (letter == "#")												// Non-filtered, display everything
+					{
+						templistArray.push({										// Add matched info to temp array
+							s1: searchCoverArt,
+							s2: searchArtist,
+							s3: searchType,
+							d1: { tokens: {"[guid]": searchTokenGuiD} },
+							d2: { tokens: {"[guid]": searchToken2GuiD} }
+						});
+					} 
+					else if (letter == searchArtist.charAt(0))						// compare the first alphabet of feedback string with the letter selected from slider
+					{
+						templistArray.push({										// Add matched info to temp array
+							s1: searchCoverArt,
+							s2: searchArtist,
+							s3: searchType,
+							d1: { tokens: {"[guid]": searchTokenGuiD} },
+							d2: { tokens: {"[guid]": searchToken2GuiD} }
+						});
+					}
+				}// end for
+				CF.listAdd(self.lstArtist, templistArray);							// Add temp array to list
+	},
+	
 	// -----------------------------------------------------------------------------------------------------------------------------
 	// Genres -> Albums -> Title
 	// -----------------------------------------------------------------------------------------------------------------------------
@@ -1151,6 +1269,53 @@ var self = {
 							d2: { tokens: {"[guid]": searchToken2GuiD} }
 						});
 					} // end if
+				}// end for
+				CF.listAdd(self.lstGenre, templistArray);							// Add temp array to list
+	},
+	
+	// Use the alphabar to filter the list of albums and display the filtered results only.
+	alphasrchGenres: function(sliderval) {
+	
+				// Calculate the letter based on the slider value (0-27). To allow for better accuracy of the letter, both 0 and 1 slider values will equal "#" in the slider.
+				var letter = "#";
+				if (sliderval > 1) {
+					// Use ascii char code and convert to the letter (letter A = 65, B = 66, and so on). Use parseInt here otherwise the + symbol might concatenate the numbers together, 
+					// rather than add them. This is because parameters may be passed as strings from tokens such as [sliderval]
+					letter = String.fromCharCode(63 + parseInt(sliderval));
+				}
+				CF.setJoin("s2000", letter);		// Test the conversion
+				
+				var templistArray = [];				//initialize temporary array
+				CF.listRemove(self.lstGenre);		//clear list of any previous entries
+	
+				for (var i = 0;i<self.arrayGenre.length;i++)						//loop thru all the elements in the Albums array 
+				{
+					var searchCoverArt = self.arrayGenre[i].s1;
+					var searchGenre = self.arrayGenre[i].s2;
+					var searchType = self.arrayGenre[i].s3;
+					var searchTokenGuiD = self.arrayGenre[i].d1.tokens["[guid]"];
+					var searchToken2GuiD = self.arrayGenre[i].d2.tokens["[guid]"];
+					
+					if (letter == "#")												// Non-filtered, display everything
+					{
+						templistArray.push({										// Add matched info to temp array
+							s1: searchCoverArt,
+							s2: searchGenre,
+							s3: searchType,
+							d1: { tokens: {"[guid]": searchTokenGuiD} },
+							d2: { tokens: {"[guid]": searchToken2GuiD} }
+						});
+					} 
+					else if (letter == searchGenre.charAt(0))						// compare the first alphabet of feedback string with the letter selected from slider
+					{
+						templistArray.push({										// Add matched info to temp array
+							s1: searchCoverArt,
+							s2: searchGenre,
+							s3: searchType,
+							d1: { tokens: {"[guid]": searchTokenGuiD} },
+							d2: { tokens: {"[guid]": searchToken2GuiD} }
+						});
+					}
 				}// end for
 				CF.listAdd(self.lstGenre, templistArray);							// Add temp array to list
 	},
@@ -1323,6 +1488,10 @@ var self = {
 			
 					self.arrayRadioStation = [];							// clear array of any previous data
 					CF.listRemove(self.lstRadioStation);					//clear list of any previous entries
+					
+					self.arrayPickListItem = [];							// clear array of any previous data
+					CF.listRemove(self.lstPickListItem);					//clear list of any previous entries
+					
 					CF.setJoins([											//toggle to the correct subpage
 						{join: self.subAlbum, value: 0},
 						{join: self.subAlbumTitle, value: 0},				
@@ -1749,6 +1918,9 @@ var self = {
 	RepeatOn: 				function() { self.sendCmd("Repeat True"); },				// Repeat On
 	RepeatOff: 				function() { self.sendCmd("Repeat False"); },				// Repeat Off
 	RepeatToggle: 			function() { self.sendCmd("Repeat Toggle"); },				// Repeat Toggle
+	ScrobbleOn: 			function() { self.sendCmd("Scrobble True"); },				// Scrobble On
+	ScrobbleOff: 			function() { self.sendCmd("Scrobble False"); },				// Scrobble Off
+	ScrobbleToggle: 		function() { self.sendCmd("Scrobble Toggle"); },			// Scrobble Toggle
 	MuteOn: 				function() { self.sendCmd("Mute True"); },					// Mute On
 	MuteOff: 				function() { self.sendCmd("Mute False"); },					// Mute Off
 	MuteToggle: 			function() { self.sendCmd("Mute Toggle"); },				// Mute Toggle
@@ -1818,10 +1990,40 @@ var self = {
 	setMediaFilter_Search:		function(guid) { self.sendCmd("SetMediaFilter Search=" + guid); },			// Search 
 	clearMediaFilter:			function() { self.sendCmd("SetMediaFilter Clear"); },						// Clear all Media filters
 	
+	// AckButton commands
+	deleteRadioStation:			function(guid) { self.sendCmd("AckButton " + guid + " Delete the station"); },		// Message Box. Delete the station option.
+	editRadioStation:			function(guid) { self.sendCmd("AckButton " + guid + " Edit the station"); },		// Message Box. Edit the station option.
+	cancelRadioStation:			function(guid) { self.sendCmd("AckButton " + guid + " Cancel"); },					// Message Box. Cancel option. Default action.
+	createRadioStation:			function(guid) { self.sendCmd("AckButton " + guid); },								// Input Box. Pressing this option will send the string. Default action.
+	cancelSearch:				function(guid) { self.sendCmd(guid + "CANCEL"); },
+	submitSearch:				function(guid, srchstring) { self.sendCmd(guid + "OK " + srchstring); },
+	getToken:					function(guid) { CF.setJoin("s1010", guid); },
+	
+	searchCancel: function() {	
+			CF.getJoin(self.btnCancel, function(join, value, tokens) {
+			self.cancelSearch(tokens["[guid]"]);	
+			self.Back();
+		});
+	},
+	
+	searchSubmit: function(srchstring) {	
+			CF.getJoin(self.btnCancel, function(join, value, tokens) { 
+				self.submitSearch(tokens["[guid]"], srchstring);	 
+			});
+	},
+	
+	//searchSubmit: function() {	self.submitSearch(tokens["[guid]"]);	},
+	//showToken: function() {	self.getToken(tokens["[guid]"]);	},
+	
+	// CreateNewRadioStation
+	// EditRadioStation
+	
 	// ======================================================================
     // Other commands
     // ======================================================================
 	
+	setPickListCount:  		    function(count) { self.sendCmd("SetPickListCount " + count); },			// create a new radio station.
+	setEncoding:  		    	function() { self.sendCmd("SetEncoding 65001"); },						// create a new radio station.
 	createRadioStation: 		function() { self.sendCmd("CreateNewRadioStation"); },					// create a new radio station.
 	editRadioStation: 			function() { self.sendCmd("EditRadioStation"); },						// edit radio station.
 	getStatus: 					function() { self.sendCmd("GetStatus"); },								// Get a report of all status on startup.

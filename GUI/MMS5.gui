@@ -24,6 +24,10 @@
       <cmd name="searchQueue" js="self.searchQueue(data)" jsSendsCommand="True">[inputval]</cmd>
       <cmd name="savePlaylist" js="self.savePlaylist(data)" jsSendsCommand="True">[inputval]</cmd>
       <cmd name="setSystemSettings" js="self.setSystemSettings()" jsSendsCommand="True" />
+      <cmd name="submitSearch" js="self.searchSubmit(data)" jsSendsCommand="True">[inputval]</cmd>
+      <cmd name="alphasrchAlbums" js="self.alphasrchAlbums(data)" jsSendsCommand="True">[sliderval]</cmd>
+      <cmd name="alphasrchArtists" js="self.alphasrchArtists(data)" jsSendsCommand="True">[sliderval]</cmd>
+      <cmd name="alphasrchGenres" js="self.alphasrchGenres(data)" jsSendsCommand="True">[sliderval]</cmd>
       <fb name="Incoming Data" regex="(?msi)(.*)">
         <group index="1" name="" datatype="s" target="s1" />
       </fb>
@@ -37,7 +41,9 @@
       <cmd name="WOL">\xFF\xFF\xFF\xFF\xFF\xFF\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93\x38\x60\x77\x93\x1E\x93</cmd>
     </system>
     <system name="Loopback" ip="127.0.0.1" port="10210" protocol="tcp" alwayson="1" offlinequeue="0" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0">
-      <cmd name="alphabar" js="self.alphasearch(data)" jsSendsCommand="False">[sliderval]</cmd>
+      <cmd name="Close_MsgBox_Shutdown" target="d4585" value="0">0</cmd>
+      <cmd name="Close_MsgBox_Reboot" target="d4586" value="0">0</cmd>
+      <cmd name="Close_MsgBox_SearchRadioStations" target="d4554" value="0">0</cmd>
     </system>
   </systems>
   <macros>
@@ -164,8 +170,8 @@
     <theme type="button" name=".top_btn_single_copy1[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(top_btn_single_on.png); color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
     <theme type="text" name=".text_sample_copy"><![CDATA[ color: White; font-size: 12px; font-family: 'Verdana'; text-align: center; vertical-align: middle; font-weight: normal; font-style: none; text-decoration: none; display: table-cell;]]></theme>
     <theme type="text" name=".Small_Text_copy"><![CDATA[ text-shadow: rgba(0,0,0,0.78) 1px 1px 1px; color: White; font-size: 12px; font-family: 'Futura'; text-align: left; vertical-align: middle; font-weight: normal; font-style: none; text-decoration: none; display: table-cell;]]></theme>
-    <theme type="button" name=".btn_212x43_copy[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
-    <theme type="button" name=".btn_212x43_copy[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_on.png); color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".arialbutton[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_off.png); color: White; font-size: 12px; font-family: 'Arial'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".arialbutton[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_on.png); color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
     <theme type="button" name=".btn_212x43_copy1[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
     <theme type="button" name=".btn_212x43_copy1[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_on.png); color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
     <theme type="button" name=".btn_212x43_copy2[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
@@ -176,7 +182,7 @@
     <theme type="button" name=".btn_212x43_copy4[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_on.png); color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
     <theme type="button" name=".btn_212x43_copy5[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
     <theme type="button" name=".btn_212x43_copy5[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_on.png); color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
-    <theme type="text" name=".cfblue2_small_c_copy"><![CDATA[ text-shadow: rgba(0,0,0,0.78) 1px 1px 1px; color: White; font-size: 14px; font-family: 'Futura'; text-align: center; vertical-align: middle; font-weight: normal; font-style: none; text-decoration: none; display: table-cell;]]></theme>
+    <theme type="text" name=".arial"><![CDATA[ text-shadow: rgba(0,0,0,0.78) 1px 1px 1px; color: White; font-size: 14px; font-family: 'Arial'; text-align: center; vertical-align: middle; font-weight: normal; font-style: none; text-decoration: none; display: table-cell;]]></theme>
     <theme type="text" name=".cfblue2_title_c_copy1"><![CDATA[ text-shadow: rgba(0,0,0,0.78) 1px 1px 1px; color: White; font-size: 18px; font-family: 'Futura'; text-align: center; vertical-align: middle; font-weight: normal; font-style: none; text-decoration: none; display: table-cell;]]></theme>
     <theme type="button" name=".btn_212x43_copy6[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
     <theme type="button" name=".btn_212x43_copy6[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_on.png); color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
@@ -201,11 +207,16 @@
     <theme type="button" name=".btn_212x43_copy13[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(btn_212x43_on.png); color: #80FFFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
     <theme type="gauge" name=".alphabar[state='0']"><![CDATA[ background-image: url(alphabet.png);]]></theme>
     <theme type="gauge" name=".alphabar[state='1']"><![CDATA[]]></theme>
+    <theme type="button" name=".edit_icon[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(Edit_icon_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".edit_icon[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(Edit_icon_on.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="input" name=".input_white"><![CDATA[ background-color: White; border-width: 0px; color: Black; font-size: 16px; font-family: 'Verdana'; text-align: left; vertical-align: middle; font-weight: normal; font-style: none; text-decoration: none; display: table-cell;]]></theme>
+    <theme type="button" name=".scrobble_icon[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(scrobble_off.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".scrobble_icon[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(scrobble_on.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
   </themes>
   <tokens>
     <token name="[inputSysName]" value="MMS5" persist="1" />
     <token name="[inputSys2Name]" value="MMS5_2" persist="1" />
-    <token name="[inputURL]" value="192.168.0.103" persist="1" />
+    <token name="[inputURL]" value="192.168.0.102" persist="1" />
   </tokens>
   <scripts>
     <script name="MMS5.js" />
@@ -310,7 +321,7 @@
       </btn>
       <subpage name="vol" x="694" y="691" j="0" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="0" />
       <subpage name="NowPlaying" x="2" y="443" j="0" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="0" />
-      <subpage name="Album_List" x="234" y="132" j="4510" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
+      <subpage name="Album_List" x="234" y="132" j="4510" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="0" />
       <subpage name="Album_Title_List" x="234" y="132" j="4511" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
       <subpage name="Artist_Album_List" x="234" y="132" j="4521" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
       <subpage name="Artist_Album_Title_List" x="234" y="132" j="4522" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
@@ -319,37 +330,40 @@
       <subpage name="DropMenu_Settings" x="0" y="0" j="4581" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="1" v="0" l="0" />
       <subpage name="DropMenu_Zone" x="0" y="0" j="4583" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="1" v="0" l="1" />
       <subpage name="DropMenu_Action" x="0" y="0" j="4582" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="1" v="0" l="0" />
-      <txt j="4581" x="640" y="0" w="134" h="64" t="cfblue2_title_c" wrap="True" l="0">zone btn
+      <txt j="4581" x="623" y="0" w="134" h="64" t="cfblue2_title_c" wrap="True" l="0">zone btn
 feedback</txt>
       <txt j="4580" x="53" y="2" w="102" h="56" t="text_sample" wrap="True" l="0">Server Disconnected</txt>
-      <txt j="0" x="947" y="3" w="69" h="60" t="cfblue2_title_c" wrap="True" l="0">Volume
+      <txt j="0" x="897" y="3" w="69" h="60" t="cfblue2_title_c" wrap="True" l="0">Volume
 Level</txt>
       <img x="0" y="61" w="1024" h="61" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">menu_bg.png</img>
-      <txt j="1" x="174" y="63" w="303" h="60" t="Small_Text" wrap="True" l="1">Feedback</txt>
-      <txt j="4582" x="953" y="61" w="58" h="60" t="cfblue2_small_c" wrap="True" l="0">Volume Level</txt>
+      <txt j="1" x="165" y="63" w="311" h="60" t="Small_Text" wrap="True" l="0">Feedback</txt>
       <btn j="4581" x="24" y="71" w="134" h="43" t="btn_212x43" flip="None" sim="2" l="0" s="1">
         <inactive s="0">SETTINGS</inactive>
         <active s="0">SETTINGS</active>
       </btn>
-      <btn j="4582" x="486" y="71" w="134" h="43" t="btn_212x43" flip="None" sim="2" l="0" s="1">
+      <btn j="4582" x="483" y="71" w="134" h="43" t="btn_212x43" flip="None" sim="2" l="0" s="1">
         <inactive s="0">ACTIONS</inactive>
         <active s="0">ACTIONS</active>
       </btn>
-      <btn j="4583" x="640" y="71" w="134" h="43" t="btn_212x43" flip="None" sim="2" l="0" s="1">
+      <btn j="4583" x="623" y="71" w="134" h="43" t="btn_212x43" flip="None" sim="2" l="0" s="1">
         <inactive s="0">ZONE</inactive>
         <active s="0">ZONE</active>
       </btn>
-      <btn j="4584" x="795" y="71" w="134" h="43" t="btn_212x43" flip="None" sim="0" l="0" s="1">
+      <btn j="4584" x="763" y="71" w="134" h="43" t="btn_212x43" flip="None" sim="0" l="0" s="1">
         <inactive s="0">SOURCES</inactive>
         <active s="0">SOURCES</active>
       </btn>
-      <img x="952" y="61" w="61" h="61" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">cf_logo_grey.png</img>
+      <img x="959" y="61" w="61" h="61" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">cf_logo_grey.png</img>
       <subpage name="wifi" x="3" y="2" j="0" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="0" />
       <subpage name="RadioSources_List" x="234" y="132" j="4550" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="1" />
       <subpage name="RadioStations_List" x="234" y="132" j="4551" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
       <subpage name="PickListItem_List" x="234" y="132" j="4552" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
-      <txt j="2000" x="808" y="3" w="114" h="60" t="cfblue2_title_l" wrap="True" l="0">Alphasearch</txt>
-      <subpage name="RadioGenres_List" x="234" y="132" j="4553" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="0" />
+      <txt j="2000" x="970" y="63" w="36" h="60" t="cfblue2_title_c" wrap="True" l="0">#</txt>
+      <subpage name="RadioGenres_List" x="234" y="132" j="4553" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
+      <subpage name="Msgbox_Search" x="0" y="0" j="4554" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
+      <subpage name="Msgbox_Reboot" x="0" y="0" j="4586" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
+      <subpage name="Msgbox_Shutdown" x="0" y="0" j="4585" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
+      <txt j="4582" x="903" y="61" w="58" h="60" t="cfblue2_small_c" wrap="True" l="0">Volume Level</txt>
     </landscape>
   </page>
   <subpage name="bg" w="1024" h="758" clip="1">
@@ -427,13 +441,19 @@ Level</txt>
     </txt>
     <txt j="4506" x="17" y="205" w="36" h="23" t="nowplaying" wrap="True" l="0">
     </txt>
-    <txt j="4501" x="144" y="34" w="71" h="113" t="nowplaying" wrap="True" l="0">
+    <txt j="4501" x="144" y="98" w="71" h="49" t="nowplaying" wrap="True" l="0">
     </txt>
     <txt j="4500" x="16" y="2" w="197" h="23" t="nowplaying" wrap="True" l="0">
     </txt>
     <txt j="4507" x="178" y="205" w="36" h="23" t="nowplaying" wrap="True" l="1">
     </txt>
     <slider j="4501" d="0" x="54" y="202" w="119" h="28" min="0" max="65535" decimals="0" unit="decimal" t="vol_bar" sim="0" l="0" />
+    <btn j="4574" x="157" y="31" w="59" h="60" t="scrobble_icon" flip="None" sim="0" l="0" s="1" js="self.ScrobbleToggle()">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
   </subpage>
   <subpage name="Queue_Item" w="759" h="90" clip="1">
     <txt j="2" x="166" y="0" w="593" h="37" t="cfblue2_title_l" wrap="True" l="0">(Queue)</txt>
@@ -650,10 +670,22 @@ Level</txt>
     </btn>
   </subpage>
   <subpage name="RadioStations_Item" w="759" h="90" clip="1">
-    <txt j="2" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(Radio Station)</txt>
-    <txt j="3" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
-    <img x="7" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="0" y="1" w="759" h="89" t="transparent_glow" flip="None" sim="1" l="0" s="1" js="self.playSelectedStation(list, listIndex, join)">
+    <txt j="2" x="166" y="0" w="593" h="61" t="cfblue2_title_l" wrap="True" l="0">(Radio Station)</txt>
+    <txt j="3" x="166" y="46" w="593" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
+    <img x="66" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
+    <btn j="1" x="70" y="1" w="689" h="89" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="self.playSelectedStation(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+    <btn j="2" x="11" y="22" w="48" h="48" t="delete_item" flip="None" sim="1" l="1" s="1">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+    <btn j="3" x="671" y="15" w="60" h="60" t="edit_icon" flip="None" sim="1" l="0" s="1">
       <inactive s="0">
       </inactive>
       <active s="0">
@@ -691,17 +723,17 @@ Level</txt>
     </btn>
     <img x="56" y="115" w="342" h="574" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">bg_drop_down_settings_menu_l.png</img>
     <txt j="0" x="82" y="141" w="294" h="35" t="menu_dropdown_title_c" wrap="True" l="0">Settings</txt>
-    <btn j="0" x="77" y="216" w="302" h="45" t="list_menudrop_header_blank" flip="None" sim="1" l="0" s="1">
+    <btn j="0" x="77" y="216" w="302" h="45" t="list_menudrop_header_blank" flip="None" sim="0" l="0" s="1">
       <inactive s="0">System Name : </inactive>
       <active s="0">System Name : </active>
     </btn>
-    <btn j="0" x="77" y="261" w="302" h="45" t="list_menudrop_footer_blank" flip="None" sim="1" l="0" s="1">
+    <btn j="0" x="77" y="261" w="302" h="45" t="list_menudrop_footer_blank" flip="None" sim="0" l="0" s="1">
       <inactive s="0">IP Address :</inactive>
       <active s="0">IP Address :</active>
     </btn>
     <input j="0" s="4521" x="185" y="264" w="194" h="38" pass="0" autoFocus="0" f="0" t="search_black" command="setSystemSettings" l="0">(IP Address)</input>
     <input j="0" s="4520" x="206" y="220" w="173" h="38" pass="0" autoFocus="0" f="0" t="search_black" command="setSystemSettings" l="0">(System Name)</input>
-    <btn j="0" x="77" y="424" w="302" h="45" t="list_menudrop_header_blank" flip="None" sim="1" l="0" s="1" js="self.Shutdown()">
+    <btn j="4585" x="77" y="424" w="302" h="45" t="list_menudrop_header_blank" flip="None" sim="2" l="0" s="1">
       <inactive s="0">Shutdown</inactive>
       <active s="0">Shutdown</active>
     </btn>
@@ -709,7 +741,7 @@ Level</txt>
       <inactive s="0">Wake-On-Lan (WOL)</inactive>
       <active s="0">Wake-On-Lan (WOL)</active>
     </btn>
-    <btn j="0" x="77" y="469" w="302" h="45" t="list_menudrop_body_blank" flip="None" sim="1" l="0" s="1" js="self.Reboot()">
+    <btn j="4586" x="77" y="469" w="302" h="45" t="list_menudrop_body_blank" flip="None" sim="2" l="0" s="1">
       <inactive s="0">Reboot</inactive>
       <active s="0">Reboot</active>
     </btn>
@@ -743,26 +775,82 @@ Level</txt>
       </active>
     </btn>
   </subpage>
+  <subpage name="CreatePandoraStation_Item" w="759" h="90" clip="1">
+    <txt j="2" x="166" y="0" w="593" h="61" t="cfblue2_title_l" wrap="True" l="0">Create a Pandora Station ...</txt>
+    <txt j="3" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">
+    </txt>
+    <img x="70" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
+    <btn j="1" x="166" y="1" w="593" h="89" t="transparent_glow" flip="None" sim="1" l="0" s="1" js="self.playSelectedStation(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+  </subpage>
+  <subpage name="Msgbox_Shutdown" w="1024" h="768" clip="1">
+    <img x="0" y="0" w="1024" h="768" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">bg_dark_overlay.png</img>
+    <img x="221" y="265" w="582" h="238" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">pop_up_window.png</img>
+    <btn j="0" x="376" y="405" w="122" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.Shutdown()">
+      <inactive s="0">YES</inactive>
+      <active s="0">YES</active>
+    </btn>
+    <txt j="0" x="255" y="333" w="520" h="50" t="text_sample" wrap="False" l="0">WARNING! This action will SHUTDOWN the MMS server. 
+
+Are you sure you want to proceed?</txt>
+    <txt j="0" x="382" y="268" w="259" h="45" t="text_sample" wrap="False" l="0">System Shutdown</txt>
+    <btn j="0" x="526" y="405" w="122" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" cmd="Close_MsgBox_Shutdown">
+      <inactive s="0">NO</inactive>
+      <active s="0">NO</active>
+    </btn>
+  </subpage>
+  <subpage name="Msgbox_Reboot" w="1024" h="768" clip="1">
+    <img x="0" y="0" w="1024" h="768" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">bg_dark_overlay.png</img>
+    <img x="221" y="265" w="582" h="238" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">pop_up_window.png</img>
+    <btn j="0" x="376" y="405" w="122" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.Reboot()">
+      <inactive s="0">YES</inactive>
+      <active s="0">YES</active>
+    </btn>
+    <txt j="0" x="255" y="333" w="520" h="50" t="text_sample" wrap="False" l="0">WARNING! This action will REBOOT the MMS server. 
+
+Are you sure you want to proceed?</txt>
+    <txt j="0" x="382" y="268" w="259" h="45" t="text_sample" wrap="False" l="0">System Reboot</txt>
+    <btn j="0" x="526" y="405" w="122" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" cmd="Close_MsgBox_Reboot">
+      <inactive s="0">NO</inactive>
+      <active s="0">NO</active>
+    </btn>
+  </subpage>
+  <subpage name="Msgbox_Search" w="1024" h="768" clip="1">
+    <img x="0" y="0" w="1024" h="768" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">bg_dark_overlay.png</img>
+    <img x="221" y="265" w="582" h="238" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">pop_up_window.png</img>
+    <txt j="4518" x="246" y="323" w="540" h="70" t="cfblue2_small_l" wrap="True" l="0">Type in the favorite name of your favorite artist, song or composer and Pandora will create a radio station featuring that radio music and more like it.</txt>
+    <txt j="4517" x="246" y="268" w="540" h="45" t="cfblue2_title_l" wrap="True" l="0">Enter an Artist or Song</txt>
+    <input j="0" s="4519" x="246" y="401" w="540" h="52" pass="0" autoFocus="0" f="0" t="input_white" command="submitSearch" l="0">(Enter search string here ...)</input>
+    <btn j="4587" x="435" y="509" w="122" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" cmd="Close_MsgBox_SearchRadioStations" js="self.searchCancel()">
+      <inactive s="0">CANCEL</inactive>
+      <active s="0">CANCEL</active>
+    </btn>
+  </subpage>
   <subpage name="Album_List" w="780" h="545" clip="1">
     <img x="576" y="16" w="186" h="29" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">menu_search.png</img>
     <input j="0" s="4510" x="604" y="16" w="158" h="30" pass="0" autoFocus="0" f="0" t="search_black" changeCommand="searchAlbums" l="0">(Search Albums)</input>
     <list j="4510" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="Album_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
     <txt j="0" x="123" y="9" w="436" h="43" t="cfblue2_title_l" wrap="True" l="0">ALBUM</txt>
-    <slider j="0" d="0" x="732" y="0" w="48" h="545" min="0" max="27" decimals="0" pressCmd="alphabar" dragCmd="alphabar" unit="decimal" t="alphabar" invert="1" sim="0" l="0" />
+    <slider j="0" d="0" x="732" y="0" w="48" h="545" min="0" max="27" decimals="0" pressCmd="alphasrchAlbums" dragCmd="alphasrchAlbums" unit="decimal" t="alphabar" invert="1" sim="0" l="0" />
+    <slider j="0" d="0" x="732" y="0" w="48" h="545" min="0" max="27" decimals="0" pressCmd="alphasrchAlbums" dragCmd="alphasrchAlbums" unit="decimal" t="alphabar" invert="1" sim="0" l="0" />
   </subpage>
   <subpage name="Artist_List" w="780" h="545" clip="1">
     <img x="576" y="16" w="186" h="29" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">menu_search.png</img>
     <input j="0" s="4511" x="604" y="16" w="158" h="30" pass="0" autoFocus="0" f="0" t="search_black" changeCommand="searchArtists" l="0">(Search Artists)</input>
     <list j="4520" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="Artist_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
     <txt j="0" x="123" y="9" w="425" h="43" t="cfblue2_title_l" wrap="True" l="0">ARTIST</txt>
-    <slider j="0" d="0" x="732" y="0" w="48" h="545" min="0" max="27" decimals="0" pressCmd="alphabar" dragCmd="alphabar" unit="decimal" t="alphabar" invert="1" sim="0" l="0" />
+    <slider j="0" d="0" x="732" y="0" w="48" h="545" min="0" max="27" decimals="0" pressCmd="alphasrchArtists" dragCmd="alphasrchArtists" unit="decimal" t="alphabar" invert="1" sim="0" l="0" />
   </subpage>
   <subpage name="Genre_List" w="780" h="545" clip="1">
     <img x="576" y="16" w="186" h="29" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">menu_search.png</img>
     <input j="0" s="4512" x="604" y="16" w="158" h="30" pass="0" autoFocus="0" f="0" t="search_black" changeCommand="searchGenres" l="0">(Search Genres)</input>
     <list j="4530" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="Genre_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
     <txt j="0" x="123" y="9" w="425" h="43" t="cfblue2_title_l" wrap="True" l="0">GENRE</txt>
-    <slider j="0" d="0" x="732" y="0" w="48" h="545" min="0" max="27" decimals="0" pressCmd="alphabar" dragCmd="alphabar" unit="decimal" t="alphabar" invert="1" sim="0" l="0" />
+    <slider j="0" d="0" x="732" y="0" w="48" h="545" min="0" max="27" decimals="0" pressCmd="alphasrchGenres" dragCmd="alphasrchGenres" unit="decimal" t="alphabar" invert="1" sim="0" l="0" />
   </subpage>
   <subpage name="Playlist_List" w="780" h="545" clip="1">
     <img x="576" y="16" w="186" h="29" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">menu_search.png</img>
