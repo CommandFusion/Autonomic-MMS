@@ -15,26 +15,26 @@
   </properties>
   <systems>
     <system name="MMS5" ip="192.168.168.204" port="5004" protocol="tcp" alwayson="1" offlinequeue="1" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="\x0D\x0A" connectionStatus="0" disconnectionStatus="0">
-      <cmd name="setVolume" js="self.SetVolume(data)" jsSendsCommand="True">[sliderval]</cmd>
-      <cmd name="searchAlbums" js="self.searchAlbums(data)" jsSendsCommand="True">[inputval]</cmd>
-      <cmd name="searchArtists" js="self.searchArtists(data)" jsSendsCommand="True">[inputval]</cmd>
-      <cmd name="searchGenres" js="self.searchGenres(data)" jsSendsCommand="True">[inputval]</cmd>
-      <cmd name="searchPlaylists" js="self.searchPlaylists(data)" jsSendsCommand="True">[inputval]</cmd>
-      <cmd name="searchRadioSources" js="self.searchRadioSources(data)" jsSendsCommand="True">[inputval]</cmd>
-      <cmd name="searchQueue" js="self.searchQueue(data)" jsSendsCommand="True">[inputval]</cmd>
-      <cmd name="savePlaylist" js="self.savePlaylist(data)" jsSendsCommand="True">[inputval]</cmd>
-      <cmd name="setSystemSettings" js="self.setSystemSettings()" jsSendsCommand="True" />
-      <cmd name="submitSearch" js="self.searchSubmit(data)" jsSendsCommand="True">[inputval]</cmd>
-      <cmd name="alphasrchAlbums" js="self.alphasrchAlbums(data)" jsSendsCommand="True">[sliderval]</cmd>
-      <cmd name="alphasrchArtists" js="self.alphasrchArtists(data)" jsSendsCommand="True">[sliderval]</cmd>
-      <cmd name="alphasrchGenres" js="self.alphasrchGenres(data)" jsSendsCommand="True">[sliderval]</cmd>
+      <cmd name="setVolume" js="mms.SetVolume(data)" jsSendsCommand="True">[sliderval]</cmd>
+      <cmd name="searchAlbums" js="mms.searchAlbums(data)" jsSendsCommand="True">[inputval]</cmd>
+      <cmd name="searchArtists" js="mms.searchArtists(data)" jsSendsCommand="True">[inputval]</cmd>
+      <cmd name="searchGenres" js="mms.searchGenres(data)" jsSendsCommand="True">[inputval]</cmd>
+      <cmd name="searchPlaylists" js="mms.searchPlaylists(data)" jsSendsCommand="True">[inputval]</cmd>
+      <cmd name="searchRadioSources" js="mms.searchRadioSources(data)" jsSendsCommand="True">[inputval]</cmd>
+      <cmd name="searchQueue" js="mms.searchQueue(data)" jsSendsCommand="True">[inputval]</cmd>
+      <cmd name="savePlaylist" js="mms.savePlaylist(data)" jsSendsCommand="True">[inputval]</cmd>
+      <cmd name="setSystemSettings" js="mms.setSystemSettings()" jsSendsCommand="True" />
+      <cmd name="submitSearch" js="mms.searchSubmit(data)" jsSendsCommand="True">[inputval]</cmd>
+      <cmd name="alphasrchAlbums" js="mms.alphasrchAlbums(data)" jsSendsCommand="True">[sliderval]</cmd>
+      <cmd name="alphasrchArtists" js="mms.alphasrchArtists(data)" jsSendsCommand="True">[sliderval]</cmd>
+      <cmd name="alphasrchGenres" js="mms.alphasrchGenres(data)" jsSendsCommand="True">[sliderval]</cmd>
       <fb name="Incoming Data" regex="(?msi)(.*)">
-        <group index="1" name="" datatype="s" target="s1" />
+        <group index="1" name="" datatype="s" target="s4585" />
       </fb>
     </system>
     <system name="MMS5_2" ip="192.168.168.204" port="23" protocol="tcp" alwayson="1" offlinequeue="0" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="\x0D\x0A" connectionStatus="0" disconnectionStatus="0">
       <fb name="Incoming Data System 2" regex="(?msi)(.*)">
-        <group index="1" name="" datatype="s" target="s1" />
+        <group index="1" name="" datatype="s" target="s4585" />
       </fb>
     </system>
     <system name="WakeOnLan" ip="255.255.255.255" port="9" protocol="udp" alwayson="0" offlinequeue="0" accept="0" acceptBroadcasts="1" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0">
@@ -216,7 +216,7 @@
   <tokens>
     <token name="[inputSysName]" value="MMS5" persist="1" />
     <token name="[inputSys2Name]" value="MMS5_2" persist="1" />
-    <token name="[inputURL]" value="192.168.0.102" persist="1" />
+    <token name="[inputURL]" value="192.168.168.204" persist="1" />
   </tokens>
   <scripts>
     <script name="MMS5.js" />
@@ -231,7 +231,7 @@
       <subpage name="Queue_List" x="234" y="132" j="4560" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="1" />
       <subpage name="Playlist_Title_List" x="234" y="132" j="4541" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
       <subpage name="Genre_Album_Title_List" x="234" y="132" j="4532" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
-      <btn j="0" x="453" y="702" w="82" h="43" t="transport_bg_c" flip="None" sim="1" l="0" s="0" js="self.Stop()">
+      <btn j="0" x="453" y="702" w="82" h="43" t="transport_bg_c" flip="None" sim="1" l="0" s="0" js="mms.Stop()">
         <inactive s="0">
           <img x="18" y="0" w="43" h="43">transports_grey_stop_off_20.png</img>
         </inactive>
@@ -239,15 +239,15 @@
           <img x="18" y="0" w="43" h="43">transports_grey_stop_on_20.png</img>
         </active>
       </btn>
-      <btn j="4572" x="371" y="702" w="82" h="43" t="transport_bg_c" flip="None" sim="0" l="0" s="0" js="self.PlayPause()">
+      <btn j="4572" x="371" y="702" w="82" h="43" t="transport_bg_c" flip="None" sim="0" l="0" s="0" js="mms.PlayPause()">
         <inactive s="0">
-          <img x="18" y="0" w="43" h="43">transports_grey_play_off_20.png</img>
+          <img x="18" y="0" w="43" h="43">transports_grey_pause_off_20.png</img>
         </inactive>
         <active s="0">
-          <img x="18" y="0" w="43" h="43">transports_grey_pause_on_20.png</img>
+          <img x="18" y="0" w="43" h="43">transports_grey_play_on_20.png</img>
         </active>
       </btn>
-      <btn j="0" x="289" y="702" w="82" h="43" t="transport_bg_c" flip="None" sim="1" l="0" s="0" js="self.Rewind()">
+      <btn j="0" x="289" y="702" w="82" h="43" t="transport_bg_c" flip="None" sim="1" l="0" s="0" js="mms.Rewind()">
         <inactive s="0">
           <img x="18" y="0" w="43" h="43">transports_grey_rewind_off_20.png</img>
         </inactive>
@@ -255,7 +255,7 @@
           <img x="18" y="0" w="43" h="43">transports_grey_rewind_on_20.png</img>
         </active>
       </btn>
-      <btn j="0" x="224" y="702" w="65" h="43" t="transport_bg_l" flip="None" sim="1" l="0" s="0" js="self.SkipPrevious()">
+      <btn j="0" x="224" y="702" w="65" h="43" t="transport_bg_l" flip="None" sim="1" l="0" s="0" js="mms.SkipPrevious()">
         <inactive s="0">
           <img x="12" y="0" w="43" h="43">transports_grey_skip_prev_off_20.png</img>
         </inactive>
@@ -263,7 +263,7 @@
           <img x="12" y="0" w="43" h="43">transports_grey_skip_prev_on_20.png</img>
         </active>
       </btn>
-      <btn j="0" x="617" y="702" w="65" h="43" t="transport_bg_r" flip="None" sim="1" l="0" s="0" js="self.SkipNext()">
+      <btn j="0" x="617" y="702" w="65" h="43" t="transport_bg_r" flip="None" sim="1" l="0" s="0" js="mms.SkipNext()">
         <inactive s="0">
           <img x="7" y="0" w="43" h="43">transports_grey_skip_next_off_20.png</img>
         </inactive>
@@ -271,7 +271,7 @@
           <img x="7" y="0" w="43" h="43">transports_grey_skip_next_on_20.png</img>
         </active>
       </btn>
-      <btn j="0" x="535" y="702" w="82" h="43" t="transport_bg_c" flip="None" sim="1" l="0" s="0" js="self.FastForward()">
+      <btn j="0" x="535" y="702" w="82" h="43" t="transport_bg_c" flip="None" sim="1" l="0" s="0" js="mms.FastForward()">
         <inactive s="0">
           <img x="18" y="0" w="43" h="43">transports_grey_fast_forward_off_20.png</img>
         </inactive>
@@ -279,7 +279,7 @@
           <img x="18" y="0" w="43" h="43">transports_grey_fast_forward_on_20.png</img>
         </active>
       </btn>
-      <btn j="4570" x="29" y="704" w="72" h="43" t="top_btn_single" flip="None" sim="0" l="0" s="0" js="self.ShuffleToggle()">
+      <btn j="4570" x="29" y="704" w="72" h="43" t="top_btn_single" flip="None" sim="0" l="0" s="0" js="mms.ShuffleToggle()">
         <inactive s="0">
           <img x="14" y="0" w="43" h="43">transports_grey_shuffle_off_25.png</img>
         </inactive>
@@ -287,7 +287,7 @@
           <img x="14" y="0" w="43" h="43">transports_grey_shuffle_on_25.png</img>
         </active>
       </btn>
-      <btn j="4571" x="123" y="704" w="72" h="43" t="top_btn_single" flip="None" sim="0" l="0" s="0" js="self.RepeatToggle()">
+      <btn j="4571" x="123" y="704" w="72" h="43" t="top_btn_single" flip="None" sim="0" l="0" s="0" js="mms.RepeatToggle()">
         <inactive s="0">
           <img x="14" y="0" w="43" h="43">transports_grey_repeat_off_25.png</img>
         </inactive>
@@ -295,27 +295,27 @@
           <img x="14" y="0" w="43" h="43">transports_grey_repeat_on_25.png</img>
         </active>
       </btn>
-      <btn j="0" x="22" y="135" w="186" h="43" t="btn_212x43" flip="None" sim="1" l="0" s="1" js="self.browseAlbums()">
+      <btn j="0" x="22" y="135" w="186" h="43" t="btn_212x43" flip="None" sim="1" l="0" s="1" js="mms.browseAlbums()">
         <inactive s="0">Albums</inactive>
         <active s="0">Albums</active>
       </btn>
-      <btn j="0" x="22" y="187" w="186" h="43" t="btn_212x43" flip="None" sim="1" l="0" s="1" js="self.browseArtists()">
+      <btn j="0" x="22" y="187" w="186" h="43" t="btn_212x43" flip="None" sim="1" l="0" s="1" js="mms.browseArtists()">
         <inactive s="0">Artists</inactive>
         <active s="0">Artists</active>
       </btn>
-      <btn j="0" x="22" y="239" w="186" h="43" t="btn_212x43" flip="None" sim="1" l="0" s="1" js="self.browseGenres()">
+      <btn j="0" x="22" y="239" w="186" h="43" t="btn_212x43" flip="None" sim="1" l="0" s="1" js="mms.browseGenres()">
         <inactive s="0">Genres</inactive>
         <active s="0">Genres</active>
       </btn>
-      <btn j="0" x="22" y="290" w="186" h="43" t="btn_212x43" flip="None" sim="1" l="0" s="1" js="self.browsePlaylists()">
+      <btn j="0" x="22" y="290" w="186" h="43" t="btn_212x43" flip="None" sim="1" l="0" s="1" js="mms.browsePlaylists()">
         <inactive s="0">Playlists</inactive>
         <active s="0">Playlists</active>
       </btn>
-      <btn j="0" x="22" y="341" w="186" h="43" t="btn_212x43" flip="None" sim="1" l="0" s="1" js="self.browseRadioSources()">
+      <btn j="0" x="22" y="341" w="186" h="43" t="btn_212x43" flip="None" sim="1" l="0" s="1" js="mms.browseRadioSources()">
         <inactive s="0">Radio Sources</inactive>
         <active s="0">Radio Sources</active>
       </btn>
-      <btn j="0" x="22" y="393" w="186" h="43" t="btn_212x43" flip="None" sim="1" l="0" s="1" js="self.browseQueue()">
+      <btn j="0" x="22" y="393" w="186" h="43" t="btn_212x43" flip="None" sim="1" l="0" s="1" js="mms.browseQueue()">
         <inactive s="0">Queue</inactive>
         <active s="0">Queue</active>
       </btn>
@@ -336,7 +336,7 @@ feedback</txt>
       <txt j="0" x="897" y="3" w="69" h="60" t="cfblue2_title_c" wrap="True" l="0">Volume
 Level</txt>
       <img x="0" y="61" w="1024" h="61" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">menu_bg.png</img>
-      <txt j="1" x="165" y="63" w="311" h="60" t="Small_Text" wrap="True" l="0">Feedback</txt>
+      <txt j="4585" x="165" y="63" w="311" h="60" t="Small_Text" wrap="True" l="0">Feedback</txt>
       <btn j="4581" x="24" y="71" w="134" h="43" t="btn_212x43" flip="None" sim="2" l="0" s="1">
         <inactive s="0">SETTINGS</inactive>
         <active s="0">SETTINGS</active>
@@ -358,7 +358,7 @@ Level</txt>
       <subpage name="RadioSources_List" x="234" y="132" j="4550" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="1" />
       <subpage name="RadioStations_List" x="234" y="132" j="4551" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
       <subpage name="PickListItem_List" x="234" y="132" j="4552" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
-      <txt j="2000" x="970" y="63" w="36" h="60" t="cfblue2_title_c" wrap="True" l="0">#</txt>
+      <txt j="4584" x="970" y="63" w="36" h="60" t="cfblue2_title_c" wrap="True" l="0">#</txt>
       <subpage name="RadioGenres_List" x="234" y="132" j="4553" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
       <subpage name="Msgbox_Search" x="0" y="0" j="4554" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
       <subpage name="Msgbox_Reboot" x="0" y="0" j="4586" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
@@ -389,14 +389,14 @@ Level</txt>
   <subpage name="vol" w="330" h="65" clip="1">
     <img x="18" y="24" w="17" h="17" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">vol_minus.png</img>
     <img x="237" y="24" w="21" h="17" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">vol_plus.png</img>
-    <btn j="4573" x="270" y="9" w="43" h="43" t="mute_button" flip="None" sim="0" l="0" s="1" js="self.MuteToggle()">
+    <btn j="4573" x="270" y="9" w="43" h="43" t="mute_button" flip="None" sim="0" l="0" s="1" js="mms.MuteToggle()">
       <inactive s="0">
       </inactive>
       <active s="0">
       </active>
     </btn>
     <img x="49" y="17" w="175" h="30" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">vol_bar_bg.png</img>
-    <slider j="4500" d="0" x="56" y="17" w="160" h="30" min="0" max="50" decimals="0" dragCmd="setVolume" releaseCmd="setVolume" unit="decimal" t="vol_bar" sim="1" l="0">
+    <slider j="4500" d="0" x="56" y="17" w="160" h="30" min="0" max="50" decimals="0" releaseCmd="setVolume" unit="decimal" t="vol_bar" sim="1" l="0">
       <indicator state="0" offsetX="0" offsetY="0" x="0" y="0" w="0" h="0" t="">vol_slider.png</indicator>
       <indicator state="1" offsetX="0" offsetY="0" x="0" y="0" w="0" h="0" t="">vol_slider.png</indicator>
     </slider>
@@ -410,23 +410,23 @@ Level</txt>
     </btn>
     <img x="676" y="115" w="342" h="574" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">bg_drop_down_settings_menu_l.png</img>
     <txt j="0" x="702" y="141" w="294" h="35" t="menu_dropdown_title_c" wrap="True" l="0">Zone Selection</txt>
-    <btn j="0" x="697" y="203" w="302" h="45" t="list_menudrop_header_blank" flip="None" sim="1" l="0" s="1" js="self.selectZone(&quot;Main&quot;)">
+    <btn j="0" x="697" y="203" w="302" h="45" t="list_menudrop_header_blank" flip="None" sim="1" l="0" s="1" js="mms.selectZone(&quot;Main&quot;)">
       <inactive s="0">Main on Mirage Media Server</inactive>
       <active s="0">Main on Mirage Media Server</active>
     </btn>
-    <btn j="0" x="697" y="383" w="302" h="45" t="list_menudrop_footer_blank" flip="None" sim="1" l="0" s="1" js="self.selectZone(&quot;Player_D&quot;)">
+    <btn j="0" x="697" y="383" w="302" h="45" t="list_menudrop_footer_blank" flip="None" sim="1" l="0" s="1" js="mms.selectZone(&quot;Player_D&quot;)">
       <inactive s="0">Player D on Mirage Media Server</inactive>
       <active s="0">Player D on Mirage Media Server</active>
     </btn>
-    <btn j="0" x="697" y="248" w="302" h="45" t="list_menudrop_body_blank" flip="None" sim="1" l="0" s="1" js="self.selectZone(&quot;Player_A&quot;)">
+    <btn j="0" x="697" y="248" w="302" h="45" t="list_menudrop_body_blank" flip="None" sim="1" l="0" s="1" js="mms.selectZone(&quot;Player_A&quot;)">
       <inactive s="0">Player A on Mirage Media Server</inactive>
       <active s="0">Player A on Mirage Media Server</active>
     </btn>
-    <btn j="0" x="697" y="293" w="302" h="45" t="list_menudrop_body_blank" flip="None" sim="1" l="0" s="1" js="self.selectZone(&quot;Player_B&quot;)">
+    <btn j="0" x="697" y="293" w="302" h="45" t="list_menudrop_body_blank" flip="None" sim="1" l="0" s="1" js="mms.selectZone(&quot;Player_B&quot;)">
       <inactive s="0">Player B on Mirage Media Server</inactive>
       <active s="0">Player B on Mirage Media Server</active>
     </btn>
-    <btn j="0" x="697" y="338" w="302" h="45" t="list_menudrop_body_blank" flip="None" sim="1" l="0" s="1" js="self.selectZone(&quot;Player_C&quot;)">
+    <btn j="0" x="697" y="338" w="302" h="45" t="list_menudrop_body_blank" flip="None" sim="1" l="0" s="1" js="mms.selectZone(&quot;Player_C&quot;)">
       <inactive s="0">Player C on Mirage Media Server</inactive>
       <active s="0">Player C on Mirage Media Server</active>
     </btn>
@@ -448,244 +448,7 @@ Level</txt>
     <txt j="4507" x="178" y="205" w="36" h="23" t="nowplaying" wrap="True" l="1">
     </txt>
     <slider j="4501" d="0" x="54" y="202" w="119" h="28" min="0" max="65535" decimals="0" unit="decimal" t="vol_bar" sim="0" l="0" />
-    <btn j="4574" x="157" y="31" w="59" h="60" t="scrobble_icon" flip="None" sim="0" l="0" s="1" js="self.ScrobbleToggle()">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-  </subpage>
-  <subpage name="Queue_Item" w="759" h="90" clip="1">
-    <txt j="2" x="166" y="0" w="593" h="37" t="cfblue2_title_l" wrap="True" l="0">(Queue)</txt>
-    <txt j="4" x="166" y="55" w="477" h="25" t="cfblue2_small_l" wrap="True" l="0">(Album)</txt>
-    <img x="72" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="66" y="0" w="693" h="90" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="self.playCurrentItem(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-    <txt j="5" x="649" y="55" w="110" h="25" t="cfblue2_small_l" wrap="True" l="0">(Time)</txt>
-    <txt j="3" x="166" y="32" w="593" h="25" t="cfblue2_small_l" wrap="True" l="1">(Artist)</txt>
-    <btn j="2" x="11" y="22" w="48" h="48" t="delete_item" flip="None" sim="1" l="1" s="1" js="self.removeCurrentItem(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-  </subpage>
-  <subpage name="Album_Item" w="759" h="90" clip="1">
-    <txt j="2" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(Album)</txt>
-    <txt j="3" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
-    <img x="7" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="0" y="0" w="640" h="89" t="transparent_glow" flip="None" sim="1" l="0" s="1" js="self.selectAlbum_Title(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-    <btn j="2" x="657" y="9" w="70" h="70" t="play_all_item" flip="None" sim="1" l="0" s="1" js="self.playAlbum(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-  </subpage>
-  <subpage name="Artist_Item" w="759" h="90" clip="1">
-    <txt j="2" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(Artist)</txt>
-    <txt j="3" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
-    <img x="7" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="0" y="1" w="650" h="89" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="self.selectArtist_Album(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-    <btn j="2" x="657" y="9" w="70" h="70" t="play_all_item" flip="None" sim="1" l="1" s="1" js="self.playArtist(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-  </subpage>
-  <subpage name="Genre_Item" w="759" h="90" clip="1">
-    <txt j="2" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(Genre)</txt>
-    <txt j="3" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
-    <img x="7" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="0" y="1" w="650" h="89" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="self.selectGenre_Album(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-    <btn j="2" x="657" y="9" w="70" h="70" t="play_all_item" flip="None" sim="1" l="0" s="1" js="self.playGenre(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-  </subpage>
-  <subpage name="Playlist_Item" w="759" h="90" clip="1">
-    <txt j="2" x="166" y="0" w="593" h="61" t="cfblue2_title_l" wrap="True" l="0">(Playlist)</txt>
-    <txt j="3" x="166" y="46" w="593" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
-    <img x="72" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="69" y="1" w="578" h="89" t="transparent_glow" flip="None" sim="1" l="0" s="1" js="self.selectPlaylist_Title(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-    <btn j="2" x="657" y="9" w="70" h="70" t="play_all_item" flip="None" sim="1" l="1" s="1" js="self.playPlaylist(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-    <btn j="3" x="11" y="22" w="48" h="48" t="delete_item" flip="None" sim="1" l="1" s="1" js="self.deletePlaylistItem(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-  </subpage>
-  <subpage name="RadioSources_Item" w="759" h="90" clip="1">
-    <txt j="2" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(Radio Sources)</txt>
-    <txt j="3" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
-    <img x="7" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="0" y="1" w="759" h="89" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="self.selectRadioSource(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-  </subpage>
-  <subpage name="Album_Title_Item" w="759" h="90" clip="1">
-    <txt j="2" x="111" y="0" w="648" h="37" t="cfblue2_title_l" wrap="True" l="1">(Selected Queue)</txt>
-    <txt j="4" x="111" y="55" w="445" h="25" t="cfblue2_small_l" wrap="True" l="1">(Album)</txt>
-    <img x="7" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="0" y="0" w="655" h="90" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="self.playCurrentTitle(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-    <txt j="5" x="565" y="55" w="194" h="25" t="cfblue2_small_l" wrap="True" l="1">(Time)</txt>
-    <txt j="3" x="111" y="32" w="648" h="25" t="cfblue2_small_l" wrap="True" l="1">(Artist)</txt>
-    <btn j="2" x="684" y="24" w="48" h="48" t="add_item" flip="None" sim="1" l="0" s="1" js="self.queueCurrentTitle(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-  </subpage>
-  <subpage name="Artist_Album_Item" w="759" h="90" clip="1">
-    <txt j="2" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(Artist)</txt>
-    <txt j="3" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
-    <img x="7" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="0" y="1" w="658" h="89" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="self.selectArtist_Album_Title(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-    <btn j="2" x="673" y="11" w="70" h="70" t="play_all_item" flip="None" sim="1" l="0" s="1" js="self.playAlbum(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-  </subpage>
-  <subpage name="Genre_Album_Item" w="759" h="90" clip="1">
-    <txt j="2" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(Album)</txt>
-    <txt j="3" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
-    <img x="7" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="0" y="0" w="657" h="89" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="self.selectGenre_Album_Title(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-    <btn j="2" x="673" y="11" w="70" h="70" t="play_all_item" flip="None" sim="1" l="0" s="1" js="self.playAlbum(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-  </subpage>
-  <subpage name="Artist_Album_Title_Item" w="759" h="90" clip="1">
-    <txt j="2" x="111" y="0" w="648" h="37" t="cfblue2_title_l" wrap="True" l="1">(Queue)</txt>
-    <txt j="4" x="111" y="55" w="445" h="25" t="cfblue2_small_l" wrap="True" l="1">(Album)</txt>
-    <img x="7" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="0" y="0" w="658" h="90" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="self.playCurrentTitle(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-    <txt j="5" x="565" y="55" w="194" h="25" t="cfblue2_small_l" wrap="True" l="1">(Time)</txt>
-    <txt j="3" x="111" y="32" w="648" h="25" t="cfblue2_small_l" wrap="True" l="1">(Artist)</txt>
-    <btn j="2" x="684" y="24" w="48" h="48" t="add_item" flip="None" sim="1" l="0" s="1" js="self.queueCurrentTitle(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-  </subpage>
-  <subpage name="Genre_Album_Title_Item" w="759" h="90" clip="1">
-    <txt j="2" x="111" y="0" w="648" h="37" t="cfblue2_title_l" wrap="True" l="1">(Queue)</txt>
-    <txt j="4" x="111" y="55" w="445" h="25" t="cfblue2_small_l" wrap="True" l="1">(Album)</txt>
-    <img x="7" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="0" y="0" w="658" h="90" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="self.playCurrentTitle(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-    <txt j="5" x="565" y="55" w="194" h="25" t="cfblue2_small_l" wrap="True" l="1">(Time)</txt>
-    <txt j="3" x="111" y="32" w="648" h="25" t="cfblue2_small_l" wrap="True" l="1">(Artist)</txt>
-    <btn j="2" x="684" y="24" w="48" h="48" t="add_item" flip="None" sim="1" l="0" s="1" js="self.queueCurrentTitle(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-  </subpage>
-  <subpage name="Playlist_Title_Item" w="759" h="90" clip="1">
-    <txt j="2" x="111" y="0" w="648" h="37" t="cfblue2_title_l" wrap="True" l="1">(Queue)</txt>
-    <txt j="4" x="111" y="55" w="445" h="25" t="cfblue2_small_l" wrap="True" l="1">(Album)</txt>
-    <img x="7" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="0" y="0" w="658" h="90" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="self.playCurrentTitle(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-    <txt j="5" x="565" y="55" w="194" h="25" t="cfblue2_small_l" wrap="True" l="1">(Time)</txt>
-    <txt j="3" x="111" y="32" w="648" h="25" t="cfblue2_small_l" wrap="True" l="1">(Artist)</txt>
-    <btn j="2" x="684" y="24" w="48" h="48" t="add_item" flip="None" sim="1" l="0" s="1" js="self.queueCurrentTitle(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-  </subpage>
-  <subpage name="RadioStations_Item" w="759" h="90" clip="1">
-    <txt j="2" x="166" y="0" w="593" h="61" t="cfblue2_title_l" wrap="True" l="0">(Radio Station)</txt>
-    <txt j="3" x="166" y="46" w="593" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
-    <img x="66" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="70" y="1" w="689" h="89" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="self.playSelectedStation(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-    <btn j="2" x="11" y="22" w="48" h="48" t="delete_item" flip="None" sim="1" l="1" s="1">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-    <btn j="3" x="671" y="15" w="60" h="60" t="edit_icon" flip="None" sim="1" l="0" s="1">
+    <btn j="4574" x="157" y="31" w="59" h="60" t="scrobble_icon" flip="None" sim="0" l="0" s="1" js="mms.ScrobbleToggle()">
       <inactive s="0">
       </inactive>
       <active s="0">
@@ -753,44 +516,10 @@ Level</txt>
     <txt j="0" x="91" y="304" w="283" h="39" t="cfblue2_title_l" wrap="True" l="0">Advanced</txt>
     <txt j="0" x="86" y="385" w="283" h="39" t="cfblue2_title_l" wrap="True" l="0">Power</txt>
   </subpage>
-  <subpage name="PickListItem_Item" w="759" h="90" clip="1">
-    <txt j="2" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(PickListItem)</txt>
-    <txt j="3" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
-    <img x="7" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="0" y="1" w="759" h="89" t="transparent_glow" flip="None" sim="1" l="0" s="1" js="self.selectPickListItem(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-  </subpage>
-  <subpage name="RadioGenres_Item" w="759" h="90" clip="1">
-    <txt j="2" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(Radio Genres)</txt>
-    <txt j="3" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
-    <img x="7" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="0" y="1" w="759" h="89" t="transparent_glow" flip="None" sim="1" l="0" s="1" js="self.selectRadioGenre(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-  </subpage>
-  <subpage name="CreatePandoraStation_Item" w="759" h="90" clip="1">
-    <txt j="2" x="166" y="0" w="593" h="61" t="cfblue2_title_l" wrap="True" l="0">Create a Pandora Station ...</txt>
-    <txt j="3" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">
-    </txt>
-    <img x="70" y="3" w="85" h="85" j="1" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
-    <btn j="1" x="166" y="1" w="593" h="89" t="transparent_glow" flip="None" sim="1" l="0" s="1" js="self.playSelectedStation(list, listIndex, join)">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-  </subpage>
   <subpage name="Msgbox_Shutdown" w="1024" h="768" clip="1">
     <img x="0" y="0" w="1024" h="768" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">bg_dark_overlay.png</img>
     <img x="221" y="265" w="582" h="238" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">pop_up_window.png</img>
-    <btn j="0" x="376" y="405" w="122" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.Shutdown()">
+    <btn j="0" x="376" y="405" w="122" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="mms.Shutdown()">
       <inactive s="0">YES</inactive>
       <active s="0">YES</active>
     </btn>
@@ -806,7 +535,7 @@ Are you sure you want to proceed?</txt>
   <subpage name="Msgbox_Reboot" w="1024" h="768" clip="1">
     <img x="0" y="0" w="1024" h="768" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">bg_dark_overlay.png</img>
     <img x="221" y="265" w="582" h="238" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">pop_up_window.png</img>
-    <btn j="0" x="376" y="405" w="122" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.Reboot()">
+    <btn j="0" x="376" y="405" w="122" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="mms.Reboot()">
       <inactive s="0">YES</inactive>
       <active s="0">YES</active>
     </btn>
@@ -825,9 +554,280 @@ Are you sure you want to proceed?</txt>
     <txt j="4518" x="246" y="323" w="540" h="70" t="cfblue2_small_l" wrap="True" l="0">Type in the favorite name of your favorite artist, song or composer and Pandora will create a radio station featuring that radio music and more like it.</txt>
     <txt j="4517" x="246" y="268" w="540" h="45" t="cfblue2_title_l" wrap="True" l="0">Enter an Artist or Song</txt>
     <input j="0" s="4519" x="246" y="401" w="540" h="52" pass="0" autoFocus="0" f="0" t="input_white" command="submitSearch" l="0">(Enter search string here ...)</input>
-    <btn j="4587" x="435" y="509" w="122" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" cmd="Close_MsgBox_SearchRadioStations" js="self.searchCancel()">
+    <btn j="4587" x="435" y="509" w="122" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" cmd="Close_MsgBox_SearchRadioStations" js="mms.searchCancel()">
       <inactive s="0">CANCEL</inactive>
       <active s="0">CANCEL</active>
+    </btn>
+  </subpage>
+  <subpage name="Album_Item" w="759" h="90" clip="1">
+    <txt j="4602" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(Album)</txt>
+    <txt j="4603" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
+    <img x="7" y="3" w="85" h="85" j="4601" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
+    <btn j="4601" x="0" y="0" w="640" h="89" t="transparent_glow" flip="None" sim="1" l="0" s="1" js="mms.selectAlbum_Title(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+    <btn j="4602" x="657" y="9" w="70" h="70" t="play_all_item" flip="None" sim="1" l="0" s="1" js="mms.playAlbum(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+  </subpage>
+  <subpage name="Album_Title_Item" w="759" h="90" clip="1">
+    <txt j="4602" x="111" y="0" w="648" h="37" t="cfblue2_title_l" wrap="True" l="1">(Selected Queue)</txt>
+    <txt j="4604" x="111" y="55" w="445" h="25" t="cfblue2_small_l" wrap="True" l="1">(Album)</txt>
+    <img x="7" y="3" w="85" h="85" j="4601" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
+    <btn j="4601" x="0" y="0" w="655" h="90" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="mms.playCurrentTitle(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+    <txt j="4605" x="565" y="55" w="194" h="25" t="cfblue2_small_l" wrap="True" l="1">(Time)</txt>
+    <txt j="4603" x="111" y="32" w="648" h="25" t="cfblue2_small_l" wrap="True" l="1">(Artist)</txt>
+    <btn j="4602" x="684" y="24" w="48" h="48" t="add_item" flip="None" sim="1" l="0" s="1" js="mms.queueCurrentTitle(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+  </subpage>
+  <subpage name="Artist_Album_Item" w="759" h="90" clip="1">
+    <txt j="4602" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(Artist)</txt>
+    <txt j="4603" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
+    <img x="7" y="3" w="85" h="85" j="4601" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
+    <btn j="4601" x="0" y="1" w="658" h="89" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="mms.selectArtist_Album_Title(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+    <btn j="4602" x="673" y="11" w="70" h="70" t="play_all_item" flip="None" sim="1" l="0" s="1" js="mms.playAlbum(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+  </subpage>
+  <subpage name="Artist_Album_Title_Item" w="759" h="90" clip="1">
+    <txt j="4602" x="111" y="0" w="648" h="37" t="cfblue2_title_l" wrap="True" l="1">(Queue)</txt>
+    <txt j="4604" x="111" y="55" w="445" h="25" t="cfblue2_small_l" wrap="True" l="1">(Album)</txt>
+    <img x="7" y="3" w="85" h="85" j="4601" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
+    <btn j="4601" x="0" y="0" w="658" h="90" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="mms.playCurrentTitle(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+    <txt j="4605" x="565" y="55" w="194" h="25" t="cfblue2_small_l" wrap="True" l="1">(Time)</txt>
+    <txt j="4603" x="111" y="32" w="648" h="25" t="cfblue2_small_l" wrap="True" l="1">(Artist)</txt>
+    <btn j="4602" x="684" y="24" w="48" h="48" t="add_item" flip="None" sim="1" l="0" s="1" js="mms.queueCurrentTitle(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+  </subpage>
+  <subpage name="Artist_Item" w="759" h="90" clip="1">
+    <img x="7" y="3" w="85" h="85" j="4601" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
+    <txt j="4602" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(Artist)</txt>
+    <txt j="4603" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
+    <btn j="4601" x="0" y="1" w="650" h="89" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="mms.selectArtist_Album(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+    <btn j="4602" x="657" y="9" w="70" h="70" t="play_all_item" flip="None" sim="1" l="1" s="1" js="mms.playArtist(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+  </subpage>
+  <subpage name="CreatePandoraStation_Item" w="759" h="90" clip="1">
+    <txt j="4602" x="166" y="0" w="593" h="61" t="cfblue2_title_l" wrap="True" l="0">Create a Pandora Station ...</txt>
+    <txt j="4603" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">
+    </txt>
+    <img x="70" y="3" w="85" h="85" j="4601" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
+    <btn j="4601" x="166" y="1" w="593" h="89" t="transparent_glow" flip="None" sim="1" l="0" s="1" js="mms.playSelectedStation(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+  </subpage>
+  <subpage name="Genre_Album_Item" w="759" h="90" clip="1">
+    <txt j="4602" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(Album)</txt>
+    <txt j="4603" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
+    <img x="7" y="3" w="85" h="85" j="4601" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
+    <btn j="4601" x="0" y="0" w="657" h="89" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="mms.selectGenre_Album_Title(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+    <btn j="4602" x="673" y="11" w="70" h="70" t="play_all_item" flip="None" sim="1" l="0" s="1" js="mms.playAlbum(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+  </subpage>
+  <subpage name="Genre_Album_Title_Item" w="759" h="90" clip="1">
+    <txt j="4602" x="111" y="0" w="648" h="37" t="cfblue2_title_l" wrap="True" l="1">(Queue)</txt>
+    <txt j="4604" x="111" y="55" w="445" h="25" t="cfblue2_small_l" wrap="True" l="1">(Album)</txt>
+    <img x="7" y="3" w="85" h="85" j="4601" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
+    <btn j="4601" x="0" y="0" w="658" h="90" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="mms.playCurrentTitle(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+    <txt j="4605" x="565" y="55" w="194" h="25" t="cfblue2_small_l" wrap="True" l="1">(Time)</txt>
+    <txt j="4603" x="111" y="32" w="648" h="25" t="cfblue2_small_l" wrap="True" l="1">(Artist)</txt>
+    <btn j="4602" x="684" y="24" w="48" h="48" t="add_item" flip="None" sim="1" l="0" s="1" js="mms.queueCurrentTitle(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+  </subpage>
+  <subpage name="Genre_Item" w="759" h="90" clip="1">
+    <txt j="4602" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(Genre)</txt>
+    <txt j="4603" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
+    <img x="7" y="3" w="85" h="85" j="4601" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
+    <btn j="4601" x="0" y="1" w="650" h="89" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="mms.selectGenre_Album(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+    <btn j="4602" x="657" y="9" w="70" h="70" t="play_all_item" flip="None" sim="1" l="0" s="1" js="mms.playGenre(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+  </subpage>
+  <subpage name="PickListItem_Item" w="759" h="90" clip="1">
+    <txt j="4602" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(PickListItem)</txt>
+    <txt j="4603" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
+    <img x="7" y="3" w="85" h="85" j="4601" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
+    <btn j="4601" x="0" y="1" w="759" h="89" t="transparent_glow" flip="None" sim="1" l="0" s="1" js="mms.selectPickListItem(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+  </subpage>
+  <subpage name="Playlist_Item" w="759" h="90" clip="1">
+    <txt j="4602" x="166" y="0" w="593" h="61" t="cfblue2_title_l" wrap="True" l="0">(Playlist)</txt>
+    <txt j="4603" x="166" y="46" w="593" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
+    <img x="72" y="3" w="85" h="85" j="4601" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
+    <btn j="4601" x="69" y="1" w="578" h="89" t="transparent_glow" flip="None" sim="1" l="0" s="1" js="mms.selectPlaylist_Title(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+    <btn j="4602" x="657" y="9" w="70" h="70" t="play_all_item" flip="None" sim="1" l="1" s="1" js="mms.playPlaylist(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+    <btn j="4603" x="11" y="22" w="48" h="48" t="delete_item" flip="None" sim="1" l="1" s="1" js="mms.deletePlaylistItem(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+  </subpage>
+  <subpage name="Playlist_Title_Item" w="759" h="90" clip="1">
+    <txt j="4602" x="111" y="0" w="648" h="37" t="cfblue2_title_l" wrap="True" l="1">(Queue)</txt>
+    <txt j="4604" x="111" y="55" w="445" h="25" t="cfblue2_small_l" wrap="True" l="1">(Album)</txt>
+    <img x="7" y="3" w="85" h="85" j="4601" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
+    <btn j="4601" x="0" y="0" w="658" h="90" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="mms.playCurrentTitle(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+    <txt j="4605" x="565" y="55" w="194" h="25" t="cfblue2_small_l" wrap="True" l="1">(Time)</txt>
+    <txt j="4603" x="111" y="32" w="648" h="25" t="cfblue2_small_l" wrap="True" l="1">(Artist)</txt>
+    <btn j="4602" x="684" y="24" w="48" h="48" t="add_item" flip="None" sim="1" l="0" s="1" js="mms.queueCurrentTitle(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+  </subpage>
+  <subpage name="Queue_Item" w="759" h="90" clip="1">
+    <txt j="4602" x="166" y="0" w="593" h="37" t="cfblue2_title_l" wrap="True" l="0">(Queue)</txt>
+    <txt j="4604" x="166" y="55" w="477" h="25" t="cfblue2_small_l" wrap="True" l="0">(Album)</txt>
+    <img x="72" y="3" w="85" h="85" j="4601" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
+    <btn j="4601" x="66" y="0" w="693" h="90" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="mms.playCurrentItem(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+    <txt j="4605" x="649" y="55" w="110" h="25" t="cfblue2_small_l" wrap="True" l="0">(Time)</txt>
+    <txt j="4603" x="166" y="32" w="593" h="25" t="cfblue2_small_l" wrap="True" l="1">(Artist)</txt>
+    <btn j="4602" x="11" y="22" w="48" h="48" t="delete_item" flip="None" sim="1" l="1" s="1" js="mms.removeCurrentItem(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+  </subpage>
+  <subpage name="RadioGenres_Item" w="759" h="90" clip="1">
+    <txt j="4602" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(Radio Genres)</txt>
+    <txt j="4603" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
+    <img x="7" y="3" w="85" h="85" j="4601" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
+    <btn j="4601" x="0" y="1" w="759" h="89" t="transparent_glow" flip="None" sim="1" l="0" s="1" js="mms.selectRadioGenre(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+  </subpage>
+  <subpage name="RadioSources_Item" w="759" h="90" clip="1">
+    <txt j="4602" x="111" y="0" w="648" h="61" t="cfblue2_title_l" wrap="True" l="0">(Radio Sources)</txt>
+    <txt j="4603" x="116" y="46" w="643" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
+    <img x="7" y="3" w="85" h="85" j="4601" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
+    <btn j="4601" x="0" y="1" w="759" h="89" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="mms.selectRadioSource(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+  </subpage>
+  <subpage name="RadioStations_Item" w="759" h="90" clip="1">
+    <txt j="4602" x="166" y="0" w="593" h="61" t="cfblue2_title_l" wrap="True" l="0">(Radio Station)</txt>
+    <txt j="4603" x="166" y="46" w="593" h="25" t="cfblue2_small_l" wrap="True" l="0">(Label)</txt>
+    <img x="66" y="3" w="85" h="85" j="4601" clickthrough="0" refresh="0" l="1" noCache="0" downloadIndicator="0" clearOnURLChange="0">Categories-system-help-icon.png</img>
+    <btn j="4601" x="70" y="1" w="689" h="89" t="transparent_glow" flip="None" sim="1" l="1" s="1" js="mms.playSelectedStation(list, listIndex, join)">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+    <btn j="4602" x="11" y="22" w="48" h="48" t="delete_item" flip="None" sim="1" l="1" s="1">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+    <btn j="4603" x="671" y="15" w="60" h="60" t="edit_icon" flip="None" sim="1" l="0" s="1">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
     </btn>
   </subpage>
   <subpage name="Album_List" w="780" h="545" clip="1">
@@ -870,14 +870,14 @@ Are you sure you want to proceed?</txt>
     <input j="0" s="4515" x="604" y="16" w="158" h="30" pass="0" autoFocus="0" f="0" t="search_black" changeCommand="searchQueue" l="0">(Search Queue)</input>
     <list j="4560" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="Queue_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
     <txt j="0" x="21" y="9" w="141" h="43" t="cfblue2_title_l" wrap="True" l="0">NOW PLAYING</txt>
-    <btn j="0" x="169" y="7" w="186" h="43" t="btn_212x43" flip="None" sim="1" l="0" s="1" js="self.clearQueue()">
+    <btn j="0" x="169" y="7" w="186" h="43" t="btn_212x43" flip="None" sim="1" l="0" s="1" js="mms.clearQueue()">
       <inactive s="0">Clear All</inactive>
       <active s="0">Clear All</active>
     </btn>
   </subpage>
   <subpage name="Album_Title_List" w="780" h="545" clip="1">
     <list j="4560" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="Album_Title_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
-    <btn j="0" x="10" y="9" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.backAlbumList()">
+    <btn j="0" x="10" y="9" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="mms.backAlbumList()">
       <inactive s="0">&lt; BACK</inactive>
       <active s="0">&lt; BACK</active>
     </btn>
@@ -885,7 +885,7 @@ Are you sure you want to proceed?</txt>
   </subpage>
   <subpage name="Artist_Album_List" w="780" h="545" clip="1">
     <list j="4510" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="Artist_Album_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
-    <btn j="0" x="10" y="9" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.backArtistList()">
+    <btn j="0" x="10" y="9" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="mms.backArtistList()">
       <inactive s="0">&lt; BACK</inactive>
       <active s="0">&lt; BACK</active>
     </btn>
@@ -893,7 +893,7 @@ Are you sure you want to proceed?</txt>
   </subpage>
   <subpage name="Genre_Album_List" w="780" h="545" clip="1">
     <list j="4510" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="Genre_Album_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
-    <btn j="0" x="10" y="9" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.backGenreList()">
+    <btn j="0" x="10" y="9" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="mms.backGenreList()">
       <inactive s="0">&lt; BACK</inactive>
       <active s="0">&lt; BACK</active>
     </btn>
@@ -901,7 +901,7 @@ Are you sure you want to proceed?</txt>
   </subpage>
   <subpage name="Playlist_Title_List" w="780" h="545" clip="1">
     <list j="4560" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="Playlist_Title_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
-    <btn j="0" x="10" y="9" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.backPlaylistList()">
+    <btn j="0" x="10" y="9" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="mms.backPlaylistList()">
       <inactive s="0">&lt; BACK</inactive>
       <active s="0">&lt; BACK</active>
     </btn>
@@ -910,7 +910,7 @@ Are you sure you want to proceed?</txt>
   <subpage name="Artist_Album_Title_List" w="780" h="545" clip="1">
     <list j="4560" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="Artist_Album_Title_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
     <txt j="0" x="123" y="9" w="545" h="43" t="cfblue2_title_l" wrap="True" l="0">ARTIST &gt; ALBUM &gt; TITLE</txt>
-    <btn j="0" x="10" y="9" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.backArtistAlbumList()">
+    <btn j="0" x="10" y="9" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="mms.backArtistAlbumList()">
       <inactive s="0">&lt; BACK</inactive>
       <active s="0">&lt; BACK</active>
     </btn>
@@ -918,7 +918,7 @@ Are you sure you want to proceed?</txt>
   <subpage name="Genre_Album_Title_List" w="780" h="545" clip="1">
     <list j="4560" x="10" y="64" w="759" h="452" headerSub="" titleSub="" contentSub="Genre_Album_Title_Item" footerSub="" orientation="v" l="1" swipedelete="0" />
     <txt j="0" x="123" y="9" w="545" h="43" t="cfblue2_title_l" wrap="True" l="0">GENRE &gt; ALBUM &gt; TITLE</txt>
-    <btn j="0" x="10" y="9" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.backGenreAlbumList()">
+    <btn j="0" x="10" y="9" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="mms.backGenreAlbumList()">
       <inactive s="0">&lt; BACK</inactive>
       <active s="0">&lt; BACK</active>
     </btn>
@@ -927,11 +927,11 @@ Are you sure you want to proceed?</txt>
     <img x="576" y="16" w="186" h="29" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">menu_search.png</img>
     <input j="0" s="4514" x="597" y="15" w="158" h="30" pass="0" autoFocus="0" f="0" t="search_black" changeCommand="searchRadioSources" l="0">(Search Radio Sources)</input>
     <txt j="0" x="123" y="9" w="402" h="43" t="cfblue2_title_l" wrap="True" l="0">RADIO SOURCE</txt>
-    <btn j="4591" x="478" y="6" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.Forward()">
+    <btn j="4591" x="478" y="6" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="mms.Forward()">
       <inactive s="0">FWD &gt;</inactive>
       <active s="0">FWD &gt;</active>
     </btn>
-    <btn j="4590" x="10" y="6" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.Back()">
+    <btn j="4590" x="10" y="6" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="mms.Back()">
       <inactive s="0">&lt; BACK</inactive>
       <active s="0">&lt; BACK</active>
     </btn>
@@ -939,11 +939,11 @@ Are you sure you want to proceed?</txt>
   </subpage>
   <subpage name="RadioStations_List" w="780" h="545" clip="1">
     <txt j="0" x="123" y="9" w="341" h="43" t="cfblue2_title_l" wrap="True" l="0">RADIO STATIONS</txt>
-    <btn j="4591" x="478" y="6" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.Forward()">
+    <btn j="4591" x="478" y="6" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="mms.Forward()">
       <inactive s="0">FWD &gt;</inactive>
       <active s="0">FWD &gt;</active>
     </btn>
-    <btn j="4590" x="10" y="6" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.Back()">
+    <btn j="4590" x="10" y="6" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="mms.Back()">
       <inactive s="0">&lt; BACK</inactive>
       <active s="0">&lt; BACK</active>
     </btn>
@@ -953,11 +953,11 @@ Are you sure you want to proceed?</txt>
     <txt j="4583" x="112" y="71" w="621" h="143" t="cfblue2_title_l" wrap="True" l="0">
     </txt>
     <txt j="0" x="123" y="9" w="340" h="43" t="cfblue2_title_l" wrap="True" l="0">PICK LIST ITEM</txt>
-    <btn j="4591" x="478" y="6" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.Forward()">
+    <btn j="4591" x="478" y="6" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="mms.Forward()">
       <inactive s="0">FWD &gt;</inactive>
       <active s="0">FWD &gt;</active>
     </btn>
-    <btn j="4590" x="10" y="6" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.Back()">
+    <btn j="4590" x="10" y="6" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="mms.Back()">
       <inactive s="0">&lt; BACK</inactive>
       <active s="0">&lt; BACK</active>
     </btn>
@@ -965,11 +965,11 @@ Are you sure you want to proceed?</txt>
   </subpage>
   <subpage name="RadioGenres_List" w="780" h="545" clip="1">
     <txt j="0" x="123" y="9" w="341" h="43" t="cfblue2_title_l" wrap="True" l="0">RADIO GENRES</txt>
-    <btn j="4591" x="478" y="6" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.Forward()">
+    <btn j="4591" x="478" y="6" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="mms.Forward()">
       <inactive s="0">FWD &gt;</inactive>
       <active s="0">FWD &gt;</active>
     </btn>
-    <btn j="4590" x="10" y="6" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="self.Back()">
+    <btn j="4590" x="10" y="6" w="90" h="43" t="top_btn_single_stretch" flip="None" sim="1" l="0" s="1" js="mms.Back()">
       <inactive s="0">&lt; BACK</inactive>
       <active s="0">&lt; BACK</active>
     </btn>

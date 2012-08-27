@@ -7,7 +7,7 @@ CONTACT:	terence@commandfusion.com
 URL:		https://github.com/CommandFusion/Autonomic-MMS
 VERSION:	v0.01
 LAST MOD:	5 March 2012
-MODULE JOIN RANGE: 4500 - 4600
+MODULE JOIN RANGE: 4500 - 4605
 MODULE TEST SETUP: Autonomic MMS5 Server, GuiDesigner 2.3.5.5, Iviewer TF v.4.0.201
 ===============================================================================
 
@@ -29,10 +29,10 @@ Special Note:
 //----------------------------------------------------------------------------------------------------------------
 //Initialization of instance
 //----------------------------------------------------------------------------------------------------------------
-//var self = function(systemName, feedbackName) {};
+//var mms = function(systemName, feedbackName) {};
 
 //For standalone system
-var self = {
+var mms = {
 	
 	// ======================================================================
 	// System Settings
@@ -140,6 +140,17 @@ var self = {
 	txtInstance:			"s4581",
 	txtVolumeLevel:			"s4582",
 	txtSelectedStation:		"s4583",
+	txtAlphabet:			"s4584",
+	
+	// List items
+	//	"d4601"		Token for thumbnails
+	//	"d4602"		Token for thumbnails
+	//	"d4603"		Token for titles
+	//	"s4601"		thumbarts URL (guid)
+	//	"s4602"		Returned string for album, songs, artists, genres, etc.
+	//	"s4603"		Manually user-defined parameter (album, artist, etc.)
+	//	"s4604"		Extra label parameter (album, artist, track time, etc.)
+	//	"s4605"		Extra label parameter (album, artist, track time, etc.)
 	
 	//Main database Arrays
 	arrayAlbum: [],					// Album
@@ -174,83 +185,84 @@ var self = {
 		CF.getJoin(CF.GlobalTokensJoin, function(join, values, tokens) {
 	
 			//Read the global tokens. If global tokens are accidentally deleted, then use default values.
-			self.sysName = tokens["[inputSysName]"] || self.defaultSysName;
-			self.sys2Name = tokens["[inputSys2Name]"] || self.defaultSys2Name;
-			self.sysURL = tokens["[inputURL]"] || self.defaultSysURL;
+			mms.sysName = tokens["[inputSysName]"] || mms.defaultSysName;
+			mms.sys2Name = tokens["[inputSys2Name]"] || mms.defaultSys2Name;
+			mms.sysURL = tokens["[inputURL]"] || mms.defaultSysURL;
 						
 			// Read the tokens and display the values on the System Settings drop-down menu box.
-			CF.setJoins([ {join: self.txtHostname, value: self.sysName}, {join: self.txtIPAdd, value: self.sysURL}, {join: self.txtIPPort, value: self.sysPort}, ]);
+			CF.setJoins([ {join: mms.txtHostname, value: mms.sysName}, {join: mms.txtIPAdd, value: mms.sysURL}, {join: mms.txtIPPort, value: mms.sysPort}, ]);
 		
 			// Switch to new systems by using the global token values.
-			CF.setSystemProperties(self.sysName, { enabled: true, address: self.sysURL,	port: self.sysPort });
-			CF.setSystemProperties(self.sys2Name, { enabled: true, address: self.sysURL, port: self.sys2Port });
+			CF.setSystemProperties(mms.sysName, { enabled: true, address: mms.sysURL,	port: mms.sysPort });
+			CF.setSystemProperties(mms.sys2Name, { enabled: true, address: mms.sysURL, port: mms.sys2Port });
 		
 			// Log in debugging window, start setup.
-			self.log("Autonomic MMS-5 System Setup Started.");		
+			mms.log("Autonomic MMS-5 System Setup Started.");		
 			
 			// Check that both the "MMS5" and "MMS5_2" system is defined in the GUI. Otherwise no commands from JS will work!
-			if (CF.systems[self.sysName] === undefined) {
+			if (CF.systems[mms.sysName] === undefined) {
 				// Show alert
-				CF.log("Your GUI file is missing the "+self.sysName+" system.\nPlease add it to your project before continuing.\n\nSee readme in comments at top of the script.");
+				CF.log("Your GUI file is missing the "+mms.sysName+" system.\nPlease add it to your project before continuing.\n\nSee readme in comments at top of the script.");
 				// Cancel further JS setup
 				return;
-			} else if (CF.systems[self.sys2Name] === undefined) {
+			} else if (CF.systems[mms.sys2Name] === undefined) {
 				// Show alert
-				CF.log("Your GUI file is missing the "+self.sys2Name+" system.\nPlease add it to your project before continuing.\n\nSee readme in comments at top of the script.");
+				CF.log("Your GUI file is missing the "+mms.sys2Name+" system.\nPlease add it to your project before continuing.\n\nSee readme in comments at top of the script.");
 				// Cancel further JS setup
 				return;
 			} 
 			
 			// Watch all incoming data through a single feedback item : Syntax CF.watch(CF.event, systemName, feedbackName, feedbackFunction)
-			CF.watch(CF.FeedbackMatchedEvent, self.sysName, "Incoming Data", self.incomingData); 				
+			CF.watch(CF.FeedbackMatchedEvent, mms.sysName, "Incoming Data", mms.incomingData); 				
 
 			// Watch for connection changes. Syntax CF.watch(CF.event, systemName, systemFunction, boolean)
-			CF.watch(CF.ConnectionStatusChangeEvent, self.sysName, self.onConnectionChange, true);			
+			CF.watch(CF.ConnectionStatusChangeEvent, mms.sysName, mms.onConnectionChange, true);			
 
 			// Suspend and resume activities when Iviewer quits or put into background
-			//CF.watch(CF.GUISuspendedEvent, self.onGUISuspended);
-			//CF.watch(CF.GUIResumedEvent, self.onGUIResumed);
+			//CF.watch(CF.GUISuspendedEvent, mms.onGUISuspended);
+			CF.watch(CF.GUIResumedEvent, mms.onGUIResumed);
 			
 			// Get the system IP address and port for use in all cover art calls. Sample command: http://192.168.1.10:5005/albumart?album={33432-33432-95909-33423-34430}
-			self.coverart = "http://"+self.sysURL+":"+(parseInt(self.sysPort)+1)+"/albumart?album="; 
+			mms.coverart = "http://"+mms.sysURL+":"+(parseInt(mms.sysPort)+1)+"/albumart?album="; 
 						
 			// Send the startup commands.
-			// CF.send(self.sysName, "SetHost 192.168.0.103\x0D\x0A");				// Set Host IP Address
-			// CF.send(self.sysName, "SetXMLMode Lists\x0D\x0A");					// Set list feedback in XML mode
-			// CF.send(self.sysName, "SetClientType "Mirage"\x0D\x0A");				// Set client type
-			self.setEncoding();														// Set character encoding to UTF8, to display non-Latin character.
-			self.setCurrentInstance();												// Set instance to current instance.
-			self.setPickListCount(1000);											// Set the number of items in the PickList list.
-			self.subcribeEventOn();													// Get real time feedback of changed status of items.
-			self.getStatus();														// Get the starting status of all items.
+			// CF.send(mms.sysName, "SetHost 192.168.0.103\x0D\x0A");				// Set Host IP Address
+			// CF.send(mms.sysName, "SetXMLMode Lists\x0D\x0A");					// Set list feedback in XML mode
+			// CF.send(mms.sysName, "SetClientType "Mirage"\x0D\x0A");				// Set client type
+			mms.setEncoding();														// Set character encoding to UTF8, to display non-Latin character.
+			mms.setCurrentInstance();												// Set instance to current instance.
+			mms.setPickListCount(1000);											// Set the number of items in the PickList list.
+			mms.subcribeEventOn();													// Get real time feedback of changed status of items.
+			mms.getStatus();														// Get the starting status of all items.
 		
 			// Show the list of Albums when starting up
-			setTimeout(function(){self.browseAlbums();}, 2000);	
+			setTimeout(function(){mms.browseAlbums();}, 2000);	
 			
 			// Disable buttons that are not really used for not by adjusting the opacity settings
-			CF.setProperties({join: self.btnSources, opacity: 0.5});												// Source button (Main Page)
-			CF.setProperties({join: self.btnForward, opacity: 0.0});												// Forward button (PickListItem List Page)
+			CF.setProperties({join: mms.btnSources, opacity: 0.5});												// Source button (Main Page)
+			CF.setProperties({join: mms.btnForward, opacity: 0.0});												// Forward button (PickListItem List Page)
 			
 			// Log in debugging window, end setup.
-			self.log("Autonomic MMS-5 System Setup Completed.");
+			mms.log("Autonomic MMS-5 System Setup Completed.");
 		
 		}); 
 	},
 	
 	// Even though the call is not executed immediately, it is enqueued for later processing.
-	onGUISuspended: function() { self.subcribeEventOn(); },
+	onGUISuspended: function() { mms.subcribeEventOn(); },
 
 	// Resume the suspended gui call.
-	onGUIResumed: function() { self.subcribeEventOn(); },
+	onGUIResumed: function() { mms.subcribeEventOn(); },
+	//onGUIResumed: function() { mms.setup(); },
 	
 	// Gets the values of the IP settings, set to the global tokens and switch to new system.
 	setSystemSettings: function() {									
 			
 			// Stop all CF.watch events else there's be multiple watch calls which causes the data received to be multiplied according to number of watches being called.
-			CF.unwatch(CF.FeedbackMatchedEvent, self.sysName, "Incoming Data");										// Stop watching all incoming data 				
-			CF.unwatch(CF.ConnectionStatusChangeEvent, self.sysName, self.onConnectionChange, true);				// Stop watching for connection changes.			
-			//CF.unwatch(CF.GUISuspendedEvent, self.onGUISuspended);
-			//CF.unwatch(CF.GUIResumedEvent, self.onGUIResumed);
+			CF.unwatch(CF.FeedbackMatchedEvent, mms.sysName, "Incoming Data");										// Stop watching all incoming data 				
+			CF.unwatch(CF.ConnectionStatusChangeEvent, mms.sysName, mms.onConnectionChange, true);				// Stop watching for connection changes.			
+			//CF.unwatch(CF.GUISuspendedEvent, mms.onGUISuspended);
+			//CF.unwatch(CF.GUIResumedEvent, mms.onGUIResumed);
 			
 			// Get the values of all the IP Settings at once. txtHostname:	"s4520", txtIPAdd: "s4521",	txtIPPort: "s4522",
 			CF.getJoins(["s4520", "s4521", "s4522"], function(joins) {
@@ -261,10 +273,10 @@ var self = {
 				CF.setToken(CF.GlobalTokensJoin, "[inputPort]", joins.s4522.value);				
 				
 				// Clear all previous lists and arrays
-				self.clearAll();
+				mms.clearAll();
 				
 				// Re-run setup with all the new global token values
-				self.setup();
+				mms.setup();
 		});
 	},
 	
@@ -275,14 +287,14 @@ var self = {
 		if (connected) {
 			// Connection established
 			CF.log("Autonomic MMS-5 System is Connected!");
-			CF.setJoin(self.txtConnection, "Server Connected");				// Send a string to display on Main Page that the System is connected
-			CF.setJoin(self.btnWifiLED, 1);									// Show connected status
+			CF.setJoin(mms.txtConnection, "Server Connected");				// Send a string to display on Main Page that the System is connected
+			CF.setJoin(mms.btnWifiLED, 1);									// Show connected status
 			
 		} else {
 			// Connection lost
 			CF.log("Autonomic MMS-5 System is Disconnected!!");
-			CF.setJoin(self.txtConnection, "Server Disconnected");			// Send a string to display on Main Page that the System is disconnected
-			CF.setJoin(self.btnWifiLED, 0);									// Show disconnected status
+			CF.setJoin(mms.txtConnection, "Server Disconnected");			// Send a string to display on Main Page that the System is disconnected
+			CF.setJoin(mms.btnWifiLED, 0);									// Show disconnected status
 		}
 	},
 
@@ -367,481 +379,481 @@ var self = {
 	
 	incomingData: function (itemName, matchedString) {
 		
-		if (self.albumRegex.test(matchedString)) {							// Test if it is a Album message. This is for loading data into Album list.
+		if (mms.albumRegex.test(matchedString)) {							// Test if it is a Album message. This is for loading data into Album list.
 				
-				var matches = self.albumRegex.exec(matchedString);			
-				self.arrayAlbum.push({										// push this into an array for searching later
-									s1: self.coverart+matches[1],		
-									s2: matches[2],						
-									s3: "Album",						
-									d1: { tokens: {"[guid]": matches[1]} },
-									d2: { tokens: {"[guid]": matches[1]} }
+				var matches = mms.albumRegex.exec(matchedString);			
+				mms.arrayAlbum.push({										// push this into an array for searching later
+									s4601: mms.coverart+matches[1]+"&e404=1",		
+									s4602: matches[2],						
+									s4603: "Album",						
+									d4601: { tokens: {"[guid]": matches[1]} },
+									d4602: { tokens: {"[guid]": matches[1]} }
 								});
-				CF.listAdd(self.lstAlbum, [{								// as the feedback item comes in, straight away push into the list
-									s1: self.coverart+matches[1],		
-									s2: matches[2],						
-									s3: "Album",						
-									d1: { tokens: {"[guid]": matches[1]} },
-									d2: { tokens: {"[guid]": matches[1]} }
+				CF.listAdd(mms.lstAlbum, [{								// as the feedback item comes in, straight away push into the list
+									s4601: mms.coverart+matches[1]+"&e404=1",		
+									s4602: matches[2],						
+									s4603: "Album",						
+									d4601: { tokens: {"[guid]": matches[1]} },
+									d4602: { tokens: {"[guid]": matches[1]} }
 								}]
 				);
-				self.albumRegex.lastIndex = 0;
+				mms.albumRegex.lastIndex = 0;
 		
-		} else if (self.artistRegex.test(matchedString)) {					// Test if it is a Artist message. This is for loading data into Artist list.
+		} else if (mms.artistRegex.test(matchedString)) {					// Test if it is a Artist message. This is for loading data into Artist list.
 		
-				var matches = self.artistRegex.exec(matchedString);
-				self.arrayArtist.push({
-									s1: self.coverart+matches[1],		
-									s2: matches[2],						
-									s3: "Artist",
-									d1: { tokens: {"[guid]": matches[1]} },
-									d2: { tokens: {"[guid]": matches[1]} }
+				var matches = mms.artistRegex.exec(matchedString);
+				mms.arrayArtist.push({
+									s4601: mms.coverart+matches[1]+"&e404=1",		
+									s4602: matches[2],						
+									s4603: "Artist",
+									d4601: { tokens: {"[guid]": matches[1]} },
+									d4602: { tokens: {"[guid]": matches[1]} }
 								});
-				CF.listAdd(self.lstArtist, [{
-									s1: self.coverart+matches[1],		
-									s2: matches[2],						
-									s3: "Artist",						
-									d1: { tokens: {"[guid]": matches[1]} },
-									d2: { tokens: {"[guid]": matches[1]} }
+				CF.listAdd(mms.lstArtist, [{
+									s4601: mms.coverart+matches[1]+"&e404=1",		
+									s4602: matches[2],						
+									s4603: "Artist",						
+									d4601: { tokens: {"[guid]": matches[1]} },
+									d4602: { tokens: {"[guid]": matches[1]} }
 								}]
 				);
-				self.artistRegex.lastIndex = 0;					
+				mms.artistRegex.lastIndex = 0;					
 
-		} else if (self.genreRegex.test(matchedString)) {					// Test if it is a Genre message. This is for loading data into Genre list.
+		} else if (mms.genreRegex.test(matchedString)) {					// Test if it is a Genre message. This is for loading data into Genre list.
 
-				var matches = self.genreRegex.exec(matchedString);
-				self.arrayGenre.push({
-									s1: self.coverart+matches[2],		
-									s2: matches[3],						
-									s3: "Genre",						
-									d1: { tokens: {"[guid]": matches[2]} },
-									d2: { tokens: {"[guid]": matches[2]} }
+				var matches = mms.genreRegex.exec(matchedString);
+				mms.arrayGenre.push({
+									s4601: mms.coverart+matches[2]+"&e404=1",		
+									s4602: matches[3],						
+									s4603: "Genre",						
+									d4601: { tokens: {"[guid]": matches[2]} },
+									d4602: { tokens: {"[guid]": matches[2]} }
 								});
-				CF.listAdd(self.lstGenre, [{
-									s1: self.coverart+matches[2],		
-									s2: matches[3],						
-									s3: "Genre",						
-									d1: { tokens: {"[guid]": matches[2]} },
-									d2: { tokens: {"[guid]": matches[2]} }
+				CF.listAdd(mms.lstGenre, [{
+									s4601: mms.coverart+matches[2]+"&e404=1",		
+									s4602: matches[3],						
+									s4603: "Genre",						
+									d4601: { tokens: {"[guid]": matches[2]} },
+									d4602: { tokens: {"[guid]": matches[2]} }
 								}]
 				);
-				self.genreRegex.lastIndex = 0;		
+				mms.genreRegex.lastIndex = 0;		
 		
-		} else if (self.playlistRegex.test(matchedString)) {					// Test if it is a Playlist message. This is for loading data into Playlist list.
+		} else if (mms.playlistRegex.test(matchedString)) {					// Test if it is a Playlist message. This is for loading data into Playlist list.
 
-				var matches = self.playlistRegex.exec(matchedString);
-				self.arrayPlaylist.push({
-									s1: self.coverart+matches[1],		
-									s2: matches[2],						
-									s3: "Playlist",						
-									d1: { tokens: {"[guid]": matches[1]} },
-									d2: { tokens: {"[guid]": matches[1]} },
-									d3: { tokens: {"[title]": matches[2]} }
+				var matches = mms.playlistRegex.exec(matchedString);
+				mms.arrayPlaylist.push({
+									s4601: mms.coverart+matches[1]+"&e404=1",		
+									s4602: matches[2],						
+									s4603: "Playlist",						
+									d4601: { tokens: {"[guid]": matches[1]} },
+									d4602: { tokens: {"[guid]": matches[1]} },
+									d4603: { tokens: {"[title]": matches[2]} }
 								});
-				CF.listAdd(self.lstPlaylist, [{
-									s1: self.coverart+matches[1],		
-									s2: matches[2],						
-									s3: "Playlist",						
-									d1: { tokens: {"[guid]": matches[1]} },
-									d2: { tokens: {"[guid]": matches[1]} },
-									d3: { tokens: {"[title]": matches[2]} }
+				CF.listAdd(mms.lstPlaylist, [{
+									s4601: mms.coverart+matches[1]+"&e404=1",		
+									s4602: matches[2],						
+									s4603: "Playlist",						
+									d4601: { tokens: {"[guid]": matches[1]} },
+									d4602: { tokens: {"[guid]": matches[1]} },
+									d4603: { tokens: {"[title]": matches[2]} }
 								}]
 				);
-				self.playlistRegex.lastIndex = 0;
+				mms.playlistRegex.lastIndex = 0;
 		
-		} else if (self.radioSourceRegex.test(matchedString)) {					// Test if it is a Radio Source message. This is for loading data into Radio Source list.
+		} else if (mms.radioSourceRegex.test(matchedString)) {					// Test if it is a Radio Source message. This is for loading data into Radio Source list.
 			
-				var matches = self.radioSourceRegex.exec(matchedString);
+				var matches = mms.radioSourceRegex.exec(matchedString);
 				
 				CF.setJoins([											//toggle to the correct subpage
-					{join: self.subRadioSource, value: 1},	
-					{join: self.subRadioStation, value: 0},
-					{join: self.subRadioGenre, value: 0},
-					{join: self.subPickListItem, value: 0},
-					{join: self.subSearchRadioStations, value: 0},
+					{join: mms.subRadioSource, value: 1},	
+					{join: mms.subRadioStation, value: 0},
+					{join: mms.subRadioGenre, value: 0},
+					{join: mms.subPickListItem, value: 0},
+					{join: mms.subSearchRadioStations, value: 0},
 				]);
 				
-				self.arrayRadioSource.push({
-									s1: self.coverart+matches[1],
-									s2: matches[2],
-									s3: "Radio Sources",
-									d1: { tokens: {"[guid]": matches[1]} }
+				mms.arrayRadioSource.push({
+									s4601: mms.coverart+matches[1]+"&e404=1",
+									s4602: matches[2],
+									s4603: "Radio Sources",
+									d4601: { tokens: {"[guid]": matches[1]} }
 									
 								});
-				CF.listAdd(self.lstRadioSource, [{
-									s1: self.coverart+matches[1],		
-									s2: matches[2],						
-									s3: "Radio Sources",						
-									d1: { tokens: {"[guid]": matches[1]} }
+				CF.listAdd(mms.lstRadioSource, [{
+									s4601: mms.coverart+matches[1]+"&e404=1",		
+									s4602: matches[2],						
+									s4603: "Radio Sources",						
+									d4601: { tokens: {"[guid]": matches[1]} }
 									
 								}]
 				);
-				self.radioSourceRegex.lastIndex = 0;						// Reset the regex to work correctly after each consecutive match
+				mms.radioSourceRegex.lastIndex = 0;						// Reset the regex to work correctly after each consecutive match
 		
-		} else if (self.radioStationRegex.test(matchedString)) {					// Test if it is a Radio Source message. This is for loading data into Radio Source list.
+		} else if (mms.radioStationRegex.test(matchedString)) {					// Test if it is a Radio Source message. This is for loading data into Radio Source list.
 			
-				var matches = self.radioStationRegex.exec(matchedString);
+				var matches = mms.radioStationRegex.exec(matchedString);
 				
 				CF.setJoins([											//toggle to the correct subpage
-					{join: self.subRadioSource, value: 0},	
-					{join: self.subRadioStation, value: 1},
-					{join: self.subRadioGenre, value: 0},
-					{join: self.subPickListItem, value: 0},
-					{join: self.subSearchRadioStations, value: 0},
+					{join: mms.subRadioSource, value: 0},	
+					{join: mms.subRadioStation, value: 1},
+					{join: mms.subRadioGenre, value: 0},
+					{join: mms.subPickListItem, value: 0},
+					{join: mms.subSearchRadioStations, value: 0},
 				]);
 				
-				self.arrayRadioStation.push({
-									s1: self.coverart+matches[1],
-									s2: matches[2],
-									s3: "",
-									d1: { tokens: {"[guid]": matches[1]} }
+				mms.arrayRadioStation.push({
+									s4601: mms.coverart+matches[1]+"&e404=1",
+									s4602: matches[2],
+									s4603: "",
+									d4601: { tokens: {"[guid]": matches[1]} }
 								});
-				CF.listAdd(self.lstRadioStation, [{
-									s1: self.coverart+matches[1],		
-									s2: matches[2],						
-									s3: "",						
-									d1: { tokens: {"[guid]": matches[1]} }
+				CF.listAdd(mms.lstRadioStation, [{
+									s4601: mms.coverart+matches[1]+"&e404=1",		
+									s4602: matches[2],						
+									s4603: "",						
+									d4601: { tokens: {"[guid]": matches[1]} }
 								}]
 				);
-				self.radioStationRegex.lastIndex = 0;						// Reset the regex to work correctly after each consecutive match
+				mms.radioStationRegex.lastIndex = 0;						// Reset the regex to work correctly after each consecutive match
 		
-		} else if (self.radioGenreRegex.test(matchedString)) {					// Test if it is a Radio Genre message. This is for loading data into Radio Source list.
+		} else if (mms.radioGenreRegex.test(matchedString)) {					// Test if it is a Radio Genre message. This is for loading data into Radio Source list.
 			
-				var matches = self.radioGenreRegex.exec(matchedString);
+				var matches = mms.radioGenreRegex.exec(matchedString);
 				
 				CF.setJoins([											//toggle to the correct subpage
-					{join: self.subRadioSource, value: 0},	
-					{join: self.subRadioStation, value: 0},
-					{join: self.subRadioGenre, value: 1},
-					{join: self.subPickListItem, value: 0},
-					{join: self.subSearchRadioStations, value: 0},
+					{join: mms.subRadioSource, value: 0},	
+					{join: mms.subRadioStation, value: 0},
+					{join: mms.subRadioGenre, value: 1},
+					{join: mms.subPickListItem, value: 0},
+					{join: mms.subSearchRadioStations, value: 0},
 				]);
 				
-				self.arrayRadioGenre.push({
-									s1: self.coverart+matches[2],
-									s2: matches[3],
-									s3: "",
-									d1: { tokens: {"[guid]": matches[2]} }
+				mms.arrayRadioGenre.push({
+									s4601: mms.coverart+matches[2]+"&e404=1",
+									s4602: matches[3],
+									s4603: "",
+									d4601: { tokens: {"[guid]": matches[2]} }
 								});
-				CF.listAdd(self.lstRadioGenre, [{
-									s1:  self.coverart+matches[2],		
-									s2:  matches[3],						
-									s3: "Radio Genre",						
-									d1: { tokens: {"[guid]": matches[2]} }
+				CF.listAdd(mms.lstRadioGenre, [{
+									s4601:  mms.coverart+matches[2]+"&e404=1",		
+									s4602:  matches[3],						
+									s4603: "Radio Genre",						
+									d4601: { tokens: {"[guid]": matches[2]} }
 								}]
 				);	
-				self.radioGenreRegex.lastIndex = 0;						// Reset the regex to work correctly after each consecutive match
+				mms.radioGenreRegex.lastIndex = 0;						// Reset the regex to work correctly after each consecutive match
 		
-		} else if (self.pickListItemRegex.test(matchedString)) {					// Test if it is a Radio Source message. This is for loading data into Radio Source list.
+		} else if (mms.pickListItemRegex.test(matchedString)) {					// Test if it is a Radio Source message. This is for loading data into Radio Source list.
 			
-				var matches = self.pickListItemRegex.exec(matchedString);
+				var matches = mms.pickListItemRegex.exec(matchedString);
 				
 				CF.setJoins([											//toggle to the correct subpage
-					{join: self.subRadioSource, value: 0},	
-					{join: self.subRadioStation, value: 0},
-					{join: self.subRadioGenre, value: 0},
-					{join: self.subPickListItem, value: 1},
-					{join: self.subSearchRadioStations, value: 0},
-					{join: self.txtSelectedStation, value: ""},
+					{join: mms.subRadioSource, value: 0},	
+					{join: mms.subRadioStation, value: 0},
+					{join: mms.subRadioGenre, value: 0},
+					{join: mms.subPickListItem, value: 1},
+					{join: mms.subSearchRadioStations, value: 0},
+					{join: mms.txtSelectedStation, value: ""},
 				]);
 				
-				self.arrayPickListItem.push({
-									s1: self.coverart+matches[1],
-									s2: matches[2],
-									s3: "",
-									d1: { tokens: {"[guid]": matches[1]} }
+				mms.arrayPickListItem.push({
+									s4601: mms.coverart+matches[1]+"&e404=1",
+									s4602: matches[2],
+									s4603: "",
+									d4601: { tokens: {"[guid]": matches[1]} }
 								});
-				CF.listAdd(self.lstPickListItem, [{
-									s1: self.coverart+matches[1],		
-									s2: matches[2],						
-									s3: "",						
-									d1: { tokens: {"[guid]": matches[1]} }
+				CF.listAdd(mms.lstPickListItem, [{
+									s4601: mms.coverart+matches[1]+"&e404=1",		
+									s4602: matches[2],						
+									s4603: "",						
+									d4601: { tokens: {"[guid]": matches[1]} }
 								}]
 				);
-				self.pickListItemRegex.lastIndex = 0;						// Reset the regex to work correctly after each consecutive match
+				mms.pickListItemRegex.lastIndex = 0;						// Reset the regex to work correctly after each consecutive match
 		
-		} else if (self.queueRegex.test(matchedString)) {					// Test if it is a Queue message. This is for loading data into Queue list.	
+		} else if (mms.queueRegex.test(matchedString)) {					// Test if it is a Queue message. This is for loading data into Queue list.	
 		
-				var matches = self.queueRegex.exec(matchedString);
-				self.arrayQueue.push({
-									s1: self.coverart+matches[1],						// fanart
-									s2: "Track #" + matches[4] + " : "+ matches[2],		// track no. & title
-									s3: matches[5],										// track time
-									s4: matches[6],										// album										
-									s5: matches[3],										// artist
-									d1: { tokens: {"[guid]": matches[1]} },
-									d2: { tokens: {"[guid]": matches[1]} }
+				var matches = mms.queueRegex.exec(matchedString);
+				mms.arrayQueue.push({
+									s4601: mms.coverart+matches[1]+"&e404=1",						// fanart
+									s4602: "Track #" + matches[4] + " : "+ matches[2],		// track no. & title
+									s4603: matches[5],										// track time
+									s4604: matches[6],										// album										
+									s4605: matches[3],										// artist
+									d4601: { tokens: {"[guid]": matches[1]} },
+									d4602: { tokens: {"[guid]": matches[1]} }
 							});
-				CF.listAdd(self.lstQueue, [{
-									s1: self.coverart+matches[1],						// fanart
-									s2: "Track #" + matches[4] + " : "+ matches[2],		// track no. & title
-									s3: matches[5],										// track time
-									s4: matches[6],										// album										
-									s5: matches[3],										// artist
-									d1: { tokens: {"[guid]": matches[1]} },
-									d2: { tokens: {"[guid]": matches[1]} }
+				CF.listAdd(mms.lstQueue, [{
+									s4601: mms.coverart+matches[1]+"&e404=1",						// fanart
+									s4602: "Track #" + matches[4] + " : "+ matches[2],		// track no. & title
+									s4603: matches[5],										// track time
+									s4604: matches[6],										// album										
+									s4605: matches[3],										// artist
+									d4601: { tokens: {"[guid]": matches[1]} },
+									d4602: { tokens: {"[guid]": matches[1]} }
 								}]
 				);
-				self.queueRegex.lastIndex = 0;								// Reset the regex to work correctly after each consecutive match
+				mms.queueRegex.lastIndex = 0;								// Reset the regex to work correctly after each consecutive match
 		
-		} else if (self.instanceRegex.test(matchedString)) {				// Test if it is a Instance message. This is for defining which zone/instance the player is at currently.
+		} else if (mms.instanceRegex.test(matchedString)) {				// Test if it is a Instance message. This is for defining which zone/instance the player is at currently.
 		
-				var matches = self.instanceRegex.exec(matchedString);
+				var matches = mms.instanceRegex.exec(matchedString);
 				switch (matches[1]) 
 				{
 					case "Main":
-						CF.setJoin(self.txtInstance, "Main");
+						CF.setJoin(mms.txtInstance, "Main");
 						break;
 					case "Player_A":
-						CF.setJoin(self.txtInstance, "Player A");
+						CF.setJoin(mms.txtInstance, "Player A");
 						break;
 					case "Player_B":
-						CF.setJoin(self.txtInstance, "Player B");
+						CF.setJoin(mms.txtInstance, "Player B");
 						break;
 					case "Player_C":
-						CF.setJoin(self.txtInstance, "Player C");
+						CF.setJoin(mms.txtInstance, "Player C");
 						break;
 					case "Player_D":
-						CF.setJoin(self.txtInstance, "Player D");
+						CF.setJoin(mms.txtInstance, "Player D");
 						break;	
 				}
-				self.instanceRegex.lastIndex = 0;
+				mms.instanceRegex.lastIndex = 0;
 			
-		} else if (self.stateThumbnailRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
+		} else if (mms.stateThumbnailRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
-				var matches = self.stateThumbnailRegex.exec(matchedString);
-				CF.setJoin(self.txtCoverArt, self.coverart+matches[1]);
-				self.stateThumbnailRegex.lastIndex = 0;
+				var matches = mms.stateThumbnailRegex.exec(matchedString);
+				CF.setJoin(mms.txtCoverArt, mms.coverart+matches[1]+"&e404=1");
+				mms.stateThumbnailRegex.lastIndex = 0;
 		
-		}else if (self.stateTrackNumberRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
+		}else if (mms.stateTrackNumberRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
-				var matches = self.stateTrackNumberRegex.exec(matchedString);
-				CF.setJoin(self.txtTrackStatus, matches[1]);
-				self.stateTrackNumberRegex.lastIndex = 0;
+				var matches = mms.stateTrackNumberRegex.exec(matchedString);
+				CF.setJoin(mms.txtTrackStatus, matches[1]);
+				mms.stateTrackNumberRegex.lastIndex = 0;
 		
-		} else if (self.stateArtistRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
+		} else if (mms.stateArtistRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
-				var matches = self.stateArtistRegex.exec(matchedString);
-				CF.setJoin(self.txtArtist, matches[1]);
-				self.stateArtistRegex.lastIndex = 0;
+				var matches = mms.stateArtistRegex.exec(matchedString);
+				CF.setJoin(mms.txtArtist, matches[1]);
+				mms.stateArtistRegex.lastIndex = 0;
 		
-		} else if (self.stateAlbumRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
+		} else if (mms.stateAlbumRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
-				var matches = self.stateAlbumRegex.exec(matchedString);
-				CF.setJoin(self.txtAlbum, matches[1]);
-				self.stateAlbumRegex.lastIndex = 0;
+				var matches = mms.stateAlbumRegex.exec(matchedString);
+				CF.setJoin(mms.txtAlbum, matches[1]);
+				mms.stateAlbumRegex.lastIndex = 0;
 		
-		} else if (self.stateTrackRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
+		} else if (mms.stateTrackRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
-				var matches = self.stateTrackRegex.exec(matchedString);
-				CF.setJoin(self.txtTrackTitle, matches[1]);
-				self.stateTrackRegex.lastIndex = 0;
+				var matches = mms.stateTrackRegex.exec(matchedString);
+				CF.setJoin(mms.txtTrackTitle, matches[1]);
+				mms.stateTrackRegex.lastIndex = 0;
 				
-		} else if (self.stateTrackTimeRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
+		} else if (mms.stateTrackTimeRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
-				var matches = self.stateTrackTimeRegex.exec(matchedString);
+				var matches = mms.stateTrackTimeRegex.exec(matchedString);
 				
 				// convert the total time into minutes and seconds
-				self.TrackTime = matches[1];
+				mms.TrackTime = matches[1];
 				var minutes = Math.floor(matches[1]/60);
 				var remain_seconds = matches[1] % 60;
 				var seconds = Math.floor(remain_seconds);
 				var time = ("00"+minutes).slice(-2) + ":" + ("00"+seconds).slice(-2);
-				CF.setJoin(self.txtTrackTime, time);
-				self.stateTrackTimeRegex.lastIndex = 0;
+				CF.setJoin(mms.txtTrackTime, time);
+				mms.stateTrackTimeRegex.lastIndex = 0;
 				
-		} else if (self.stateTrackDurationRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
+		} else if (mms.stateTrackDurationRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
-				var matches = self.stateTrackDurationRegex.exec(matchedString);
+				var matches = mms.stateTrackDurationRegex.exec(matchedString);
 				
 				// convert the total time into minutes and seconds
-				self.TrackDuration = Math.floor(matches[1]);
+				mms.TrackDuration = Math.floor(matches[1]);
 				var minutes = Math.floor(matches[1]/60);
 				var remain_seconds = matches[1] % 60;
 				var seconds = Math.floor(remain_seconds);
 				var time = ("00"+minutes).slice(-2) + ":" + ("00"+seconds).slice(-2);
-				CF.setJoin(self.txtTrackDuration, time);
-				self.stateTrackDurationRegex.lastIndex = 0;
+				CF.setJoin(mms.txtTrackDuration, time);
+				mms.stateTrackDurationRegex.lastIndex = 0;
 		
-		} else if (self.stateShuffleRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
+		} else if (mms.stateShuffleRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
-				var matches = self.stateShuffleRegex.exec(matchedString);
+				var matches = mms.stateShuffleRegex.exec(matchedString);
 				switch(matches[1])
 				{
 					case "True":
-						CF.setJoin(self.btnShuffle, 1);
+						CF.setJoin(mms.btnShuffle, 1);
 						break;
 					case "False":
-						CF.setJoin(self.btnShuffle, 0);
+						CF.setJoin(mms.btnShuffle, 0);
 						break;
 				}
-				self.stateShuffleRegex.lastIndex = 0;
+				mms.stateShuffleRegex.lastIndex = 0;
 				
-		} else if (self.stateScrobbleRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
+		} else if (mms.stateScrobbleRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
-				var matches = self.stateScrobbleRegex.exec(matchedString);
+				var matches = mms.stateScrobbleRegex.exec(matchedString);
 				switch(matches[1])
 				{
 					case "1":
-						CF.setJoin(self.btnScrobble, 1);
+						CF.setJoin(mms.btnScrobble, 1);
 						break;
 					case "0":
-						CF.setJoin(self.btnScrobble, 0);
+						CF.setJoin(mms.btnScrobble, 0);
 						break;
 				}
-				self.stateScrobbleRegex.lastIndex = 0;
+				mms.stateScrobbleRegex.lastIndex = 0;
 				
-		} else if (self.stateRepeatRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
+		} else if (mms.stateRepeatRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
-				var matches = self.stateRepeatRegex.exec(matchedString);
+				var matches = mms.stateRepeatRegex.exec(matchedString);
 				switch(matches[1])
 				{
 					case "True":
-						CF.setJoin(self.btnRepeat, 1);
+						CF.setJoin(mms.btnRepeat, 1);
 						break;
 					case "False":
-						CF.setJoin(self.btnRepeat, 0);
+						CF.setJoin(mms.btnRepeat, 0);
 						break;
 				}  
-				self.stateRepeatRegex.lastIndex = 0;
+				mms.stateRepeatRegex.lastIndex = 0;
 				
-		} else if (self.statePlayStatusRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
+		} else if (mms.statePlayStatusRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
-				var matches = self.statePlayStatusRegex.exec(matchedString);
+				var matches = mms.statePlayStatusRegex.exec(matchedString);
 				switch(matches[1])
 				{
 					case "Play":
-						CF.setJoin(self.btnPlayPause, 0);
-						CF.setJoin(self.txtPlayStatus, "PLAYING STATUS : Playing");
+						CF.setJoin(mms.btnPlayPause, 0);
+						CF.setJoin(mms.txtPlayStatus, "PLAYING STATUS : Playing");
 						break;
 					case "Pause":
-						CF.setJoin(self.btnPlayPause, 1);
-						CF.setJoin(self.txtPlayStatus, "PLAYING STATUS : Paused");
+						CF.setJoin(mms.btnPlayPause, 1);
+						CF.setJoin(mms.txtPlayStatus, "PLAYING STATUS : Paused");
 						break;
 					case "Stop":
-						CF.setJoin(self.btnPlayPause, 0);
-						CF.setJoin(self.txtPlayStatus, "PLAYING STATUS : Stopped");
+						CF.setJoin(mms.btnPlayPause, 0);
+						CF.setJoin(mms.txtPlayStatus, "PLAYING STATUS : Stopped");
 						break;	
 				}  
-				self.statePlayStatusRegex.lastIndex = 0;
+				mms.statePlayStatusRegex.lastIndex = 0;
 
-		} else if (self.stateMuteRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
+		} else if (mms.stateMuteRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
-				var matches = self.stateMuteRegex.exec(matchedString);
+				var matches = mms.stateMuteRegex.exec(matchedString);
 				switch(matches[1])
 				{
 					case "True":
-						CF.setJoin(self.btnMute, 1);
+						CF.setJoin(mms.btnMute, 1);
 						break;
 					case "False":
-						CF.setJoin(self.btnMute, 0);
+						CF.setJoin(mms.btnMute, 0);
 						break;
 				}  
-				self.stateMuteRegex.lastIndex = 0;
+				mms.stateMuteRegex.lastIndex = 0;
 				
-		} else if (self.stateVolumeRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
+		} else if (mms.stateVolumeRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
-				var matches = self.stateVolumeRegex.exec(matchedString);
-				CF.setJoin(self.txtVolumeLevel, matches[1]);
-				CF.setJoin(self.sldVolumeControl, Math.round((matches[1]/50)*65535));
-				self.stateVolumeRegex.lastIndex = 0;
+				var matches = mms.stateVolumeRegex.exec(matchedString);
+				CF.setJoin(mms.txtVolumeLevel, matches[1]);
+				CF.setJoin(mms.sldVolumeControl, Math.round((matches[1]/50)*65535));
+				mms.stateVolumeRegex.lastIndex = 0;
 		
-		} else if (self.stateBackRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
+		} else if (mms.stateBackRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
-				var matches = self.stateBackRegex.exec(matchedString);
+				var matches = mms.stateBackRegex.exec(matchedString);
 				switch(matches[1])
 				{
 					case "True":
-						CF.setProperties({join: self.btnBack, opacity: 1.0});
+						CF.setProperties({join: mms.btnBack, opacity: 1.0});
 						break;
 					case "False":
-						CF.setProperties({join: self.btnBack, opacity: 0.0});
+						CF.setProperties({join: mms.btnBack, opacity: 0.0});
 						break;
 				}  
-				self.stateBackRegex.lastIndex = 0;
+				mms.stateBackRegex.lastIndex = 0;
 		
-		} else if (self.stateForwardRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
+		} else if (mms.stateForwardRegex.test(matchedString)) {				// Test if it is a Current Fanart message. This is for defining the fanart for the currently playing item.
 		
-				var matches = self.stateForwardRegex.exec(matchedString);
+				var matches = mms.stateForwardRegex.exec(matchedString);
 				switch(matches[1])
 				{
 					case "True":
-						CF.setProperties({join: self.btnForward, opacity: 1.0});
+						CF.setProperties({join: mms.btnForward, opacity: 1.0});
 						break;
 					case "False":
-						CF.setProperties({join: self.btnForward, opacity: 0.0});
+						CF.setProperties({join: mms.btnForward, opacity: 0.0});
 						break;
 				}  
-				self.stateForwardRegex.lastIndex = 0;
+				mms.stateForwardRegex.lastIndex = 0;
 		
-		} else if (self.stateUIMessageRegex.test(matchedString)) {					// Test if it is a Radio Source message. This is for loading data into Radio Source list.
+		} else if (mms.stateUIMessageRegex.test(matchedString)) {					// Test if it is a Radio Source message. This is for loading data into Radio Source list.
 			
-				var matches = self.stateUIMessageRegex.exec(matchedString);
+				var matches = mms.stateUIMessageRegex.exec(matchedString);
 				
 				CF.setJoins([											//toggle to the correct subpage
-					{join: self.subRadioSource, value: 0},	
-					{join: self.subRadioStation, value: 0},
-					{join: self.subRadioGenre, value: 0},
-					{join: self.subPickListItem, value: 1},
-					{join: self.subSearchRadioStations, value: 0},
-					{join: self.txtSelectedStation, value: "Currently " + matches[1]},
+					{join: mms.subRadioSource, value: 0},	
+					{join: mms.subRadioStation, value: 0},
+					{join: mms.subRadioGenre, value: 0},
+					{join: mms.subPickListItem, value: 1},
+					{join: mms.subSearchRadioStations, value: 0},
+					{join: mms.txtSelectedStation, value: "Currently " + matches[1]},
 				]);
-				self.stateUIMessageRegex.lastIndex = 0;						// Reset the regex to work correctly after each consecutive match
+				mms.stateUIMessageRegex.lastIndex = 0;						// Reset the regex to work correctly after each consecutive match
 		
-		} else if (self.stateUIInputBoxRegex.test(matchedString)) {				// Test if it is a Radio Source message. This is for loading data into Radio Source list.
+		} else if (mms.stateUIInputBoxRegex.test(matchedString)) {				// Test if it is a Radio Source message. This is for loading data into Radio Source list.
 			
-				var matches = self.stateUIInputBoxRegex.exec(matchedString);
+				var matches = mms.stateUIInputBoxRegex.exec(matchedString);
 				
 				CF.setJoins([													//toggle to the correct subpage
-					{join: self.subRadioSource, value: 0},	
-					{join: self.subRadioStation, value: 0},	
-					{join: self.subPickListItem, value: 0},	
-					{join: self.subRadioGenre, value: 0},	
-					{join: self.subSearchRadioStations, value: 1},
-					{join: self.txtSearchTitle, value: matches[2]},	
-					{join: self.txtSearchDesc, value: matches[3]},
-					{join: self.btnCancel, tokens: {"[guid]": matches[6]} },
+					{join: mms.subRadioSource, value: 0},	
+					{join: mms.subRadioStation, value: 0},	
+					{join: mms.subPickListItem, value: 0},	
+					{join: mms.subRadioGenre, value: 0},	
+					{join: mms.subSearchRadioStations, value: 1},
+					{join: mms.txtSearchTitle, value: matches[2]},	
+					{join: mms.txtSearchDesc, value: matches[3]},
+					{join: mms.btnCancel, tokens: {"[guid]": matches[6]} },
 				]);
 				
-				self.stateUIInputBoxRegex.lastIndex = 0;						// Reset the regex to work correctly after each consecutive match
+				mms.stateUIInputBoxRegex.lastIndex = 0;						// Reset the regex to work correctly after each consecutive match
 		} 
 		
-		/*else if (self.stateRunningRegex.test(matchedString)) {				// Test if it is a shutdown message. This is for checking the shutdown status.
+		/*else if (mms.stateRunningRegex.test(matchedString)) {				// Test if it is a shutdown message. This is for checking the shutdown status.
 		
-				var matches = self.stateRunningRegex.exec(matchedString);
+				var matches = mms.stateRunningRegex.exec(matchedString);
 				
 				switch(matches[1])
 				{
 					case "True":
 						//Set the network connection status to disconnected and WIFI LED off
-						CF.setJoin(self.txtConnection, "Server Connected");		//Send a string to display on Main Page that the System is disconnected
-						CF.setJoin(self.btnWifiLED, 1);						//Show disconnected status
+						CF.setJoin(mms.txtConnection, "Server Connected");		//Send a string to display on Main Page that the System is disconnected
+						CF.setJoin(mms.btnWifiLED, 1);						//Show disconnected status
 						break;
 					case "False":
 						//Set the network connection status to disconnected and WIFI LED off
-						CF.setJoin(self.txtConnection, "Server Disconnected");		//Send a string to display on Main Page that the System is disconnected
-						CF.setJoin(self.btnWifiLED, 0);								//Show disconnected status
+						CF.setJoin(mms.txtConnection, "Server Disconnected");		//Send a string to display on Main Page that the System is disconnected
+						CF.setJoin(mms.btnWifiLED, 0);								//Show disconnected status
 						
 						// Clear all the Now Playing items
 						CF.setJoins([																		
-							{join: self.txtPlayStatus, value: ""},
-							{join: self.txtTrackStatus, value: ""},				
-							{join: self.txtCoverArt, value: ""},			
-							{join: self.txtTrackTitle, value: ""},			
-							{join: self.txtAlbum, value: ""},
-							{join: self.txtArtist, value: ""},			
-							{join: self.txtTrackTime, value: ""},
-							{join: self.txtTrackDuration, value: ""},
-							{join: self.sldTrackTime, value: 0},			// track time feedback slider
+							{join: mms.txtPlayStatus, value: ""},
+							{join: mms.txtTrackStatus, value: ""},				
+							{join: mms.txtCoverArt, value: ""},			
+							{join: mms.txtTrackTitle, value: ""},			
+							{join: mms.txtAlbum, value: ""},
+							{join: mms.txtArtist, value: ""},			
+							{join: mms.txtTrackTime, value: ""},
+							{join: mms.txtTrackDuration, value: ""},
+							{join: mms.sldTrackTime, value: 0},			// track time feedback slider
 						]);
 						break;
 				} 
-				self.stateRunningRegex.lastIndex = 0;
+				mms.stateRunningRegex.lastIndex = 0;
 		}
 		*/
 		
 		// Set the playing status feedback on the slider
-		CF.setJoin(self.sldTrackTime, Math.round((self.TrackTime/self.TrackDuration)*65535));	
+		CF.setJoin(mms.sldTrackTime, Math.round((mms.TrackTime/mms.TrackDuration)*65535));	
 	}, 
 	
 	// =============================================================================================================================
@@ -854,62 +866,62 @@ var self = {
 	// Albums -> Title
 	// -----------------------------------------------------------------------------------------------------------------------------
 	browseAlbums: function() { 
-		self.arrayAlbum = [];																// clear array of any previous data
-		CF.listRemove(self.lstAlbum);														// clear list of any previous entries
+		mms.arrayAlbum = [];																// clear array of any previous data
+		CF.listRemove(mms.lstAlbum);														// clear list of any previous entries
 		CF.setJoins([																		// show the correct subpage and hide the rest
-				{join: self.subAlbum, value: 1},
-				{join: self.subAlbumTitle, value: 0},				
-				{join: self.subArtist, value: 0},			
-				{join: self.subArtistAlbum, value: 0},			
-				{join: self.subArtistAlbumTitle, value: 0},
-				{join: self.subGenre, value: 0},			
-				{join: self.subGenreAlbum, value: 0},
-				{join: self.subGenreAlbumTitle, value: 0},	
-				{join: self.subPlaylist, value: 0},		
-				{join: self.subPlaylistTitle, value: 0},		
-				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioStation, value: 0},
-				{join: self.subRadioGenre, value: 0},
-				{join: self.subPickListItem, value: 0},
-				{join: self.subQueue, value: 0},
+				{join: mms.subAlbum, value: 1},
+				{join: mms.subAlbumTitle, value: 0},				
+				{join: mms.subArtist, value: 0},			
+				{join: mms.subArtistAlbum, value: 0},			
+				{join: mms.subArtistAlbumTitle, value: 0},
+				{join: mms.subGenre, value: 0},			
+				{join: mms.subGenreAlbum, value: 0},
+				{join: mms.subGenreAlbumTitle, value: 0},	
+				{join: mms.subPlaylist, value: 0},		
+				{join: mms.subPlaylistTitle, value: 0},		
+				{join: mms.subRadioSource, value: 0},
+				{join: mms.subRadioStation, value: 0},
+				{join: mms.subRadioGenre, value: 0},
+				{join: mms.subPickListItem, value: 0},
+				{join: mms.subQueue, value: 0},
 			]);
-		self.clearMusicFilter();															// clear all previous music filters
-		self.clearRadioFilter();															// clear all previous radio filters
-		self.sendCmd("BrowseAlbums"); 														// send the command and populate the array with data
-		//setTimeout(function(){CF.listAdd(self.lstAlbum, self.arrayAlbum);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
+		mms.clearMusicFilter();															// clear all previous music filters
+		mms.clearRadioFilter();															// clear all previous radio filters
+		mms.sendCmd("BrowseAlbums"); 														// send the command and populate the array with data
+		//setTimeout(function(){CF.listAdd(mms.lstAlbum, mms.arrayAlbum);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 	},
 	
 	selectAlbum_Title: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
-			self.arrayQueue = [];															// clear array of any previous data
-			CF.listRemove(self.lstQueue);							//clear list of any previous entries
+			mms.arrayQueue = [];															// clear array of any previous data
+			CF.listRemove(mms.lstQueue);							//clear list of any previous entries
 			CF.setJoins([											//toggle to the correct subpage
-				{join: self.subAlbum, value: 0},
-				{join: self.subAlbumTitle, value: 1},				
-				{join: self.subArtist, value: 0},			
-				{join: self.subArtistAlbum, value: 0},			
-				{join: self.subArtistAlbumTitle, value: 0},
-				{join: self.subGenre, value: 0},			
-				{join: self.subGenreAlbum, value: 0},
-				{join: self.subGenreAlbumTitle, value: 0},	
-				{join: self.subPlaylist, value: 0},		
-				{join: self.subPlaylistTitle, value: 0},		
-				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioStation, value: 0},
-				{join: self.subRadioGenre, value: 0},				
-				{join: self.subPickListItem, value: 0},
-				{join: self.subQueue, value: 0},
+				{join: mms.subAlbum, value: 0},
+				{join: mms.subAlbumTitle, value: 1},				
+				{join: mms.subArtist, value: 0},			
+				{join: mms.subArtistAlbum, value: 0},			
+				{join: mms.subArtistAlbumTitle, value: 0},
+				{join: mms.subGenre, value: 0},			
+				{join: mms.subGenreAlbum, value: 0},
+				{join: mms.subGenreAlbumTitle, value: 0},	
+				{join: mms.subPlaylist, value: 0},		
+				{join: mms.subPlaylistTitle, value: 0},		
+				{join: mms.subRadioSource, value: 0},
+				{join: mms.subRadioStation, value: 0},
+				{join: mms.subRadioGenre, value: 0},				
+				{join: mms.subPickListItem, value: 0},
+				{join: mms.subQueue, value: 0},
 			]);
-			self.setMusicFilter_Album(t["[guid]"]);					//set the filter
-			self.sendCmd("BrowseAlbumTitles");						// Get all the titles in the selected album
-			//setTimeout(function(){CF.listAdd(self.lstQueue, self.arrayQueue);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
+			mms.setMusicFilter_Album(t["[guid]"]);					//set the filter
+			mms.sendCmd("BrowseAlbumTitles");						// Get all the titles in the selected album
+			//setTimeout(function(){CF.listAdd(mms.lstQueue, mms.arrayQueue);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 		});
 	},
 	
 	//Delete all previous tracks and play the album. If want to just queue the album tracks to current queue, use playAlbumTrue instead.
 	playAlbum: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
-			self.playAlbumFalse(t["[guid]"]);						
+			mms.playAlbumFalse(t["[guid]"]);						
 		});
 	},
 	
@@ -917,28 +929,28 @@ var self = {
 	searchAlbums: function(strSearch) {
 	
 				var templistArray = [];				//initialize temporary array
-				CF.listRemove(self.lstAlbum);		//clear list of any previous entries
+				CF.listRemove(mms.lstAlbum);		//clear list of any previous entries
 	
-				for (var i = 0;i<self.arrayAlbum.length;i++)						//loop thru all the elements in the Albums array 
+				for (var i = 0;i<mms.arrayAlbum.length;i++)						//loop thru all the elements in the Albums array 
 				{
-					var searchCoverArt = self.arrayAlbum[i].s1;
-					var searchAlbum = self.arrayAlbum[i].s2;
-					var searchType = self.arrayAlbum[i].s3;
-					var searchTokenGuiD = self.arrayAlbum[i].d1.tokens["[guid]"];
-					var searchToken2GuiD = self.arrayAlbum[i].d2.tokens["[guid]"];
+					var searchCoverArt = mms.arrayAlbum[i].s4601;
+					var searchAlbum = mms.arrayAlbum[i].s4602;
+					var searchType = mms.arrayAlbum[i].s4603;
+					var searchTokenGuiD = mms.arrayAlbum[i].d4601.tokens["[guid]"];
+					var searchToken2GuiD = mms.arrayAlbum[i].d4602.tokens["[guid]"];
 					
-					if(self.search(searchAlbum, strSearch))							// refer to search() from "Other functions" section
+					if(mms.search(searchAlbum, strSearch))							// refer to search() from "Other functions" section
 					{
 						templistArray.push({										// Add matched info to temp array
-							s1: searchCoverArt,
-							s2: searchAlbum,
-							s3: searchType,
-							d1: { tokens: {"[guid]": searchTokenGuiD} },
-							d2: { tokens: {"[guid]": searchToken2GuiD} }
+							s4601: searchCoverArt,
+							s4602: searchAlbum,
+							s4603: searchType,
+							d4601: { tokens: {"[guid]": searchTokenGuiD} },
+							d4602: { tokens: {"[guid]": searchToken2GuiD} }
 						});
 					} // end if
 				}// end for
-				CF.listAdd(self.lstAlbum, templistArray);							// Add temp array to list
+				CF.listAdd(mms.lstAlbum, templistArray);							// Add temp array to list
 	},
 	
 	// Use the alphabar to filter the list of albums and display the filtered results only.
@@ -951,41 +963,41 @@ var self = {
 					// rather than add them. This is because parameters may be passed as strings from tokens such as [sliderval]
 					letter = String.fromCharCode(63 + parseInt(sliderval));
 				}
-				CF.setJoin("s2000", letter);		// Test the conversion
+				CF.setJoin(mms.txtAlphabet, letter);		// Test the conversion
 				
 				var templistArray = [];				//initialize temporary array
-				CF.listRemove(self.lstAlbum);		//clear list of any previous entries
+				CF.listRemove(mms.lstAlbum);		//clear list of any previous entries
 	
-				for (var i = 0;i<self.arrayAlbum.length;i++)						//loop thru all the elements in the Albums array 
+				for (var i = 0;i<mms.arrayAlbum.length;i++)						//loop thru all the elements in the Albums array 
 				{
-					var searchCoverArt = self.arrayAlbum[i].s1;
-					var searchAlbum = self.arrayAlbum[i].s2;
-					var searchType = self.arrayAlbum[i].s3;
-					var searchTokenGuiD = self.arrayAlbum[i].d1.tokens["[guid]"];
-					var searchToken2GuiD = self.arrayAlbum[i].d2.tokens["[guid]"];
+					var searchCoverArt = mms.arrayAlbum[i].s4601;
+					var searchAlbum = mms.arrayAlbum[i].s4602;
+					var searchType = mms.arrayAlbum[i].s4603;
+					var searchTokenGuiD = mms.arrayAlbum[i].d4601.tokens["[guid]"];
+					var searchToken2GuiD = mms.arrayAlbum[i].d4602.tokens["[guid]"];
 					
 					if (letter == "#")												// Non-filtered, display everything
 					{
 						templistArray.push({										
-							s1: searchCoverArt,
-							s2: searchAlbum,
-							s3: searchType,
-							d1: { tokens: {"[guid]": searchTokenGuiD} },
-							d2: { tokens: {"[guid]": searchToken2GuiD} }
+							s4601: searchCoverArt,
+							s4602: searchAlbum,
+							s4603: searchType,
+							d4601: { tokens: {"[guid]": searchTokenGuiD} },
+							d4602: { tokens: {"[guid]": searchToken2GuiD} }
 						});
 					} 
 					else if (letter == searchAlbum.charAt(0))						// compare the first alphabet of feedback string with the letter selected from slider
 					{
 						templistArray.push({										// Add matched info to temp array
-							s1: searchCoverArt,
-							s2: searchAlbum,
-							s3: searchType,
-							d1: { tokens: {"[guid]": searchTokenGuiD} },
-							d2: { tokens: {"[guid]": searchToken2GuiD} }
+							s4601: searchCoverArt,
+							s4602: searchAlbum,
+							s4603: searchType,
+							d4601: { tokens: {"[guid]": searchTokenGuiD} },
+							d4602: { tokens: {"[guid]": searchToken2GuiD} }
 						});
 					}
 				}// end for
-				CF.listAdd(self.lstAlbum, templistArray);							// Add temp array to list
+				CF.listAdd(mms.lstAlbum, templistArray);							// Add temp array to list
 	},
 	
 	// -----------------------------------------------------------------------------------------------------------------------------
@@ -993,89 +1005,89 @@ var self = {
 	// -----------------------------------------------------------------------------------------------------------------------------
 	
 	browseArtists: function() { 
-		self.arrayArtist = [];																// clear array of any previous data
-		CF.listRemove(self.lstArtist);														// clear list of any previous entries
+		mms.arrayArtist = [];																// clear array of any previous data
+		CF.listRemove(mms.lstArtist);														// clear list of any previous entries
 		CF.setJoins([																		// show the correct subpage and hide the rest
-				{join: self.subAlbum, value: 0},
-				{join: self.subAlbumTitle, value: 0},				
-				{join: self.subArtist, value: 1},			
-				{join: self.subArtistAlbum, value: 0},			
-				{join: self.subArtistAlbumTitle, value: 0},
-				{join: self.subGenre, value: 0},			
-				{join: self.subGenreAlbum, value: 0},
-				{join: self.subGenreAlbumTitle, value: 0},	
-				{join: self.subPlaylist, value: 0},		
-				{join: self.subPlaylistTitle, value: 0},		
-				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioStation, value: 0},				
-				{join: self.subRadioGenre, value: 0},
-				{join: self.subPickListItem, value: 0},
-				{join: self.subQueue, value: 0},
+				{join: mms.subAlbum, value: 0},
+				{join: mms.subAlbumTitle, value: 0},				
+				{join: mms.subArtist, value: 1},			
+				{join: mms.subArtistAlbum, value: 0},			
+				{join: mms.subArtistAlbumTitle, value: 0},
+				{join: mms.subGenre, value: 0},			
+				{join: mms.subGenreAlbum, value: 0},
+				{join: mms.subGenreAlbumTitle, value: 0},	
+				{join: mms.subPlaylist, value: 0},		
+				{join: mms.subPlaylistTitle, value: 0},		
+				{join: mms.subRadioSource, value: 0},
+				{join: mms.subRadioStation, value: 0},				
+				{join: mms.subRadioGenre, value: 0},
+				{join: mms.subPickListItem, value: 0},
+				{join: mms.subQueue, value: 0},
 			]);
-		self.clearMusicFilter();															// clear all previous music filters
-		self.clearRadioFilter();															// clear all previous radio filters
-		self.sendCmd("BrowseArtists"); 														// send the command
-		//setTimeout(function(){CF.listAdd(self.lstArtist, self.arrayArtist);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
+		mms.clearMusicFilter();															// clear all previous music filters
+		mms.clearRadioFilter();															// clear all previous radio filters
+		mms.sendCmd("BrowseArtists"); 														// send the command
+		//setTimeout(function(){CF.listAdd(mms.lstArtist, mms.arrayArtist);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 	},
 	
 	selectArtist_Album: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
-			self.arrayAlbum = [];									// clear array of any previous data
-			CF.listRemove(self.lstAlbum);							//clear list of any previous entries
+			mms.arrayAlbum = [];									// clear array of any previous data
+			CF.listRemove(mms.lstAlbum);							//clear list of any previous entries
 			CF.setJoins([											//toggle to the correct subpage
-				{join: self.subAlbum, value: 0},
-				{join: self.subAlbumTitle, value: 0},				
-				{join: self.subArtist, value: 0},			
-				{join: self.subArtistAlbum, value: 1},			
-				{join: self.subArtistAlbumTitle, value: 0},
-				{join: self.subGenre, value: 0},			
-				{join: self.subGenreAlbum, value: 0},
-				{join: self.subGenreAlbumTitle, value: 0},	
-				{join: self.subPlaylist, value: 0},		
-				{join: self.subPlaylistTitle, value: 0},		
-				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioStation, value: 0},				
-				{join: self.subRadioGenre, value: 0},
-				{join: self.subPickListItem, value: 0},
-				{join: self.subQueue, value: 0},
+				{join: mms.subAlbum, value: 0},
+				{join: mms.subAlbumTitle, value: 0},				
+				{join: mms.subArtist, value: 0},			
+				{join: mms.subArtistAlbum, value: 1},			
+				{join: mms.subArtistAlbumTitle, value: 0},
+				{join: mms.subGenre, value: 0},			
+				{join: mms.subGenreAlbum, value: 0},
+				{join: mms.subGenreAlbumTitle, value: 0},	
+				{join: mms.subPlaylist, value: 0},		
+				{join: mms.subPlaylistTitle, value: 0},		
+				{join: mms.subRadioSource, value: 0},
+				{join: mms.subRadioStation, value: 0},				
+				{join: mms.subRadioGenre, value: 0},
+				{join: mms.subPickListItem, value: 0},
+				{join: mms.subQueue, value: 0},
 			]);
-			self.setMusicFilter_Artist(t["[guid]"]);					//set the filter
-			self.sendCmd("BrowseAlbums");						// Get all the titles in the selected album
-			//setTimeout(function(){CF.listAdd(self.lstAlbum, self.arrayAlbum);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
+			mms.setMusicFilter_Artist(t["[guid]"]);					//set the filter
+			mms.sendCmd("BrowseAlbums");						// Get all the titles in the selected album
+			//setTimeout(function(){CF.listAdd(mms.lstAlbum, mms.arrayAlbum);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 		});
 	},
 	
 	selectArtist_Album_Title: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
-			self.arrayQueue = [];									// clear array of any previous data
-			CF.listRemove(self.lstQueue);							//clear list of any previous entries
+			mms.arrayQueue = [];									// clear array of any previous data
+			CF.listRemove(mms.lstQueue);							//clear list of any previous entries
 			CF.setJoins([											//toggle to the correct subpage
-				{join: self.subAlbum, value: 0},
-				{join: self.subAlbumTitle, value: 0},				
-				{join: self.subArtist, value: 0},			
-				{join: self.subArtistAlbum, value: 0},			
-				{join: self.subArtistAlbumTitle, value: 1},
-				{join: self.subGenre, value: 0},			
-				{join: self.subGenreAlbum, value: 0},
-				{join: self.subGenreAlbumTitle, value: 0},	
-				{join: self.subPlaylist, value: 0},		
-				{join: self.subPlaylistTitle, value: 0},		
-				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioStation, value: 0},				
-				{join: self.subRadioGenre, value: 0},
-				{join: self.subPickListItem, value: 0},
-				{join: self.subQueue, value: 0},
+				{join: mms.subAlbum, value: 0},
+				{join: mms.subAlbumTitle, value: 0},				
+				{join: mms.subArtist, value: 0},			
+				{join: mms.subArtistAlbum, value: 0},			
+				{join: mms.subArtistAlbumTitle, value: 1},
+				{join: mms.subGenre, value: 0},			
+				{join: mms.subGenreAlbum, value: 0},
+				{join: mms.subGenreAlbumTitle, value: 0},	
+				{join: mms.subPlaylist, value: 0},		
+				{join: mms.subPlaylistTitle, value: 0},		
+				{join: mms.subRadioSource, value: 0},
+				{join: mms.subRadioStation, value: 0},				
+				{join: mms.subRadioGenre, value: 0},
+				{join: mms.subPickListItem, value: 0},
+				{join: mms.subQueue, value: 0},
 			]);
-			self.setMusicFilter_Album(t["[guid]"]);					//set the filter
-			self.sendCmd("BrowseAlbumTitles");						// Get all the titles in the selected album
-			//setTimeout(function(){CF.listAdd(self.lstQueue, self.arrayQueue);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
+			mms.setMusicFilter_Album(t["[guid]"]);					//set the filter
+			mms.sendCmd("BrowseAlbumTitles");						// Get all the titles in the selected album
+			//setTimeout(function(){CF.listAdd(mms.lstQueue, mms.arrayQueue);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 		});
 	},
 	
 	//Delete all previous tracks and play the all albums under Artist. If want to just queue the albums to current queue, use playArtistTrue instead.
 	playArtist: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
-			self.playArtistFalse(t["[guid]"]);						
+			mms.playArtistFalse(t["[guid]"]);						
 		});
 	},
 	
@@ -1083,28 +1095,28 @@ var self = {
 	searchArtists: function(strSearch) {
 	
 				var templistArray = [];				//initialize temporary array
-				CF.listRemove(self.lstArtist);		//clear list of any previous entries
+				CF.listRemove(mms.lstArtist);		//clear list of any previous entries
 	
-				for (var i = 0;i<self.arrayArtist.length;i++)						//loop thru all the elements in the Albums array 
+				for (var i = 0;i<mms.arrayArtist.length;i++)						//loop thru all the elements in the Albums array 
 				{
-					var searchCoverArt = self.arrayArtist[i].s1;
-					var searchArtist = self.arrayArtist[i].s2;
-					var searchType = self.arrayArtist[i].s3;
-					var searchTokenGuiD = self.arrayArtist[i].d1.tokens["[guid]"];
-					var searchToken2GuiD = self.arrayArtist[i].d2.tokens["[guid]"];
+					var searchCoverArt = mms.arrayArtist[i].s4601;
+					var searchArtist = mms.arrayArtist[i].s4602;
+					var searchType = mms.arrayArtist[i].s4603;
+					var searchTokenGuiD = mms.arrayArtist[i].d4601.tokens["[guid]"];
+					var searchToken2GuiD = mms.arrayArtist[i].d4602.tokens["[guid]"];
 					
-					if(self.search(searchArtist, strSearch))							// refer to search() from "Other functions" section
+					if(mms.search(searchArtist, strSearch))							// refer to search() from "Other functions" section
 					{
 						templistArray.push({										// Add matched info to temp array
-							s1: searchCoverArt,
-							s2: searchArtist,
-							s3: searchType,
-							d1: { tokens: {"[guid]": searchTokenGuiD} },
-							d2: { tokens: {"[guid]": searchToken2GuiD} }
+							s4601: searchCoverArt,
+							s4602: searchArtist,
+							s4603: searchType,
+							d4601: { tokens: {"[guid]": searchTokenGuiD} },
+							d4602: { tokens: {"[guid]": searchToken2GuiD} }
 						});
 					} // end if
 				}// end for
-				CF.listAdd(self.lstArtist, templistArray);							// Add temp array to list
+				CF.listAdd(mms.lstArtist, templistArray);							// Add temp array to list
 	},
 	
 	// Use the alphabar to filter the list of albums and display the filtered results only.
@@ -1117,41 +1129,41 @@ var self = {
 					// rather than add them. This is because parameters may be passed as strings from tokens such as [sliderval]
 					letter = String.fromCharCode(63 + parseInt(sliderval));
 				}
-				CF.setJoin("s2000", letter);		// Test the conversion
+				CF.setJoin(mms.txtAlphabet, letter);		// Test the conversion
 				
 				var templistArray = [];				//initialize temporary array
-				CF.listRemove(self.lstArtist);		//clear list of any previous entries
+				CF.listRemove(mms.lstArtist);		//clear list of any previous entries
 	
-				for (var i = 0;i<self.arrayArtist.length;i++)						//loop thru all the elements in the Albums array 
+				for (var i = 0;i<mms.arrayArtist.length;i++)						//loop thru all the elements in the Albums array 
 				{
-					var searchCoverArt = self.arrayArtist[i].s1;
-					var searchArtist = self.arrayArtist[i].s2;
-					var searchType = self.arrayArtist[i].s3;
-					var searchTokenGuiD = self.arrayArtist[i].d1.tokens["[guid]"];
-					var searchToken2GuiD = self.arrayArtist[i].d2.tokens["[guid]"];
+					var searchCoverArt = mms.arrayArtist[i].s4601;
+					var searchArtist = mms.arrayArtist[i].s4602;
+					var searchType = mms.arrayArtist[i].s4603;
+					var searchTokenGuiD = mms.arrayArtist[i].d4601.tokens["[guid]"];
+					var searchToken2GuiD = mms.arrayArtist[i].d4602.tokens["[guid]"];
 					
 					if (letter == "#")												// Non-filtered, display everything
 					{
 						templistArray.push({										// Add matched info to temp array
-							s1: searchCoverArt,
-							s2: searchArtist,
-							s3: searchType,
-							d1: { tokens: {"[guid]": searchTokenGuiD} },
-							d2: { tokens: {"[guid]": searchToken2GuiD} }
+							s4601: searchCoverArt,
+							s4602: searchArtist,
+							s4603: searchType,
+							d4601: { tokens: {"[guid]": searchTokenGuiD} },
+							d4602: { tokens: {"[guid]": searchToken2GuiD} }
 						});
 					} 
 					else if (letter == searchArtist.charAt(0))						// compare the first alphabet of feedback string with the letter selected from slider
 					{
 						templistArray.push({										// Add matched info to temp array
-							s1: searchCoverArt,
-							s2: searchArtist,
-							s3: searchType,
-							d1: { tokens: {"[guid]": searchTokenGuiD} },
-							d2: { tokens: {"[guid]": searchToken2GuiD} }
+							s4601: searchCoverArt,
+							s4602: searchArtist,
+							s4603: searchType,
+							d4601: { tokens: {"[guid]": searchTokenGuiD} },
+							d4602: { tokens: {"[guid]": searchToken2GuiD} }
 						});
 					}
 				}// end for
-				CF.listAdd(self.lstArtist, templistArray);							// Add temp array to list
+				CF.listAdd(mms.lstArtist, templistArray);							// Add temp array to list
 	},
 	
 	// -----------------------------------------------------------------------------------------------------------------------------
@@ -1159,89 +1171,89 @@ var self = {
 	// -----------------------------------------------------------------------------------------------------------------------------
 	
 	browseGenres: function() { 
-		self.arrayGenre = [];																// clear array of any previous data
-		CF.listRemove(self.lstGenre);														// clear list of any previous entries
+		mms.arrayGenre = [];																// clear array of any previous data
+		CF.listRemove(mms.lstGenre);														// clear list of any previous entries
 		CF.setJoins([																		// show the correct subpage and hide the rest
-				{join: self.subAlbum, value: 0},
-				{join: self.subAlbumTitle, value: 0},				
-				{join: self.subArtist, value: 0},			
-				{join: self.subArtistAlbum, value: 0},			
-				{join: self.subArtistAlbumTitle, value: 0},
-				{join: self.subGenre, value: 1},			
-				{join: self.subGenreAlbum, value: 0},
-				{join: self.subGenreAlbumTitle, value: 0},	
-				{join: self.subPlaylist, value: 0},		
-				{join: self.subPlaylistTitle, value: 0},		
-				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioStation, value: 0},				
-				{join: self.subRadioGenre, value: 0},
-				{join: self.subPickListItem, value: 0},
-				{join: self.subQueue, value: 0},
+				{join: mms.subAlbum, value: 0},
+				{join: mms.subAlbumTitle, value: 0},				
+				{join: mms.subArtist, value: 0},			
+				{join: mms.subArtistAlbum, value: 0},			
+				{join: mms.subArtistAlbumTitle, value: 0},
+				{join: mms.subGenre, value: 1},			
+				{join: mms.subGenreAlbum, value: 0},
+				{join: mms.subGenreAlbumTitle, value: 0},	
+				{join: mms.subPlaylist, value: 0},		
+				{join: mms.subPlaylistTitle, value: 0},		
+				{join: mms.subRadioSource, value: 0},
+				{join: mms.subRadioStation, value: 0},				
+				{join: mms.subRadioGenre, value: 0},
+				{join: mms.subPickListItem, value: 0},
+				{join: mms.subQueue, value: 0},
 			]);
-		self.clearMusicFilter();															// clear all previous music filters
-		self.clearRadioFilter();															// clear all previous radio filters
-		self.sendCmd("BrowseGenres"); 														// send the command
-		//setTimeout(function(){CF.listAdd(self.lstGenre, self.arrayGenre);}, 4000);			// set a short delay to give time for array to be populated before adding array into list.
+		mms.clearMusicFilter();															// clear all previous music filters
+		mms.clearRadioFilter();															// clear all previous radio filters
+		mms.sendCmd("BrowseGenres"); 														// send the command
+		//setTimeout(function(){CF.listAdd(mms.lstGenre, mms.arrayGenre);}, 4000);			// set a short delay to give time for array to be populated before adding array into list.
 	},
 	
 	selectGenre_Album: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
-			self.arrayAlbum = [];									// clear array of any previous data
-			CF.listRemove(self.lstAlbum);							//clear list of any previous entries
+			mms.arrayAlbum = [];									// clear array of any previous data
+			CF.listRemove(mms.lstAlbum);							//clear list of any previous entries
 			CF.setJoins([											//toggle to the correct subpage
-				{join: self.subAlbum, value: 0},
-				{join: self.subAlbumTitle, value: 0},				
-				{join: self.subArtist, value: 0},			
-				{join: self.subArtistAlbum, value: 0},			
-				{join: self.subArtistAlbumTitle, value: 0},
-				{join: self.subGenre, value: 0},			
-				{join: self.subGenreAlbum, value: 1},
-				{join: self.subGenreAlbumTitle, value: 0},	
-				{join: self.subPlaylist, value: 0},		
-				{join: self.subPlaylistTitle, value: 0},		
-				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioStation, value: 0},				
-				{join: self.subRadioGenre, value: 0},
-				{join: self.subPickListItem, value: 0},
-				{join: self.subQueue, value: 0},
+				{join: mms.subAlbum, value: 0},
+				{join: mms.subAlbumTitle, value: 0},				
+				{join: mms.subArtist, value: 0},			
+				{join: mms.subArtistAlbum, value: 0},			
+				{join: mms.subArtistAlbumTitle, value: 0},
+				{join: mms.subGenre, value: 0},			
+				{join: mms.subGenreAlbum, value: 1},
+				{join: mms.subGenreAlbumTitle, value: 0},	
+				{join: mms.subPlaylist, value: 0},		
+				{join: mms.subPlaylistTitle, value: 0},		
+				{join: mms.subRadioSource, value: 0},
+				{join: mms.subRadioStation, value: 0},				
+				{join: mms.subRadioGenre, value: 0},
+				{join: mms.subPickListItem, value: 0},
+				{join: mms.subQueue, value: 0},
 			]);
-			self.setMusicFilter_Genre(t["[guid]"]);				//set the filter
-			self.sendCmd("BrowseAlbums");						// Get all the titles in the selected album
-			//setTimeout(function(){CF.listAdd(self.lstAlbum, self.arrayAlbum);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
+			mms.setMusicFilter_Genre(t["[guid]"]);				//set the filter
+			mms.sendCmd("BrowseAlbums");						// Get all the titles in the selected album
+			//setTimeout(function(){CF.listAdd(mms.lstAlbum, mms.arrayAlbum);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 		});
 	},
 	
 	selectGenre_Album_Title: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
-			self.arrayQueue = [];									// clear array of any previous data
-			CF.listRemove(self.lstQueue);							//clear list of any previous entries
+			mms.arrayQueue = [];									// clear array of any previous data
+			CF.listRemove(mms.lstQueue);							//clear list of any previous entries
 			CF.setJoins([											//toggle to the correct subpage
-				{join: self.subAlbum, value: 0},
-				{join: self.subAlbumTitle, value: 0},				
-				{join: self.subArtist, value: 0},			
-				{join: self.subArtistAlbum, value: 0},			
-				{join: self.subArtistAlbumTitle, value: 0},
-				{join: self.subGenre, value: 0},			
-				{join: self.subGenreAlbum, value: 0},
-				{join: self.subGenreAlbumTitle, value: 1},	
-				{join: self.subPlaylist, value: 0},		
-				{join: self.subPlaylistTitle, value: 0},		
-				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioStation, value: 0},				
-				{join: self.subRadioGenre, value: 0},
-				{join: self.subPickListItem, value: 0},
-				{join: self.subQueue, value: 0},
+				{join: mms.subAlbum, value: 0},
+				{join: mms.subAlbumTitle, value: 0},				
+				{join: mms.subArtist, value: 0},			
+				{join: mms.subArtistAlbum, value: 0},			
+				{join: mms.subArtistAlbumTitle, value: 0},
+				{join: mms.subGenre, value: 0},			
+				{join: mms.subGenreAlbum, value: 0},
+				{join: mms.subGenreAlbumTitle, value: 1},	
+				{join: mms.subPlaylist, value: 0},		
+				{join: mms.subPlaylistTitle, value: 0},		
+				{join: mms.subRadioSource, value: 0},
+				{join: mms.subRadioStation, value: 0},				
+				{join: mms.subRadioGenre, value: 0},
+				{join: mms.subPickListItem, value: 0},
+				{join: mms.subQueue, value: 0},
 			]);
-			self.setMusicFilter_Album(t["[guid]"]);				//set the filter
-			self.sendCmd("BrowseAlbumTitles");						// Get all the titles in the selected album
-			//setTimeout(function(){CF.listAdd(self.lstQueue, self.arrayQueue);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
+			mms.setMusicFilter_Album(t["[guid]"]);				//set the filter
+			mms.sendCmd("BrowseAlbumTitles");						// Get all the titles in the selected album
+			//setTimeout(function(){CF.listAdd(mms.lstQueue, mms.arrayQueue);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 		});
 	},
 	
 	//Delete all previous tracks and play the all albums under Artist. If want to just queue the albums to current queue, use playArtistTrue instead.
 	playGenre: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
-			self.playGenreFalse(t["[guid]"]);						
+			mms.playGenreFalse(t["[guid]"]);						
 		});
 	},
 	
@@ -1249,28 +1261,28 @@ var self = {
 	searchGenres: function(strSearch) {
 	
 				var templistArray = [];				//initialize temporary array
-				CF.listRemove(self.lstGenre);		//clear list of any previous entries
+				CF.listRemove(mms.lstGenre);		//clear list of any previous entries
 	
-				for (var i = 0;i<self.arrayGenre.length;i++)						//loop thru all the elements in the Albums array 
+				for (var i = 0;i<mms.arrayGenre.length;i++)						//loop thru all the elements in the Albums array 
 				{
-					var searchCoverArt = self.arrayGenre[i].s1;
-					var searchGenre = self.arrayGenre[i].s2;
-					var searchType = self.arrayGenre[i].s3;
-					var searchTokenGuiD = self.arrayGenre[i].d1.tokens["[guid]"];
-					var searchToken2GuiD = self.arrayGenre[i].d2.tokens["[guid]"];
+					var searchCoverArt = mms.arrayGenre[i].s4601;
+					var searchGenre = mms.arrayGenre[i].s4602;
+					var searchType = mms.arrayGenre[i].s4603;
+					var searchTokenGuiD = mms.arrayGenre[i].d4601.tokens["[guid]"];
+					var searchToken2GuiD = mms.arrayGenre[i].d4602.tokens["[guid]"];
 					
-					if(self.search(searchGenre, strSearch))							// refer to search() from "Other functions" section
+					if(mms.search(searchGenre, strSearch))							// refer to search() from "Other functions" section
 					{
 						templistArray.push({										// Add matched info to temp array
-							s1: searchCoverArt,
-							s2: searchGenre,
-							s3: searchType,
-							d1: { tokens: {"[guid]": searchTokenGuiD} },
-							d2: { tokens: {"[guid]": searchToken2GuiD} }
+							s4601: searchCoverArt,
+							s4602: searchGenre,
+							s4603: searchType,
+							d4601: { tokens: {"[guid]": searchTokenGuiD} },
+							d4602: { tokens: {"[guid]": searchToken2GuiD} }
 						});
 					} // end if
 				}// end for
-				CF.listAdd(self.lstGenre, templistArray);							// Add temp array to list
+				CF.listAdd(mms.lstGenre, templistArray);							// Add temp array to list
 	},
 	
 	// Use the alphabar to filter the list of albums and display the filtered results only.
@@ -1283,41 +1295,41 @@ var self = {
 					// rather than add them. This is because parameters may be passed as strings from tokens such as [sliderval]
 					letter = String.fromCharCode(63 + parseInt(sliderval));
 				}
-				CF.setJoin("s2000", letter);		// Test the conversion
+				CF.setJoin(mms.txtAlphabet, letter);		// Test the conversion
 				
 				var templistArray = [];				//initialize temporary array
-				CF.listRemove(self.lstGenre);		//clear list of any previous entries
+				CF.listRemove(mms.lstGenre);		//clear list of any previous entries
 	
-				for (var i = 0;i<self.arrayGenre.length;i++)						//loop thru all the elements in the Albums array 
+				for (var i = 0;i<mms.arrayGenre.length;i++)						//loop thru all the elements in the Albums array 
 				{
-					var searchCoverArt = self.arrayGenre[i].s1;
-					var searchGenre = self.arrayGenre[i].s2;
-					var searchType = self.arrayGenre[i].s3;
-					var searchTokenGuiD = self.arrayGenre[i].d1.tokens["[guid]"];
-					var searchToken2GuiD = self.arrayGenre[i].d2.tokens["[guid]"];
+					var searchCoverArt = mms.arrayGenre[i].s4601;
+					var searchGenre = mms.arrayGenre[i].s4602;
+					var searchType = mms.arrayGenre[i].s4603;
+					var searchTokenGuiD = mms.arrayGenre[i].d4601.tokens["[guid]"];
+					var searchToken2GuiD = mms.arrayGenre[i].d4602.tokens["[guid]"];
 					
 					if (letter == "#")												// Non-filtered, display everything
 					{
 						templistArray.push({										// Add matched info to temp array
-							s1: searchCoverArt,
-							s2: searchGenre,
-							s3: searchType,
-							d1: { tokens: {"[guid]": searchTokenGuiD} },
-							d2: { tokens: {"[guid]": searchToken2GuiD} }
+							s4601: searchCoverArt,
+							s4602: searchGenre,
+							s4603: searchType,
+							d4601: { tokens: {"[guid]": searchTokenGuiD} },
+							d4602: { tokens: {"[guid]": searchToken2GuiD} }
 						});
 					} 
 					else if (letter == searchGenre.charAt(0))						// compare the first alphabet of feedback string with the letter selected from slider
 					{
 						templistArray.push({										// Add matched info to temp array
-							s1: searchCoverArt,
-							s2: searchGenre,
-							s3: searchType,
-							d1: { tokens: {"[guid]": searchTokenGuiD} },
-							d2: { tokens: {"[guid]": searchToken2GuiD} }
+							s4601: searchCoverArt,
+							s4602: searchGenre,
+							s4603: searchType,
+							d4601: { tokens: {"[guid]": searchTokenGuiD} },
+							d4602: { tokens: {"[guid]": searchToken2GuiD} }
 						});
 					}
 				}// end for
-				CF.listAdd(self.lstGenre, templistArray);							// Add temp array to list
+				CF.listAdd(mms.lstGenre, templistArray);							// Add temp array to list
 	},
 	
 	// -----------------------------------------------------------------------------------------------------------------------------
@@ -1325,107 +1337,107 @@ var self = {
 	// -----------------------------------------------------------------------------------------------------------------------------
 	
 	browsePlaylists: function() { 
-		self.arrayPlaylist = [];															// clear array of any previous data
-		CF.listRemove(self.lstPlaylist);													// clear list of any previous entries
+		mms.arrayPlaylist = [];															// clear array of any previous data
+		CF.listRemove(mms.lstPlaylist);													// clear list of any previous entries
 		CF.setJoins([																		// show the correct subpage and hide the rest
-				{join: self.subAlbum, value: 0},
-				{join: self.subAlbumTitle, value: 0},				
-				{join: self.subArtist, value: 0},			
-				{join: self.subArtistAlbum, value: 0},			
-				{join: self.subArtistAlbumTitle, value: 0},
-				{join: self.subGenre, value: 0},			
-				{join: self.subGenreAlbum, value: 0},
-				{join: self.subGenreAlbumTitle, value: 0},	
-				{join: self.subPlaylist, value: 1},		
-				{join: self.subPlaylistTitle, value: 0},		
-				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioStation, value: 0},				
-				{join: self.subRadioGenre, value: 0},
-				{join: self.subPickListItem, value: 0},
-				{join: self.subQueue, value: 0},
+				{join: mms.subAlbum, value: 0},
+				{join: mms.subAlbumTitle, value: 0},				
+				{join: mms.subArtist, value: 0},			
+				{join: mms.subArtistAlbum, value: 0},			
+				{join: mms.subArtistAlbumTitle, value: 0},
+				{join: mms.subGenre, value: 0},			
+				{join: mms.subGenreAlbum, value: 0},
+				{join: mms.subGenreAlbumTitle, value: 0},	
+				{join: mms.subPlaylist, value: 1},		
+				{join: mms.subPlaylistTitle, value: 0},		
+				{join: mms.subRadioSource, value: 0},
+				{join: mms.subRadioStation, value: 0},				
+				{join: mms.subRadioGenre, value: 0},
+				{join: mms.subPickListItem, value: 0},
+				{join: mms.subQueue, value: 0},
 			]);
-		self.clearMusicFilter();															// clear all previous music filters
-		self.clearRadioFilter();															// clear all previous radio filters
-		self.sendCmd("BrowsePlaylists"); 														// send the command
-		//setTimeout(function(){CF.listAdd(self.lstPlaylist, self.arrayPlaylist);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
+		mms.clearMusicFilter();															// clear all previous music filters
+		mms.clearRadioFilter();															// clear all previous radio filters
+		mms.sendCmd("BrowsePlaylists"); 														// send the command
+		//setTimeout(function(){CF.listAdd(mms.lstPlaylist, mms.arrayPlaylist);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 	},
 	
 	selectPlaylist_Title: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
-			self.arrayQueue = [];									// clear array of any previous data
-			CF.listRemove(self.lstQueue);							//clear list of any previous entries
+			mms.arrayQueue = [];									// clear array of any previous data
+			CF.listRemove(mms.lstQueue);							//clear list of any previous entries
 			CF.setJoins([											//toggle to the correct subpage
-				{join: self.subAlbum, value: 0},
-				{join: self.subAlbumTitle, value: 0},				
-				{join: self.subArtist, value: 0},			
-				{join: self.subArtistAlbum, value: 0},			
-				{join: self.subArtistAlbumTitle, value: 0},
-				{join: self.subGenre, value: 0},			
-				{join: self.subGenreAlbum, value: 0},
-				{join: self.subGenreAlbumTitle, value: 0},	
-				{join: self.subPlaylist, value: 0},		
-				{join: self.subPlaylistTitle, value: 1},		
-				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioStation, value: 0},				
-				{join: self.subRadioGenre, value: 0},
-				{join: self.subPickListItem, value: 0},
-				{join: self.subQueue, value: 0},
+				{join: mms.subAlbum, value: 0},
+				{join: mms.subAlbumTitle, value: 0},				
+				{join: mms.subArtist, value: 0},			
+				{join: mms.subArtistAlbum, value: 0},			
+				{join: mms.subArtistAlbumTitle, value: 0},
+				{join: mms.subGenre, value: 0},			
+				{join: mms.subGenreAlbum, value: 0},
+				{join: mms.subGenreAlbumTitle, value: 0},	
+				{join: mms.subPlaylist, value: 0},		
+				{join: mms.subPlaylistTitle, value: 1},		
+				{join: mms.subRadioSource, value: 0},
+				{join: mms.subRadioStation, value: 0},				
+				{join: mms.subRadioGenre, value: 0},
+				{join: mms.subPickListItem, value: 0},
+				{join: mms.subQueue, value: 0},
 			]);
-			self.setMusicFilter_Playlist(t["[guid]"]);				//set the filter
-			self.sendCmd("BrowseTitles");									// Get all the titles in the selected album
-			//setTimeout(function(){CF.listAdd(self.lstQueue, self.arrayQueue);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
+			mms.setMusicFilter_Playlist(t["[guid]"]);				//set the filter
+			mms.sendCmd("BrowseTitles");									// Get all the titles in the selected album
+			//setTimeout(function(){CF.listAdd(mms.lstQueue, mms.arrayQueue);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 		});
 	},
 	
 	//Delete all previous tracks and play the all albums under Artist. If want to just queue the albums to current queue, use playArtistTrue instead.
 	playPlaylist: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
-			self.playPlaylistFalse(t["[guid]"]);						
+			mms.playPlaylistFalse(t["[guid]"]);						
 		});
 	},
 	
 	deletePlaylistItem: function(list, listIndex, join) {											// Delete Playlist Item. 
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
-			self.deletePlaylist(t["[title]"]);						
+			mms.deletePlaylist(t["[title]"]);						
 		});
 	},
 	
 	// Special Note : It'll take a while for the playlist changes to be updated, you won't be able to see the changes immediately.
 	savePlaylist: function(title) {																	
-		self.sendCmd("SavePlaylist " + title); 														// Save Playlist. *Command : SavePlaylist "Playlist1" 
-		CF.setJoin(self.txtPlaylist, "");										// Reset the Playlist textbox to show back default text 
+		mms.sendCmd("SavePlaylist " + title); 														// Save Playlist. *Command : SavePlaylist "Playlist1" 
+		CF.setJoin(mms.txtPlaylist, "");										// Reset the Playlist textbox to show back default text 
 	},
 	
-	deletePlaylist: function(title) { self.sendCmd("DeletePlaylist " + title); },					// Delete Playlist. *Command : SavePlaylist "Playlist1"
+	deletePlaylist: function(title) { mms.sendCmd("DeletePlaylist " + title); },					// Delete Playlist. *Command : SavePlaylist "Playlist1"
 	
 	// Search the list of playlists and display the searched results only.
 	searchPlaylists: function(strSearch) {
 	
 				var templistArray = [];				//initialize temporary array
-				CF.listRemove(self.lstPlaylist);		//clear list of any previous entries
+				CF.listRemove(mms.lstPlaylist);		//clear list of any previous entries
 	
-				for (var i = 0;i<self.arrayPlaylist.length;i++)						//loop thru all the elements in the Albums array 
+				for (var i = 0;i<mms.arrayPlaylist.length;i++)						//loop thru all the elements in the Albums array 
 				{
-					var searchCoverArt = self.arrayPlaylist[i].s1;
-					var searchPlaylist = self.arrayPlaylist[i].s2;
-					var searchType = self.arrayPlaylist[i].s3;
-					var searchTokenGuiD = self.arrayPlaylist[i].d1.tokens["[guid]"];
-					var searchToken2GuiD = self.arrayPlaylist[i].d2.tokens["[guid]"];
-					var searchToken3GuiD = self.arrayPlaylist[i].d3.tokens["[guid]"];
+					var searchCoverArt = mms.arrayPlaylist[i].s4601;
+					var searchPlaylist = mms.arrayPlaylist[i].s4602;
+					var searchType = mms.arrayPlaylist[i].s4603;
+					var searchTokenGuiD = mms.arrayPlaylist[i].d4601.tokens["[guid]"];
+					var searchToken2GuiD = mms.arrayPlaylist[i].d4602.tokens["[guid]"];
+					var searchToken3GuiD = mms.arrayPlaylist[i].d4603.tokens["[guid]"];
 					
-					if(self.search(searchPlaylist, strSearch))							// refer to search() from "Other functions" section
+					if(mms.search(searchPlaylist, strSearch))							// refer to search() from "Other functions" section
 					{
 						templistArray.push({										// Add matched info to temp array
-							s1: searchCoverArt,
-							s2: searchPlaylist,
-							s3: searchType,
-							d1: { tokens: {"[guid]": searchTokenGuiD} },
-							d2: { tokens: {"[guid]": searchToken2GuiD} },
-							d3: { tokens: {"[guid]": searchToken3GuiD} }
+							s4601: searchCoverArt,
+							s4602: searchPlaylist,
+							s4603: searchType,
+							d4601: { tokens: {"[guid]": searchTokenGuiD} },
+							d4602: { tokens: {"[guid]": searchToken2GuiD} },
+							d4603: { tokens: {"[guid]": searchToken3GuiD} }
 						});
 					} // end if
 				}// end for
-				CF.listAdd(self.lstPlaylist, templistArray);							// Add temp array to list
+				CF.listAdd(mms.lstPlaylist, templistArray);							// Add temp array to list
 	},
 	
 	// -----------------------------------------------------------------------------------------------------------------------------
@@ -1433,160 +1445,160 @@ var self = {
 	// -----------------------------------------------------------------------------------------------------------------------------
 	
 	browseRadioSources: function() { 
-		self.arrayRadioSource = [];															// clear array of any previous data
-		CF.listRemove(self.lstRadioSource);													// clear list of any previous entries
+		mms.arrayRadioSource = [];															// clear array of any previous data
+		CF.listRemove(mms.lstRadioSource);													// clear list of any previous entries
 		CF.setJoins([																		// show the correct subpage and hide the rest
-				{join: self.subAlbum, value: 0},
-				{join: self.subAlbumTitle, value: 0},				
-				{join: self.subArtist, value: 0},			
-				{join: self.subArtistAlbum, value: 0},			
-				{join: self.subArtistAlbumTitle, value: 0},
-				{join: self.subGenre, value: 0},			
-				{join: self.subGenreAlbum, value: 0},
-				{join: self.subGenreAlbumTitle, value: 0},	
-				{join: self.subPlaylist, value: 0},		
-				{join: self.subPlaylistTitle, value: 0},		
-				{join: self.subRadioSource, value: 1},
-				{join: self.subRadioStation, value: 0},
-				{join: self.subRadioGenre, value: 0},
-				{join: self.subPickListItem, value: 0},
-				{join: self.subQueue, value: 0},
+				{join: mms.subAlbum, value: 0},
+				{join: mms.subAlbumTitle, value: 0},				
+				{join: mms.subArtist, value: 0},			
+				{join: mms.subArtistAlbum, value: 0},			
+				{join: mms.subArtistAlbumTitle, value: 0},
+				{join: mms.subGenre, value: 0},			
+				{join: mms.subGenreAlbum, value: 0},
+				{join: mms.subGenreAlbumTitle, value: 0},	
+				{join: mms.subPlaylist, value: 0},		
+				{join: mms.subPlaylistTitle, value: 0},		
+				{join: mms.subRadioSource, value: 1},
+				{join: mms.subRadioStation, value: 0},
+				{join: mms.subRadioGenre, value: 0},
+				{join: mms.subPickListItem, value: 0},
+				{join: mms.subQueue, value: 0},
 			]);
-		self.clearMusicFilter();															// clear all previous music filters
-		self.clearRadioFilter();															// clear all previous radio filters
-		self.sendCmd("BrowseRadioSources"); 														// send the command
-		//setTimeout(function(){CF.listAdd(self.lstRadioSource, self.arrayRadioSource);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
+		mms.clearMusicFilter();															// clear all previous music filters
+		mms.clearRadioFilter();															// clear all previous radio filters
+		mms.sendCmd("BrowseRadioSources"); 														// send the command
+		//setTimeout(function(){CF.listAdd(mms.lstRadioSource, mms.arrayRadioSource);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 	},
 	
 	selectRadioSource: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
 			
-			if (self.arrayRadioSource[listIndex].s2 == "SiriusXM Internet Radio"){ 
-					self.arrayRadioGenre = [];								// clear array of any previous data
-					CF.listRemove(self.lstRadioGenre);						//clear list of any previous entries
+			if (mms.arrayRadioSource[listIndex].s4602 == "SiriusXM Internet Radio"){ 
+					mms.arrayRadioGenre = [];								// clear array of any previous data
+					CF.listRemove(mms.lstRadioGenre);						//clear list of any previous entries
 					CF.setJoins([											//toggle to the correct subpage
-						{join: self.subAlbum, value: 0},
-						{join: self.subAlbumTitle, value: 0},				
-						{join: self.subArtist, value: 0},			
-						{join: self.subArtistAlbum, value: 0},			
-						{join: self.subArtistAlbumTitle, value: 0},
-						{join: self.subGenre, value: 0},			
-						{join: self.subGenreAlbum, value: 0},
-						{join: self.subGenreAlbumTitle, value: 0},	
-						{join: self.subPlaylist, value: 0},		
-						{join: self.subPlaylistTitle, value: 0},		
-						{join: self.subRadioSource, value: 0},	
-						{join: self.subRadioStation, value: 0},
-						{join: self.subRadioGenre, value: 1},
-						{join: self.subPickListItem, value: 0},
-						{join: self.subQueue, value: 0},
+						{join: mms.subAlbum, value: 0},
+						{join: mms.subAlbumTitle, value: 0},				
+						{join: mms.subArtist, value: 0},			
+						{join: mms.subArtistAlbum, value: 0},			
+						{join: mms.subArtistAlbumTitle, value: 0},
+						{join: mms.subGenre, value: 0},			
+						{join: mms.subGenreAlbum, value: 0},
+						{join: mms.subGenreAlbumTitle, value: 0},	
+						{join: mms.subPlaylist, value: 0},		
+						{join: mms.subPlaylistTitle, value: 0},		
+						{join: mms.subRadioSource, value: 0},	
+						{join: mms.subRadioStation, value: 0},
+						{join: mms.subRadioGenre, value: 1},
+						{join: mms.subPickListItem, value: 0},
+						{join: mms.subQueue, value: 0},
 					]);
-					self.setRadioFilter_RadioSource(t["[guid]"]);				//set the filter
-					self.sendCmd("BrowseRadioGenres");
+					mms.setRadioFilter_RadioSource(t["[guid]"]);				//set the filter
+					mms.sendCmd("BrowseRadioGenres");
 			
 			} else {
 			
-					self.arrayRadioStation = [];							// clear array of any previous data
-					CF.listRemove(self.lstRadioStation);					//clear list of any previous entries
+					mms.arrayRadioStation = [];							// clear array of any previous data
+					CF.listRemove(mms.lstRadioStation);					//clear list of any previous entries
 					
-					self.arrayPickListItem = [];							// clear array of any previous data
-					CF.listRemove(self.lstPickListItem);					//clear list of any previous entries
+					mms.arrayPickListItem = [];							// clear array of any previous data
+					CF.listRemove(mms.lstPickListItem);					//clear list of any previous entries
 					
 					CF.setJoins([											//toggle to the correct subpage
-						{join: self.subAlbum, value: 0},
-						{join: self.subAlbumTitle, value: 0},				
-						{join: self.subArtist, value: 0},			
-						{join: self.subArtistAlbum, value: 0},			
-						{join: self.subArtistAlbumTitle, value: 0},
-						{join: self.subGenre, value: 0},			
-						{join: self.subGenreAlbum, value: 0},
-						{join: self.subGenreAlbumTitle, value: 0},	
-						{join: self.subPlaylist, value: 0},		
-						{join: self.subPlaylistTitle, value: 0},		
-						{join: self.subRadioSource, value: 0},	
-						{join: self.subRadioStation, value: 1},
-						{join: self.subRadioGenre, value: 0},
-						{join: self.subPickListItem, value: 0},
-						{join: self.subQueue, value: 0},
+						{join: mms.subAlbum, value: 0},
+						{join: mms.subAlbumTitle, value: 0},				
+						{join: mms.subArtist, value: 0},			
+						{join: mms.subArtistAlbum, value: 0},			
+						{join: mms.subArtistAlbumTitle, value: 0},
+						{join: mms.subGenre, value: 0},			
+						{join: mms.subGenreAlbum, value: 0},
+						{join: mms.subGenreAlbumTitle, value: 0},	
+						{join: mms.subPlaylist, value: 0},		
+						{join: mms.subPlaylistTitle, value: 0},		
+						{join: mms.subRadioSource, value: 0},	
+						{join: mms.subRadioStation, value: 1},
+						{join: mms.subRadioGenre, value: 0},
+						{join: mms.subPickListItem, value: 0},
+						{join: mms.subQueue, value: 0},
 					]); 
-					self.setRadioFilter_RadioSource(t["[guid]"]);				//set the filter
-					self.sendCmd("BrowseRadioStations");
+					mms.setRadioFilter_RadioSource(t["[guid]"]);				//set the filter
+					mms.sendCmd("BrowseRadioStations");
 			}
 		});
 	},
 	
 	selectRadioGenre: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
-			self.arrayRadioStation = [];								// clear array of any previous data
-			CF.listRemove(self.lstRadioStation);						//clear list of any previous entries
+			mms.arrayRadioStation = [];								// clear array of any previous data
+			CF.listRemove(mms.lstRadioStation);						//clear list of any previous entries
 			CF.setJoins([											//toggle to the correct subpage
-						{join: self.subAlbum, value: 0},
-						{join: self.subAlbumTitle, value: 0},				
-						{join: self.subArtist, value: 0},			
-						{join: self.subArtistAlbum, value: 0},			
-						{join: self.subArtistAlbumTitle, value: 0},
-						{join: self.subGenre, value: 0},			
-						{join: self.subGenreAlbum, value: 0},
-						{join: self.subGenreAlbumTitle, value: 0},	
-						{join: self.subPlaylist, value: 0},		
-						{join: self.subPlaylistTitle, value: 0},		
-						{join: self.subRadioSource, value: 0},	
-						{join: self.subRadioStation, value: 1},
-						{join: self.subRadioGenre, value: 0},
-						{join: self.subPickListItem, value: 0},
-						{join: self.subQueue, value: 0},
+						{join: mms.subAlbum, value: 0},
+						{join: mms.subAlbumTitle, value: 0},				
+						{join: mms.subArtist, value: 0},			
+						{join: mms.subArtistAlbum, value: 0},			
+						{join: mms.subArtistAlbumTitle, value: 0},
+						{join: mms.subGenre, value: 0},			
+						{join: mms.subGenreAlbum, value: 0},
+						{join: mms.subGenreAlbumTitle, value: 0},	
+						{join: mms.subPlaylist, value: 0},		
+						{join: mms.subPlaylistTitle, value: 0},		
+						{join: mms.subRadioSource, value: 0},	
+						{join: mms.subRadioStation, value: 1},
+						{join: mms.subRadioGenre, value: 0},
+						{join: mms.subPickListItem, value: 0},
+						{join: mms.subQueue, value: 0},
 					]);
-					self.setRadioFilter_RadioGenre(t["[guid]"]);				//set the filter
-					self.sendCmd("BrowseRadioStations");
+					mms.setRadioFilter_RadioGenre(t["[guid]"]);				//set the filter
+					mms.sendCmd("BrowseRadioStations");
 		});
 	},
 	
 	playSelectedStation: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
-			self.playRadioStation(t["[guid]"]);				//play item using PlayRadioStation
+			mms.playRadioStation(t["[guid]"]);				//play item using PlayRadioStation
 		});
 	},
 	
 	selectPickListItem: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
-			self.arrayPickListItem = [];							// clear array of any previous data
-			CF.listRemove(self.lstPickListItem);					//clear list of any previous entries
+			mms.arrayPickListItem = [];							// clear array of any previous data
+			CF.listRemove(mms.lstPickListItem);					//clear list of any previous entries
 			CF.setJoins([											//toggle to the correct subpage
-				{join: self.subRadioSource, value: 0},	
-				{join: self.subRadioStation, value: 0},
-				{join: self.subRadioGenre, value: 0},
-				{join: self.subPickListItem, value: 1},
+				{join: mms.subRadioSource, value: 0},	
+				{join: mms.subRadioStation, value: 0},
+				{join: mms.subRadioGenre, value: 0},
+				{join: mms.subPickListItem, value: 1},
 			]);
-			self.ackpickListItem(t["[guid]"]);				//Play item using AckPickList OR
+			mms.ackpickListItem(t["[guid]"]);				//Play item using AckPickList OR
 		});
 	},
 	
-	ackpickListItem: 			function(guid) { self.sendCmd("AckPickItem " + guid); },				// Ack Pick Item 
+	ackpickListItem: 			function(guid) { mms.sendCmd("AckPickItem " + guid); },				// Ack Pick Item 
 	
 	// Search the list of radio sources and display the searched results only.
 	searchRadioSources: function(strSearch) {
 	
 				var templistArray = [];													//initialize temporary array
-				CF.listRemove(self.lstRadioSource);										//clear list of any previous entries
+				CF.listRemove(mms.lstRadioSource);										//clear list of any previous entries
 	
-				for (var i = 0;i<self.arrayRadioSource.length;i++)						//loop thru all the elements in the Albums array 
+				for (var i = 0;i<mms.arrayRadioSource.length;i++)						//loop thru all the elements in the Albums array 
 				{
-					var searchCoverArt = self.arrayRadioSource[i].s1;
-					var searchRadioSource = self.arrayRadioSource[i].s2;
-					var searchType = self.arrayRadioSource[i].s3;
-					var searchTokenGuiD = self.arrayRadioSource[i].d1.tokens["[guid]"];
+					var searchCoverArt = mms.arrayRadioSource[i].s4601;
+					var searchRadioSource = mms.arrayRadioSource[i].s4602;
+					var searchType = mms.arrayRadioSource[i].s4603;
+					var searchTokenGuiD = mms.arrayRadioSource[i].d4601.tokens["[guid]"];
 					
-					if(self.search(searchRadioSource, strSearch))							// refer to search() from "Other functions" section
+					if(mms.search(searchRadioSource, strSearch))							// refer to search() from "Other functions" section
 					{
 						templistArray.push({										// Add matched info to temp array
-							s1: searchCoverArt,
-							s2: searchRadioSource,
-							s3: searchType,
-							d1: { tokens: {"[guid]": searchTokenGuiD} }
+							s4601: searchCoverArt,
+							s4602: searchRadioSource,
+							s4603: searchType,
+							d4601: { tokens: {"[guid]": searchTokenGuiD} }
 						});
 					} // end if
 				}// end for
-				CF.listAdd(self.lstRadioSource, templistArray);							// Add temp array to list
+				CF.listAdd(mms.lstRadioSource, templistArray);							// Add temp array to list
 	},
 	
 	// -----------------------------------------------------------------------------------------------------------------------------
@@ -1594,53 +1606,53 @@ var self = {
 	// -----------------------------------------------------------------------------------------------------------------------------
 	
 	browseQueue: function() { 
-		self.arrayQueue = [];															// clear array of any previous data
-		CF.listRemove(self.lstQueue);													// clear list of any previous entries
+		mms.arrayQueue = [];															// clear array of any previous data
+		CF.listRemove(mms.lstQueue);													// clear list of any previous entries
 		CF.setJoins([																	// show the correct subpage and hide the rest
-				{join: self.subAlbum, value: 0},
-				{join: self.subAlbumTitle, value: 0},				
-				{join: self.subArtist, value: 0},			
-				{join: self.subArtistAlbum, value: 0},			
-				{join: self.subArtistAlbumTitle, value: 0},
-				{join: self.subGenre, value: 0},			
-				{join: self.subGenreAlbum, value: 0},
-				{join: self.subGenreAlbumTitle, value: 0},	
-				{join: self.subPlaylist, value: 0},		
-				{join: self.subPlaylistTitle, value: 0},		
-				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioStation, value: 0},				
-				{join: self.subRadioGenre, value: 0},
-				{join: self.subPickListItem, value: 0},
-				{join: self.subQueue, value: 1},
+				{join: mms.subAlbum, value: 0},
+				{join: mms.subAlbumTitle, value: 0},				
+				{join: mms.subArtist, value: 0},			
+				{join: mms.subArtistAlbum, value: 0},			
+				{join: mms.subArtistAlbumTitle, value: 0},
+				{join: mms.subGenre, value: 0},			
+				{join: mms.subGenreAlbum, value: 0},
+				{join: mms.subGenreAlbumTitle, value: 0},	
+				{join: mms.subPlaylist, value: 0},		
+				{join: mms.subPlaylistTitle, value: 0},		
+				{join: mms.subRadioSource, value: 0},
+				{join: mms.subRadioStation, value: 0},				
+				{join: mms.subRadioGenre, value: 0},
+				{join: mms.subPickListItem, value: 0},
+				{join: mms.subQueue, value: 1},
 			]);
-		self.clearMusicFilter();															// clear all previous music filters
-		self.clearRadioFilter();															// clear all previous radio filters
-		self.sendCmd("BrowseNowPlaying"); 														// send the command
-		//setTimeout(function(){CF.listAdd(self.lstQueue, self.arrayQueue);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
+		mms.clearMusicFilter();															// clear all previous music filters
+		mms.clearRadioFilter();															// clear all previous radio filters
+		mms.sendCmd("BrowseNowPlaying"); 														// send the command
+		//setTimeout(function(){CF.listAdd(mms.lstQueue, mms.arrayQueue);}, 2000);			// set a short delay to give time for array to be populated before adding array into list.
 	},
 	
 	playCurrentTitle: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
-			self.playTitleFalse(t["[guid]"]);				// Play the current title
+			mms.playTitleFalse(t["[guid]"]);				// Play the current title
 		});
 	},
 	
 	queueCurrentTitle: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
-			self.playTitleTrue(t["[guid]"]);				// Play the current title
+			mms.playTitleTrue(t["[guid]"]);				// Play the current title
 		});
 	},
 
 	playCurrentItem: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
-			self.playNowPlayingItem(t["[guid]"]);				// Play the current item
+			mms.playNowPlayingItem(t["[guid]"]);				// Play the current item
 		});
 	},
 	
 	removeCurrentItem: function(list, listIndex, join) {							
 		CF.getJoin(list+":"+listIndex+":"+join, function(j,v,t) {
-			self.removeNowPlayingItem(t["[guid]"]);				// Remove the current item
-			self.browseQueue();									// Refresh the list
+			mms.removeNowPlayingItem(t["[guid]"]);				// Remove the current item
+			mms.browseQueue();									// Refresh the list
 		});
 	},
 	
@@ -1648,28 +1660,28 @@ var self = {
 	searchQueue: function(strSearch) {
 	
 				var templistArray = [];				//initialize temporary array
-				CF.listRemove(self.lstQueue);		//clear list of any previous entries
+				CF.listRemove(mms.lstQueue);		//clear list of any previous entries
 	
-				for (var i = 0;i<self.arrayQueue.length;i++)						//loop thru all the elements in the Albums array 
+				for (var i = 0;i<mms.arrayQueue.length;i++)						//loop thru all the elements in the Albums array 
 				{
-					var searchCoverArt = self.arrayQueue[i].s1;
-					var searchQueue = self.arrayQueue[i].s2;
-					var searchType = self.arrayQueue[i].s3;
-					var searchTokenGuiD = self.arrayQueue[i].d1.tokens["[guid]"];
-					var searchToken2GuiD = self.arrayQueue[i].d2.tokens["[guid]"];
+					var searchCoverArt = mms.arrayQueue[i].s4601;
+					var searchQueue = mms.arrayQueue[i].s4602;
+					var searchType = mms.arrayQueue[i].s4603;
+					var searchTokenGuiD = mms.arrayQueue[i].d4601.tokens["[guid]"];
+					var searchToken2GuiD = mms.arrayQueue[i].d4602.tokens["[guid]"];
 					
-					if(self.search(searchQueue, strSearch))							// refer to search() from "Other functions" section
+					if(mms.search(searchQueue, strSearch))							// refer to search() from "Other functions" section
 					{
 						templistArray.push({										// Add matched info to temp array
-							s1: searchCoverArt,
-							s2: searchQueue,
-							s3: searchType,
-							d1: { tokens: {"[guid]": searchTokenGuiD} },
-							d2: { tokens: {"[guid]": searchToken2GuiD} }
+							s4601: searchCoverArt,
+							s4602: searchQueue,
+							s4603: searchType,
+							d4601: { tokens: {"[guid]": searchTokenGuiD} },
+							d4602: { tokens: {"[guid]": searchToken2GuiD} }
 						});
 					} // end if
 				}// end for
-				CF.listAdd(self.lstQueue, templistArray);							// Add temp array to list
+				CF.listAdd(mms.lstQueue, templistArray);							// Add temp array to list
 	},
 	
 	// -----------------------------------------------------------------------------------------------------------------------------
@@ -1678,201 +1690,201 @@ var self = {
 		
 	backAlbumList: function() {
 		CF.setJoins([
-				{join: self.subAlbum, value: 1},
-				{join: self.subAlbumTitle, value: 0},				
-				{join: self.subArtist, value: 0},			
-				{join: self.subArtistAlbum, value: 0},			
-				{join: self.subArtistAlbumTitle, value: 0},
-				{join: self.subGenre, value: 0},			
-				{join: self.subGenreAlbum, value: 0},
-				{join: self.subGenreAlbumTitle, value: 0},	
-				{join: self.subPlaylist, value: 0},		
-				{join: self.subPlaylistTitle, value: 0},		
-				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioStation, value: 0},				
-				{join: self.subPickListItem, value: 0},
-				{join: self.subQueue, value: 0},
+				{join: mms.subAlbum, value: 1},
+				{join: mms.subAlbumTitle, value: 0},				
+				{join: mms.subArtist, value: 0},			
+				{join: mms.subArtistAlbum, value: 0},			
+				{join: mms.subArtistAlbumTitle, value: 0},
+				{join: mms.subGenre, value: 0},			
+				{join: mms.subGenreAlbum, value: 0},
+				{join: mms.subGenreAlbumTitle, value: 0},	
+				{join: mms.subPlaylist, value: 0},		
+				{join: mms.subPlaylistTitle, value: 0},		
+				{join: mms.subRadioSource, value: 0},
+				{join: mms.subRadioStation, value: 0},				
+				{join: mms.subPickListItem, value: 0},
+				{join: mms.subQueue, value: 0},
 			]);
-		self.clearMusicFilter();															// clear all previous music filters
-		self.clearRadioFilter();															// clear all previous radio filters
+		mms.clearMusicFilter();															// clear all previous music filters
+		mms.clearRadioFilter();															// clear all previous radio filters
 	},
 	
 	backArtistList: function() {
 		CF.setJoins([
-				{join: self.subAlbum, value: 0},
-				{join: self.subAlbumTitle, value: 0},				
-				{join: self.subArtist, value: 1},			
-				{join: self.subArtistAlbum, value: 0},			
-				{join: self.subArtistAlbumTitle, value: 0},
-				{join: self.subGenre, value: 0},			
-				{join: self.subGenreAlbum, value: 0},
-				{join: self.subGenreAlbumTitle, value: 0},	
-				{join: self.subPlaylist, value: 0},		
-				{join: self.subPlaylistTitle, value: 0},		
-				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioStation, value: 0},				
-				{join: self.subPickListItem, value: 0},
-				{join: self.subQueue, value: 0},
+				{join: mms.subAlbum, value: 0},
+				{join: mms.subAlbumTitle, value: 0},				
+				{join: mms.subArtist, value: 1},			
+				{join: mms.subArtistAlbum, value: 0},			
+				{join: mms.subArtistAlbumTitle, value: 0},
+				{join: mms.subGenre, value: 0},			
+				{join: mms.subGenreAlbum, value: 0},
+				{join: mms.subGenreAlbumTitle, value: 0},	
+				{join: mms.subPlaylist, value: 0},		
+				{join: mms.subPlaylistTitle, value: 0},		
+				{join: mms.subRadioSource, value: 0},
+				{join: mms.subRadioStation, value: 0},				
+				{join: mms.subPickListItem, value: 0},
+				{join: mms.subQueue, value: 0},
 			]);
-		self.clearMusicFilter();															// clear all previous music filters
-		self.clearRadioFilter();															// clear all previous radio filters
+		mms.clearMusicFilter();															// clear all previous music filters
+		mms.clearRadioFilter();															// clear all previous radio filters
 	},
 	
 	backArtistAlbumList: function() {
 		CF.setJoins([
-				{join: self.subAlbum, value: 0},
-				{join: self.subAlbumTitle, value: 0},				
-				{join: self.subArtist, value: 0},			
-				{join: self.subArtistAlbum, value: 1},			
-				{join: self.subArtistAlbumTitle, value: 0},
-				{join: self.subGenre, value: 0},			
-				{join: self.subGenreAlbum, value: 0},
-				{join: self.subGenreAlbumTitle, value: 0},	
-				{join: self.subPlaylist, value: 0},		
-				{join: self.subPlaylistTitle, value: 0},		
-				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioStation, value: 0},				
-				{join: self.subPickListItem, value: 0},
-				{join: self.subQueue, value: 0},
+				{join: mms.subAlbum, value: 0},
+				{join: mms.subAlbumTitle, value: 0},				
+				{join: mms.subArtist, value: 0},			
+				{join: mms.subArtistAlbum, value: 1},			
+				{join: mms.subArtistAlbumTitle, value: 0},
+				{join: mms.subGenre, value: 0},			
+				{join: mms.subGenreAlbum, value: 0},
+				{join: mms.subGenreAlbumTitle, value: 0},	
+				{join: mms.subPlaylist, value: 0},		
+				{join: mms.subPlaylistTitle, value: 0},		
+				{join: mms.subRadioSource, value: 0},
+				{join: mms.subRadioStation, value: 0},				
+				{join: mms.subPickListItem, value: 0},
+				{join: mms.subQueue, value: 0},
 			]);
 	},
 	
 	backGenreList: function() {
 		CF.setJoins([
-				{join: self.subAlbum, value: 0},
-				{join: self.subAlbumTitle, value: 0},				
-				{join: self.subArtist, value: 0},			
-				{join: self.subArtistAlbum, value: 0},			
-				{join: self.subArtistAlbumTitle, value: 0},
-				{join: self.subGenre, value: 1},			
-				{join: self.subGenreAlbum, value: 0},
-				{join: self.subGenreAlbumTitle, value: 0},	
-				{join: self.subPlaylist, value: 0},		
-				{join: self.subPlaylistTitle, value: 0},		
-				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioStation, value: 0},				
-				{join: self.subPickListItem, value: 0},
-				{join: self.subQueue, value: 0},
+				{join: mms.subAlbum, value: 0},
+				{join: mms.subAlbumTitle, value: 0},				
+				{join: mms.subArtist, value: 0},			
+				{join: mms.subArtistAlbum, value: 0},			
+				{join: mms.subArtistAlbumTitle, value: 0},
+				{join: mms.subGenre, value: 1},			
+				{join: mms.subGenreAlbum, value: 0},
+				{join: mms.subGenreAlbumTitle, value: 0},	
+				{join: mms.subPlaylist, value: 0},		
+				{join: mms.subPlaylistTitle, value: 0},		
+				{join: mms.subRadioSource, value: 0},
+				{join: mms.subRadioStation, value: 0},				
+				{join: mms.subPickListItem, value: 0},
+				{join: mms.subQueue, value: 0},
 			]);
-		self.clearMusicFilter();															// clear all previous music filters
-		self.clearRadioFilter();															// clear all previous radio filters
+		mms.clearMusicFilter();															// clear all previous music filters
+		mms.clearRadioFilter();															// clear all previous radio filters
 	},
 	
 	backGenreAlbumList: function() {
 		CF.setJoins([
-				{join: self.subAlbum, value: 0},
-				{join: self.subAlbumTitle, value: 0},				
-				{join: self.subArtist, value: 0},			
-				{join: self.subArtistAlbum, value: 0},			
-				{join: self.subArtistAlbumTitle, value: 0},
-				{join: self.subGenre, value: 0},			
-				{join: self.subGenreAlbum, value: 1},
-				{join: self.subGenreAlbumTitle, value: 0},	
-				{join: self.subPlaylist, value: 0},		
-				{join: self.subPlaylistTitle, value: 0},		
-				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioStation, value: 0},				
-				{join: self.subPickListItem, value: 0},
-				{join: self.subQueue, value: 0},
+				{join: mms.subAlbum, value: 0},
+				{join: mms.subAlbumTitle, value: 0},				
+				{join: mms.subArtist, value: 0},			
+				{join: mms.subArtistAlbum, value: 0},			
+				{join: mms.subArtistAlbumTitle, value: 0},
+				{join: mms.subGenre, value: 0},			
+				{join: mms.subGenreAlbum, value: 1},
+				{join: mms.subGenreAlbumTitle, value: 0},	
+				{join: mms.subPlaylist, value: 0},		
+				{join: mms.subPlaylistTitle, value: 0},		
+				{join: mms.subRadioSource, value: 0},
+				{join: mms.subRadioStation, value: 0},				
+				{join: mms.subPickListItem, value: 0},
+				{join: mms.subQueue, value: 0},
 			]);
 	},
 	
 	backPlaylistList: function() {
 		CF.setJoins([
-				{join: self.subAlbum, value: 0},
-				{join: self.subAlbumTitle, value: 0},				
-				{join: self.subArtist, value: 0},			
-				{join: self.subArtistAlbum, value: 0},			
-				{join: self.subArtistAlbumTitle, value: 0},
-				{join: self.subGenre, value: 0},			
-				{join: self.subGenreAlbum, value: 0},
-				{join: self.subGenreAlbumTitle, value: 0},	
-				{join: self.subPlaylist, value: 1},		
-				{join: self.subPlaylistTitle, value: 0},		
-				{join: self.subRadioSource, value: 0},
-				{join: self.subRadioStation, value: 0},				
-				{join: self.subPickListItem, value: 0},
-				{join: self.subQueue, value: 0},
+				{join: mms.subAlbum, value: 0},
+				{join: mms.subAlbumTitle, value: 0},				
+				{join: mms.subArtist, value: 0},			
+				{join: mms.subArtistAlbum, value: 0},			
+				{join: mms.subArtistAlbumTitle, value: 0},
+				{join: mms.subGenre, value: 0},			
+				{join: mms.subGenreAlbum, value: 0},
+				{join: mms.subGenreAlbumTitle, value: 0},	
+				{join: mms.subPlaylist, value: 1},		
+				{join: mms.subPlaylistTitle, value: 0},		
+				{join: mms.subRadioSource, value: 0},
+				{join: mms.subRadioStation, value: 0},				
+				{join: mms.subPickListItem, value: 0},
+				{join: mms.subQueue, value: 0},
 			]);
-		self.clearMusicFilter();															// clear all previous music filters
-		self.clearRadioFilter();															// clear all previous radio filters
+		mms.clearMusicFilter();															// clear all previous music filters
+		mms.clearRadioFilter();															// clear all previous radio filters
 	},
 	
 	backRadioSourceList: function() {
 		CF.setJoins([
-				{join: self.subAlbum, value: 0},
-				{join: self.subAlbumTitle, value: 0},				
-				{join: self.subArtist, value: 0},			
-				{join: self.subArtistAlbum, value: 0},			
-				{join: self.subArtistAlbumTitle, value: 0},
-				{join: self.subGenre, value: 0},			
-				{join: self.subGenreAlbum, value: 0},
-				{join: self.subGenreAlbumTitle, value: 0},	
-				{join: self.subPlaylist, value: 0},		
-				{join: self.subPlaylistTitle, value: 0},		
-				{join: self.subRadioSource, value: 1},
-				{join: self.subRadioStation, value: 0},				
-				{join: self.subPickListItem, value: 0},
-				{join: self.subQueue, value: 0},
+				{join: mms.subAlbum, value: 0},
+				{join: mms.subAlbumTitle, value: 0},				
+				{join: mms.subArtist, value: 0},			
+				{join: mms.subArtistAlbum, value: 0},			
+				{join: mms.subArtistAlbumTitle, value: 0},
+				{join: mms.subGenre, value: 0},			
+				{join: mms.subGenreAlbum, value: 0},
+				{join: mms.subGenreAlbumTitle, value: 0},	
+				{join: mms.subPlaylist, value: 0},		
+				{join: mms.subPlaylistTitle, value: 0},		
+				{join: mms.subRadioSource, value: 1},
+				{join: mms.subRadioStation, value: 0},				
+				{join: mms.subPickListItem, value: 0},
+				{join: mms.subQueue, value: 0},
 			]);
-		self.clearMusicFilter();															// clear all previous music filters
-		self.clearRadioFilter();															// clear all previous radio filters
+		mms.clearMusicFilter();															// clear all previous music filters
+		mms.clearRadioFilter();															// clear all previous radio filters
 	},
 	
 	backRadioSourceStations: function() {
-		CF.listRemove(self.lstPickListItem);
-		self.Back();																		// Go back browsing history
+		CF.listRemove(mms.lstPickListItem);
+		mms.Back();																		// Go back browsing history
 	},
 	
 	forwardRadioSourceStations: function() {
-		CF.listRemove(self.lstPickListItem);
-		self.Forward();																		// Move forward browsing history
+		CF.listRemove(mms.lstPickListItem);
+		mms.Forward();																		// Move forward browsing history
 	},
 	
 	clearAll: function() {
 		
 		// clear all lists of previous entries
-		CF.listRemove(self.lstAlbum);				
-		CF.listRemove(self.lstArtist);				
-		CF.listRemove(self.lstGenre);				
-		CF.listRemove(self.lstPlaylist);			
-		CF.listRemove(self.lstRadioSource);
-		CF.listRemove(self.lstRadioStation);		
-		CF.listRemove(self.lstPickListItem);
-		CF.listRemove(self.lstQueue);
+		CF.listRemove(mms.lstAlbum);				
+		CF.listRemove(mms.lstArtist);				
+		CF.listRemove(mms.lstGenre);				
+		CF.listRemove(mms.lstPlaylist);			
+		CF.listRemove(mms.lstRadioSource);
+		CF.listRemove(mms.lstRadioStation);		
+		CF.listRemove(mms.lstPickListItem);
+		CF.listRemove(mms.lstQueue);
 		
 		// clear all arrays of previous entries
-		self.arrayAlbum = [];					// Album
-		self.arrayArtist = [];					// Artist
-		self.arrayGenre = [];					// Genre
-		self.arrayPlaylist = [];				// Playlist
-		self.arrayRadioSource = [];				// Radio Sources
-		self.arrayRadioStation = [],			// Radio Stations
-		self.arrayPickListItem = [];			// PickListItem
-		self.arrayQueue = [];					// Now Playing
-		self.artistLetters = [];				// Artist letters
+		mms.arrayAlbum = [];					// Album
+		mms.arrayArtist = [];					// Artist
+		mms.arrayGenre = [];					// Genre
+		mms.arrayPlaylist = [];				// Playlist
+		mms.arrayRadioSource = [];				// Radio Sources
+		mms.arrayRadioStation = [],			// Radio Stations
+		mms.arrayPickListItem = [];			// PickListItem
+		mms.arrayQueue = [];					// Now Playing
+		mms.artistLetters = [];				// Artist letters
 		
 		// clear the irrelevant text fields and slider values
 		CF.setJoins([																		
-				{join: "s1", value: ""},
-				{join: self.txtPlayStatus, value: ""},
-				{join: self.txtTrackStatus, value: ""},				
-				{join: self.txtCoverArt, value: ""},			
-				{join: self.txtTrackTitle, value: ""},			
-				{join: self.txtAlbum, value: ""},
-				{join: self.txtArtist, value: ""},			
-				{join: self.txtTrackTime, value: ""},
-				{join: self.txtTrackDuration, value: ""},
-				{join: self.srchAlbum, value: ""},			
-				{join: self.srchArtist, value: ""},
-				{join: self.srchGenre, value: ""},			
-				{join: self.srchPlaylist, value: ""},
-				{join: self.srchRadioSource, value: ""},			
-				{join: self.srchQueue, value: ""},
-				{join: self.txtPlaylist, value: ""},
-				{join: self.txtVolumeLevel, value: ""},
-				{join: self.sldVolumeControl, value: 0},		// volume slider
-				{join: self.sldTrackTime, value: 0},			// track time feedback slider
+				{join: "s4601", value: ""},
+				{join: mms.txtPlayStatus, value: ""},
+				{join: mms.txtTrackStatus, value: ""},				
+				{join: mms.txtCoverArt, value: ""},			
+				{join: mms.txtTrackTitle, value: ""},			
+				{join: mms.txtAlbum, value: ""},
+				{join: mms.txtArtist, value: ""},			
+				{join: mms.txtTrackTime, value: ""},
+				{join: mms.txtTrackDuration, value: ""},
+				{join: mms.srchAlbum, value: ""},			
+				{join: mms.srchArtist, value: ""},
+				{join: mms.srchGenre, value: ""},			
+				{join: mms.srchPlaylist, value: ""},
+				{join: mms.srchRadioSource, value: ""},			
+				{join: mms.srchQueue, value: ""},
+				{join: mms.txtPlaylist, value: ""},
+				{join: mms.txtVolumeLevel, value: ""},
+				{join: mms.sldVolumeControl, value: 0},		// volume slider
+				{join: mms.sldTrackTime, value: 0},			// track time feedback slider
 		]);
 	},
 	
@@ -1881,139 +1893,139 @@ var self = {
 	// -----------------------------------------------------------------------------------------------------------------------------
 	
 	// Play All commands
-	playAlbumTrue: 			function(guid) { self.sendCmd("PlayAlbum " + guid + " True"); },		// Play selected Album. Will be added to the queue without interrupting playback.
-	playAlbumFalse: 		function(guid) { self.sendCmd("PlayAlbum " + guid + " False"); },		// Play selected Album. The queue will be cleared before the tracks are added.
-	playArtistTrue: 		function(guid) { self.sendCmd("PlayArtist " + guid + " True"); },		// Play selected Artist. Will be added to the queue without interrupting playback.
-	playArtistFalse: 		function(guid) { self.sendCmd("PlayArtist " + guid + " False"); },		// Play selected Artist. The queue will be cleared before the tracks are added.
-	playGenreTrue: 			function(guid) { self.sendCmd("PlayGenre " + guid + " True"); },		// Play selected Genre. Will be added to the queue without interrupting playback.
-	playGenreFalse: 		function(guid) { self.sendCmd("PlayGenre " + guid + " False"); },		// Play selected Genre. The queue will be cleared before the tracks are added.
-	playPlaylistTrue: 		function(guid) { self.sendCmd("PlayPlaylist " + guid + " True"); },		// Play selected Playlist. Will be added to the queue without interrupting playback.
-	playPlaylistFalse: 		function(guid) { self.sendCmd("PlayPlaylist " + guid + " False"); },	// Play selected Playlist. The queue will be cleared before the tracks are added.
-	playTitleTrue: 			function(guid) { self.sendCmd("PlayTitle " + guid + " True"); },		// Play selected Title. Will be added to the queue without interrupting playback.
-	playTitleFalse: 		function(guid) { self.sendCmd("PlayTitle " + guid + " False"); },		// Play selected Title. The queue will be cleared before the tracks are added.
-	playRadioStation: 		function(guid) { self.sendCmd("PlayRadioStation " + guid); },			// Play selected Radio Station. Will always clear the now playing queue.
-	playNowPlayingItem: 	function(guid) { self.sendCmd("JumpToNowPlayingItem " + guid); },		// Jump to the selected Item and begin playback.
-	removeNowPlayingItem: 	function(guid) { self.sendCmd("RemoveNowPlayingItem " + guid); },		// Remove the selected Item.
+	playAlbumTrue: 			function(guid) { mms.sendCmd("PlayAlbum " + guid + " True"); },		// Play selected Album. Will be added to the queue without interrupting playback.
+	playAlbumFalse: 		function(guid) { mms.sendCmd("PlayAlbum " + guid + " False"); },		// Play selected Album. The queue will be cleared before the tracks are added.
+	playArtistTrue: 		function(guid) { mms.sendCmd("PlayArtist " + guid + " True"); },		// Play selected Artist. Will be added to the queue without interrupting playback.
+	playArtistFalse: 		function(guid) { mms.sendCmd("PlayArtist " + guid + " False"); },		// Play selected Artist. The queue will be cleared before the tracks are added.
+	playGenreTrue: 			function(guid) { mms.sendCmd("PlayGenre " + guid + " True"); },		// Play selected Genre. Will be added to the queue without interrupting playback.
+	playGenreFalse: 		function(guid) { mms.sendCmd("PlayGenre " + guid + " False"); },		// Play selected Genre. The queue will be cleared before the tracks are added.
+	playPlaylistTrue: 		function(guid) { mms.sendCmd("PlayPlaylist " + guid + " True"); },		// Play selected Playlist. Will be added to the queue without interrupting playback.
+	playPlaylistFalse: 		function(guid) { mms.sendCmd("PlayPlaylist " + guid + " False"); },	// Play selected Playlist. The queue will be cleared before the tracks are added.
+	playTitleTrue: 			function(guid) { mms.sendCmd("PlayTitle " + guid + " True"); },		// Play selected Title. Will be added to the queue without interrupting playback.
+	playTitleFalse: 		function(guid) { mms.sendCmd("PlayTitle " + guid + " False"); },		// Play selected Title. The queue will be cleared before the tracks are added.
+	playRadioStation: 		function(guid) { mms.sendCmd("PlayRadioStation " + guid); },			// Play selected Radio Station. Will always clear the now playing queue.
+	playNowPlayingItem: 	function(guid) { mms.sendCmd("JumpToNowPlayingItem " + guid); },		// Jump to the selected Item and begin playback.
+	removeNowPlayingItem: 	function(guid) { mms.sendCmd("RemoveNowPlayingItem " + guid); },		// Remove the selected Item.
 	
 	// Browse library commands
-	browseMusic: 			function() { self.sendCmd("Browse Music"); },				// Browse Music
-	browseRecordedTV: 		function() { self.sendCmd("Browse RecordedTV"); },			// Browse Recorded TV
-	browseMovies: 			function() { self.sendCmd("Browse Movies"); },				// Browse Movies
-	browseVideos: 			function() { self.sendCmd("Browse Videos"); },				// Browse Videos
-	browsePictures: 		function() { self.sendCmd("Browse Pictures"); },			// Browse Pictures
-	browseInstances: 		function() { self.sendCmd("BrowseInstances"); },			// Browse Instances
-	browseFavorites: 		function() { self.sendCmd("BrowseFavorites"); },			// Browse Favorites
-	browseRadioStations: 	function() { self.sendCmd("BrowseRadioStations"); },		// Browse Radio Stations
+	browseMusic: 			function() { mms.sendCmd("Browse Music"); },				// Browse Music
+	browseRecordedTV: 		function() { mms.sendCmd("Browse RecordedTV"); },			// Browse Recorded TV
+	browseMovies: 			function() { mms.sendCmd("Browse Movies"); },				// Browse Movies
+	browseVideos: 			function() { mms.sendCmd("Browse Videos"); },				// Browse Videos
+	browsePictures: 		function() { mms.sendCmd("Browse Pictures"); },			// Browse Pictures
+	browseInstances: 		function() { mms.sendCmd("BrowseInstances"); },			// Browse Instances
+	browseFavorites: 		function() { mms.sendCmd("BrowseFavorites"); },			// Browse Favorites
+	browseRadioStations: 	function() { mms.sendCmd("BrowseRadioStations"); },		// Browse Radio Stations
 	
 	// Basic transport commands
-	PlayPause: 				function() { self.sendCmd("PlayPause"); },					// Play/Pause
-	Play: 					function() { self.sendCmd("Play"); },						// Play
-	Pause: 					function() { self.sendCmd("Pause"); },						// Pause
-	Stop: 					function() { self.sendCmd("Stop"); },						// Stop
-	SkipNext: 				function() { self.sendCmd("SkipNext"); },					// Skip Next
-	SkipPrevious: 			function() { self.sendCmd("SkipPrevious"); },				// Skip Previous
-	ShuffleOn: 				function() { self.sendCmd("Shuffle True"); },				// Shuffle On
-	ShuffleOff: 			function() { self.sendCmd("Shuffle False"); },				// Shuffle Off
-	ShuffleToggle: 			function() { self.sendCmd("Shuffle Toggle"); },				// Shuffle Toggle
-	RepeatOn: 				function() { self.sendCmd("Repeat True"); },				// Repeat On
-	RepeatOff: 				function() { self.sendCmd("Repeat False"); },				// Repeat Off
-	RepeatToggle: 			function() { self.sendCmd("Repeat Toggle"); },				// Repeat Toggle
-	ScrobbleOn: 			function() { self.sendCmd("Scrobble True"); },				// Scrobble On
-	ScrobbleOff: 			function() { self.sendCmd("Scrobble False"); },				// Scrobble Off
-	ScrobbleToggle: 		function() { self.sendCmd("Scrobble Toggle"); },			// Scrobble Toggle
-	MuteOn: 				function() { self.sendCmd("Mute True"); },					// Mute On
-	MuteOff: 				function() { self.sendCmd("Mute False"); },					// Mute Off
-	MuteToggle: 			function() { self.sendCmd("Mute Toggle"); },				// Mute Toggle
-	VolumeUp: 				function() { self.sendCmd("VolumeUp"); },					// Volume Up. Volume range 0 - 50.
-	VolumeDown: 			function() { self.sendCmd("VolumeDown"); },					// Volume Down. Volume range 0 - 50.
-	SetVolume: 				function(level) { self.sendCmd("SetVolume " + level); },					// Volume Down. Volume range 0 - 50.
+	PlayPause: 				function() { mms.sendCmd("PlayPause"); },					// Play/Pause
+	Play: 					function() { mms.sendCmd("Play"); },						// Play
+	Pause: 					function() { mms.sendCmd("Pause"); },						// Pause
+	Stop: 					function() { mms.sendCmd("Stop"); },						// Stop
+	SkipNext: 				function() { mms.sendCmd("SkipNext"); },					// Skip Next
+	SkipPrevious: 			function() { mms.sendCmd("SkipPrevious"); },				// Skip Previous
+	ShuffleOn: 				function() { mms.sendCmd("Shuffle True"); },				// Shuffle On
+	ShuffleOff: 			function() { mms.sendCmd("Shuffle False"); },				// Shuffle Off
+	ShuffleToggle: 			function() { mms.sendCmd("Shuffle Toggle"); },				// Shuffle Toggle
+	RepeatOn: 				function() { mms.sendCmd("Repeat True"); },				// Repeat On
+	RepeatOff: 				function() { mms.sendCmd("Repeat False"); },				// Repeat Off
+	RepeatToggle: 			function() { mms.sendCmd("Repeat Toggle"); },				// Repeat Toggle
+	ScrobbleOn: 			function() { mms.sendCmd("Scrobble True"); },				// Scrobble On
+	ScrobbleOff: 			function() { mms.sendCmd("Scrobble False"); },				// Scrobble Off
+	ScrobbleToggle: 		function() { mms.sendCmd("Scrobble Toggle"); },			// Scrobble Toggle
+	MuteOn: 				function() { mms.sendCmd("Mute True"); },					// Mute On
+	MuteOff: 				function() { mms.sendCmd("Mute False"); },					// Mute Off
+	MuteToggle: 			function() { mms.sendCmd("Mute Toggle"); },				// Mute Toggle
+	VolumeUp: 				function() { mms.sendCmd("VolumeUp"); },					// Volume Up. Volume range 0 - 50.
+	VolumeDown: 			function() { mms.sendCmd("VolumeDown"); },					// Volume Down. Volume range 0 - 50.
+	SetVolume: 				function(level) { mms.sendCmd("SetVolume " + level); },					// Volume Down. Volume range 0 - 50.
 	
 	// Other remote commands
-	ChannelUp: 				function() { self.sendCmd("SendRemote ch+"); },				// Channel Up
-	ChannelDown: 			function() { self.sendCmd("SendRemote ch-"); },				// Channel Down
-	Rewind: 				function() { self.sendCmd("SendRemote Rewind"); },			// Rewind
-	FastForward: 			function() { self.sendCmd("SendRemote FastForward"); },		// Fast Forward
-	Record: 				function() { self.sendCmd("SendRemote Record"); },			// Record
-	Information: 			function() { self.sendCmd("SendRemote MoreInfo"); },		// Information
-	Guide: 					function() { self.sendCmd("Navigate TVGuide"); },			// Guide 
-	Back_IR: 				function() { self.sendCmd("SendRemote Back"); },			// Back (IR Remote)
-	DVDMenu: 				function() { self.sendCmd("SendRemote DVDMenu"); },			// DVDMenu
-	GreenButton: 			function() { self.sendCmd("Navigate Start"); },				// Green Button
-	Up: 					function() { self.sendCmd("SendRemote up"); },				// Up
-	Down: 					function() { self.sendCmd("SendRemote down"); },			// Down
-	Left: 					function() { self.sendCmd("SendRemote left"); },			// Left
-	Right: 					function() { self.sendCmd("SendRemote right"); },			// Right
-	Select: 				function() { self.sendCmd("SendRemote ok"); },				// Select OK
-	NumPad1: 				function() { self.sendCmd("SendRemote 1"); },				// NumPad1
-	NumPad2: 				function() { self.sendCmd("SendRemote 2"); },				// NumPad2
-	NumPad3: 				function() { self.sendCmd("SendRemote 3"); },				// NumPad3
-	NumPad4: 				function() { self.sendCmd("SendRemote 4"); },				// NumPad4
-	NumPad5: 				function() { self.sendCmd("SendRemote 5"); },				// NumPad5
-	NumPad6: 				function() { self.sendCmd("SendRemote 6"); },				// NumPad6
-	NumPad7: 				function() { self.sendCmd("SendRemote 7"); },				// NumPad7
-	NumPad8: 				function() { self.sendCmd("SendRemote 8"); },				// NumPad8
-	NumPad9: 				function() { self.sendCmd("SendRemote 9"); },				// NumPad9
-	NumPad0: 				function() { self.sendCmd("SendRemote 0"); },				// NumPad0
-	NumPadEnter: 			function() { self.sendCmd("SendRemote enter"); },			// NumPadEnter
-	NumPadClear: 			function() { self.sendCmd("SendRemote clear"); },			// NumPadClear
-	Slideshow: 				function() { self.sendCmd("Navigate Slideshow"); },			// Slideshow
-	LiveTV: 				function() { self.sendCmd("Navigate LiveTV"); },			// Live TV
+	ChannelUp: 				function() { mms.sendCmd("SendRemote ch+"); },				// Channel Up
+	ChannelDown: 			function() { mms.sendCmd("SendRemote ch-"); },				// Channel Down
+	Rewind: 				function() { mms.sendCmd("SendRemote Rewind"); },			// Rewind
+	FastForward: 			function() { mms.sendCmd("SendRemote FastForward"); },		// Fast Forward
+	Record: 				function() { mms.sendCmd("SendRemote Record"); },			// Record
+	Information: 			function() { mms.sendCmd("SendRemote MoreInfo"); },		// Information
+	Guide: 					function() { mms.sendCmd("Navigate TVGuide"); },			// Guide 
+	Back_IR: 				function() { mms.sendCmd("SendRemote Back"); },			// Back (IR Remote)
+	DVDMenu: 				function() { mms.sendCmd("SendRemote DVDMenu"); },			// DVDMenu
+	GreenButton: 			function() { mms.sendCmd("Navigate Start"); },				// Green Button
+	Up: 					function() { mms.sendCmd("SendRemote up"); },				// Up
+	Down: 					function() { mms.sendCmd("SendRemote down"); },			// Down
+	Left: 					function() { mms.sendCmd("SendRemote left"); },			// Left
+	Right: 					function() { mms.sendCmd("SendRemote right"); },			// Right
+	Select: 				function() { mms.sendCmd("SendRemote ok"); },				// Select OK
+	NumPad1: 				function() { mms.sendCmd("SendRemote 1"); },				// NumPad1
+	NumPad2: 				function() { mms.sendCmd("SendRemote 2"); },				// NumPad2
+	NumPad3: 				function() { mms.sendCmd("SendRemote 3"); },				// NumPad3
+	NumPad4: 				function() { mms.sendCmd("SendRemote 4"); },				// NumPad4
+	NumPad5: 				function() { mms.sendCmd("SendRemote 5"); },				// NumPad5
+	NumPad6: 				function() { mms.sendCmd("SendRemote 6"); },				// NumPad6
+	NumPad7: 				function() { mms.sendCmd("SendRemote 7"); },				// NumPad7
+	NumPad8: 				function() { mms.sendCmd("SendRemote 8"); },				// NumPad8
+	NumPad9: 				function() { mms.sendCmd("SendRemote 9"); },				// NumPad9
+	NumPad0: 				function() { mms.sendCmd("SendRemote 0"); },				// NumPad0
+	NumPadEnter: 			function() { mms.sendCmd("SendRemote enter"); },			// NumPadEnter
+	NumPadClear: 			function() { mms.sendCmd("SendRemote clear"); },			// NumPadClear
+	Slideshow: 				function() { mms.sendCmd("Navigate Slideshow"); },			// Slideshow
+	LiveTV: 				function() { mms.sendCmd("Navigate LiveTV"); },			// Live TV
 	
 	// SetMusicFilter commands
-	setMusicFilter_Album:		function(guid) { self.sendCmd("SetMusicFilter Album=" + guid); },			// Set Album filter 
-	setMusicFilter_Artist:		function(guid) { self.sendCmd("SetMusicFilter Artist=" + guid); },			// Set Artist filter
-	setMusicFilter_Genre:		function(guid) { self.sendCmd("SetMusicFilter Genre=" + guid); },			// Set Genre filter
-	setMusicFilter_Playlist:	function(guid) { self.sendCmd("SetMusicFilter Playlist=" + guid); },		// Set Playlist filter
-	setMusicFilter_RadioSource:	function(guid) { self.sendCmd("SetMusicFilter RadioSource=" + guid); },	// Set Radio Sources filter
-	setMusicFilter_Queue:		function(guid) { self.sendCmd("SetMusicFilter NowPlaying=" + guid); },		// Set Now Playing filter
-	setMusicFilter_Search:		function(guid) { self.sendCmd("SetMusicFilter Search=" + guid); },			// Search 
-	clearMusicFilter:			function() { self.sendCmd("SetMusicFilter Clear"); },						// Clear all Music filters
+	setMusicFilter_Album:		function(guid) { mms.sendCmd("SetMusicFilter Album=" + guid); },			// Set Album filter 
+	setMusicFilter_Artist:		function(guid) { mms.sendCmd("SetMusicFilter Artist=" + guid); },			// Set Artist filter
+	setMusicFilter_Genre:		function(guid) { mms.sendCmd("SetMusicFilter Genre=" + guid); },			// Set Genre filter
+	setMusicFilter_Playlist:	function(guid) { mms.sendCmd("SetMusicFilter Playlist=" + guid); },		// Set Playlist filter
+	setMusicFilter_RadioSource:	function(guid) { mms.sendCmd("SetMusicFilter RadioSource=" + guid); },	// Set Radio Sources filter
+	setMusicFilter_Queue:		function(guid) { mms.sendCmd("SetMusicFilter NowPlaying=" + guid); },		// Set Now Playing filter
+	setMusicFilter_Search:		function(guid) { mms.sendCmd("SetMusicFilter Search=" + guid); },			// Search 
+	clearMusicFilter:			function() { mms.sendCmd("SetMusicFilter Clear"); },						// Clear all Music filters
 	
 	// SetMusicFilter commands
-	setRadioFilter_Album:		function(guid) { self.sendCmd("SetRadioFilter Album=" + guid); },			// Set Album filter 
-	setRadioFilter_Artist:		function(guid) { self.sendCmd("SetRadioFilter Artist=" + guid); },			// Set Artist filter
-	setRadioFilter_Genre:		function(guid) { self.sendCmd("SetRadioFilter Genre=" + guid); },			// Set Genre filter
-	setRadioFilter_Playlist:	function(guid) { self.sendCmd("SetRadioFilter Playlist=" + guid); },		// Set Playlist filter
-	setRadioFilter_RadioSource:	function(guid) { self.sendCmd("SetRadioFilter RadioSource=" + guid); },		// Set Radio Sources filter
-	setRadioFilter_RadioGenre:	function(guid) { self.sendCmd("SetRadioFilter RadioGenre=" + guid); },	// Set Radio Sources filter
-	setRadioFilter_Queue:		function(guid) { self.sendCmd("SetRadioFilter NowPlaying=" + guid); },		// Set Now Playing filter
-	setRadioFilter_Search:		function(guid) { self.sendCmd("SetRadioFilter Search=" + guid); },			// Search 
-	clearRadioFilter:			function() { self.sendCmd("SetRadioFilter Clear"); },						// Clear all Radio filters
+	setRadioFilter_Album:		function(guid) { mms.sendCmd("SetRadioFilter Album=" + guid); },			// Set Album filter 
+	setRadioFilter_Artist:		function(guid) { mms.sendCmd("SetRadioFilter Artist=" + guid); },			// Set Artist filter
+	setRadioFilter_Genre:		function(guid) { mms.sendCmd("SetRadioFilter Genre=" + guid); },			// Set Genre filter
+	setRadioFilter_Playlist:	function(guid) { mms.sendCmd("SetRadioFilter Playlist=" + guid); },		// Set Playlist filter
+	setRadioFilter_RadioSource:	function(guid) { mms.sendCmd("SetRadioFilter RadioSource=" + guid); },		// Set Radio Sources filter
+	setRadioFilter_RadioGenre:	function(guid) { mms.sendCmd("SetRadioFilter RadioGenre=" + guid); },	// Set Radio Sources filter
+	setRadioFilter_Queue:		function(guid) { mms.sendCmd("SetRadioFilter NowPlaying=" + guid); },		// Set Now Playing filter
+	setRadioFilter_Search:		function(guid) { mms.sendCmd("SetRadioFilter Search=" + guid); },			// Search 
+	clearRadioFilter:			function() { mms.sendCmd("SetRadioFilter Clear"); },						// Clear all Radio filters
 	
 	// SetMediaFilter commands
-	setMediaFilter_Album:		function(guid) { self.sendCmd("SetMediaFilter Album=" + guid); },			// Set Album filter 
-	setMediaFilter_Artist:		function(guid) { self.sendCmd("SetMediaFilter Artist=" + guid); },			// Set Artist filter
-	setMediaFilter_Genre:		function(guid) { self.sendCmd("SetMediaFilter Genre=" + guid); },			// Set Genre filter
-	setMediaFilter_Playlist:	function(guid) { self.sendCmd("SetMediaFilter Playlist=" + guid); },		// Set Playlist filter
-	setMediaFilter_RadioSource:	function(guid) { self.sendCmd("SetMediaFilter RadioSource=" + guid); },		// Set Radio Sources filter
-	setMediaFilter_Queue:		function(guid) { self.sendCmd("SetMediaFilter NowPlaying=" + guid); },		// Set Now Playing filter
-	setMediaFilter_Search:		function(guid) { self.sendCmd("SetMediaFilter Search=" + guid); },			// Search 
-	clearMediaFilter:			function() { self.sendCmd("SetMediaFilter Clear"); },						// Clear all Media filters
+	setMediaFilter_Album:		function(guid) { mms.sendCmd("SetMediaFilter Album=" + guid); },			// Set Album filter 
+	setMediaFilter_Artist:		function(guid) { mms.sendCmd("SetMediaFilter Artist=" + guid); },			// Set Artist filter
+	setMediaFilter_Genre:		function(guid) { mms.sendCmd("SetMediaFilter Genre=" + guid); },			// Set Genre filter
+	setMediaFilter_Playlist:	function(guid) { mms.sendCmd("SetMediaFilter Playlist=" + guid); },		// Set Playlist filter
+	setMediaFilter_RadioSource:	function(guid) { mms.sendCmd("SetMediaFilter RadioSource=" + guid); },		// Set Radio Sources filter
+	setMediaFilter_Queue:		function(guid) { mms.sendCmd("SetMediaFilter NowPlaying=" + guid); },		// Set Now Playing filter
+	setMediaFilter_Search:		function(guid) { mms.sendCmd("SetMediaFilter Search=" + guid); },			// Search 
+	clearMediaFilter:			function() { mms.sendCmd("SetMediaFilter Clear"); },						// Clear all Media filters
 	
 	// AckButton commands
-	deleteRadioStation:			function(guid) { self.sendCmd("AckButton " + guid + " Delete the station"); },		// Message Box. Delete the station option.
-	editRadioStation:			function(guid) { self.sendCmd("AckButton " + guid + " Edit the station"); },		// Message Box. Edit the station option.
-	cancelRadioStation:			function(guid) { self.sendCmd("AckButton " + guid + " Cancel"); },					// Message Box. Cancel option. Default action.
-	createRadioStation:			function(guid) { self.sendCmd("AckButton " + guid); },								// Input Box. Pressing this option will send the string. Default action.
-	cancelSearch:				function(guid) { self.sendCmd(guid + "CANCEL"); },
-	submitSearch:				function(guid, srchstring) { self.sendCmd(guid + "OK " + srchstring); },
+	deleteRadioStation:			function(guid) { mms.sendCmd("AckButton " + guid + " Delete the station"); },		// Message Box. Delete the station option.
+	editRadioStation:			function(guid) { mms.sendCmd("AckButton " + guid + " Edit the station"); },		// Message Box. Edit the station option.
+	cancelRadioStation:			function(guid) { mms.sendCmd("AckButton " + guid + " Cancel"); },					// Message Box. Cancel option. Default action.
+	createRadioStation:			function(guid) { mms.sendCmd("AckButton " + guid); },								// Input Box. Pressing this option will send the string. Default action.
+	cancelSearch:				function(guid) { mms.sendCmd(guid + "CANCEL"); },
+	submitSearch:				function(guid, srchstring) { mms.sendCmd(guid + "OK " + srchstring); },
 	getToken:					function(guid) { CF.setJoin("s1010", guid); },
 	
 	searchCancel: function() {	
-			CF.getJoin(self.btnCancel, function(join, value, tokens) {
-			self.cancelSearch(tokens["[guid]"]);	
-			self.Back();
+			CF.getJoin(mms.btnCancel, function(join, value, tokens) {
+			mms.cancelSearch(tokens["[guid]"]);	
+			mms.Back();
 		});
 	},
 	
 	searchSubmit: function(srchstring) {	
-			CF.getJoin(self.btnCancel, function(join, value, tokens) { 
-				self.submitSearch(tokens["[guid]"], srchstring);	 
+			CF.getJoin(mms.btnCancel, function(join, value, tokens) { 
+				mms.submitSearch(tokens["[guid]"], srchstring);	 
 			});
 	},
 	
-	//searchSubmit: function() {	self.submitSearch(tokens["[guid]"]);	},
-	//showToken: function() {	self.getToken(tokens["[guid]"]);	},
+	//searchSubmit: function() {	mms.submitSearch(tokens["[guid]"]);	},
+	//showToken: function() {	mms.getToken(tokens["[guid]"]);	},
 	
 	// CreateNewRadioStation
 	// EditRadioStation
@@ -2022,45 +2034,45 @@ var self = {
     // Other commands
     // ======================================================================
 	
-	setPickListCount:  		    function(count) { self.sendCmd("SetPickListCount " + count); },			// create a new radio station.
-	setEncoding:  		    	function() { self.sendCmd("SetEncoding 65001"); },						// create a new radio station.
-	createRadioStation: 		function() { self.sendCmd("CreateNewRadioStation"); },					// create a new radio station.
-	editRadioStation: 			function() { self.sendCmd("EditRadioStation"); },						// edit radio station.
-	getStatus: 					function() { self.sendCmd("GetStatus"); },								// Get a report of all status on startup.
-	setCurrentInstance: 		function() { self.sendCmd("SetInstance *");	},							// Select current instance.
-	subcribeEventOn: 			function() { self.sendCmd("SubscribeEvents True"); },					// Turns ON feedback of StateChanged events for CURRENT instance only.
-	subcribeEventOff: 			function() { self.sendCmd("SubscribeEvents False"); },					// Turns OFF feedback of StateChanged events for CURRENT instance only.
-	subcribeAllEventOn: 		function() { self.sendCmd("SubscribeEventsAll True"); },				// Turns ON feedback of StateChanged events for ALL instances.
-	subcribeAllEventOff: 		function() { self.sendCmd("SubscribeEventsAll False"); },				// Turns OFF feedback of StateChanged events for ALL instances.
-	clearQueue:					function() { self.sendCmd("ClearNowPlaying"); self.browseQueue();},		// Stop all playing tracks and clear all now playing list.
-	Shutdown:					function() { self.sendCmd2("Shutdown"); },								// System Shutdown
-	Reboot:						function() { self.sendCmd2("Reboot"); },								// System Reboot
+	setPickListCount:  		    function(count) { mms.sendCmd("SetPickListCount " + count); },			// create a new radio station.
+	setEncoding:  		    	function() { mms.sendCmd("SetEncoding 65001"); },						// create a new radio station.
+	createRadioStation: 		function() { mms.sendCmd("CreateNewRadioStation"); },					// create a new radio station.
+	editRadioStation: 			function() { mms.sendCmd("EditRadioStation"); },						// edit radio station.
+	getStatus: 					function() { mms.sendCmd("GetStatus"); },								// Get a report of all status on startup.
+	setCurrentInstance: 		function() { mms.sendCmd("SetInstance *");	},							// Select current instance.
+	subcribeEventOn: 			function() { mms.sendCmd("SubscribeEvents True"); },					// Turns ON feedback of StateChanged events for CURRENT instance only.
+	subcribeEventOff: 			function() { mms.sendCmd("SubscribeEvents False"); },					// Turns OFF feedback of StateChanged events for CURRENT instance only.
+	subcribeAllEventOn: 		function() { mms.sendCmd("SubscribeEventsAll True"); },				// Turns ON feedback of StateChanged events for ALL instances.
+	subcribeAllEventOff: 		function() { mms.sendCmd("SubscribeEventsAll False"); },				// Turns OFF feedback of StateChanged events for ALL instances.
+	clearQueue:					function() { mms.sendCmd("ClearNowPlaying"); mms.browseQueue();},		// Stop all playing tracks and clear all now playing list.
+	Shutdown:					function() { mms.sendCmd2("Shutdown"); },								// System Shutdown
+	Reboot:						function() { mms.sendCmd2("Reboot"); },								// System Reboot
 	
 	Back: function() { 																					// Back
-		CF.listRemove(self.lstRadioSource);
-		CF.listRemove(self.lstRadioStation);
-		CF.listRemove(self.lstPickListItem);		
-		self.sendCmd("Back"); 
+		CF.listRemove(mms.lstRadioSource);
+		CF.listRemove(mms.lstRadioStation);
+		CF.listRemove(mms.lstPickListItem);		
+		mms.sendCmd("Back"); 
 	},
 	
 	Forward: function() { 																				// Forward
-		CF.listRemove(self.lstRadioSource);
-		CF.listRemove(self.lstRadioStation);
-		CF.listRemove(self.lstPickListItem);
-		self.sendCmd("Forward"); 
+		CF.listRemove(mms.lstRadioSource);
+		CF.listRemove(mms.lstRadioStation);
+		CF.listRemove(mms.lstPickListItem);
+		mms.sendCmd("Forward"); 
 	},								
 	
 	
 	// Select the zone instance and update the now playing info.
 	selectZone:	function(zone) { 
-		self.sendCmd("SetInstance "+zone);
-		self.getStatus();
-		self.browseQueue();		
+		mms.sendCmd("SetInstance "+zone);
+		mms.getStatus();
+		mms.browseQueue();		
 	},		
 	
 	// Format the command string to send to system : CF.send(systemName, string [, outputFormat])
-	sendCmd: function(command) { CF.send(self.sysName, command+"\x0D\x0A"); },										// System 1 : Port 5004
-	sendCmd2: function(command) { CF.send(self.sys2Name, command+"\x0D\x0A"); },									// System 2 : Port 23
+	sendCmd: function(command) { CF.send(mms.sysName, command+"\x0D\x0A"); },										// System 1 : Port 5004
+	sendCmd2: function(command) { CF.send(mms.sys2Name, command+"\x0D\x0A"); },									// System 2 : Port 23
 	
 	// Only allow logging calls when CF is in debug mode - better performance in release mode this way
 	log: function(msg) {
@@ -2073,8 +2085,8 @@ var self = {
 CF.modules.push(
 	{
 		name:"Autonomic MMS5", 		// the name of the module (mostly for display purposes)
-		setup:self.setup,			// the setup function to call
-		object: self,       		// the object to which the setup function belongs
+		setup:mms.setup,			// the setup function to call
+		object: mms,       		// the object to which the setup function belongs
 		version: "Beta v0.01"       // An optional module version number that is displayed in the Remote Debugger
 	}
 );
